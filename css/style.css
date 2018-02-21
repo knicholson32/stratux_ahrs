@@ -1,0 +1,954 @@
+@charset "UTF-8";
+
+@font-face {
+    font-family: 'Monaco';
+    src: url('../fonts/monaco.ttf');
+}
+
+/* AHRS CSS STYLESHEET */
+/* Components:
+ *  Main Container    id    ahrs_container
+ *  Scroll Precvent   id    scroll_prevent
+ *  Sky Container     id    sky_container
+ *  Sky Mask          id    sky_mask
+ *
+ *  Tape Class        class tape
+ *  Speed Tape        id    speed_tape
+      Tape Scroll     id    speed_tape_scroll
+      Tape Text       id    speed_tape_text
+      Tape Counter    id    speed_tape_counter
+      Index Holder    id    speed_tape_index_holder
+      Tick Holder     id    speed_tape_tick_holder
+        Color Bar     class speed_tape_color_bar
+      Tape Index      class speed_tape_index
+      Counter Holder  id    speed_counter_holder
+      Speed Counter   id    speed_counter
+      Annun           id    speed_annun
+      Annun Text      id    speed_annun_text
+ *  H Tick Class      class h_tick
+ *  V Tick Class      class v_tick
+ *  Alt Tape          id    alt_tape
+      Tape Scroll     id    alt_tape_scroll
+      Tape Text       id    alt_tape_text
+      Tape Counter    id    alt_tape_counter
+      Index Holder    id    alt_tape_index_holder
+      Tick Holder     id    alt_tape_tick_holder
+      Tape Index      class alt_tape_index
+      Counter Holder  id    alt_counter_holder
+      Speed Counter   id    alt_counter
+      V Speed         id    alt_vspeed
+      Pointer         id    vspeed_pointer
+        Outer         id    vspeed_pointer_outer
+      Annun           id    alt_annun
+      Annun Text      id    alt_annun_text
+ *  Heading Tape      id    heading_tape
+      Scroll Hold     id    heading_tape_holder
+      Tape Scroll     id    heading_tape_scroll
+      Annun           id    heading_annun
+      Heading Text    id    heading_text
+      Pointer         id    heading_pointer
+ *  Virtual Horizion  id    vhorizon
+      User Bars       id    user_bars
+      L User Bar      id    left_user_bar
+      C User Bar      id    center_user_bar
+      C User Bar Mask id    center_user_bar_mask
+      R User Bar      id    right_user_bar
+      Arrow Right     id    user_arrow_right
+      Arrow Left      id    user_arrow_left
+      Angle Pointer   id    user_angle_pointer
+      SVG Bar         id    vhor_bar
+      Pitch Indicator id    pitch_indicator
+      Pitch Scroll    id    pitch_tape_scroll
+      Pitch Tick      class ahrs_tick
+      Pitch Text      class ahrs_text
+      Chevron         class ahrs_chevron
+ *  Readouts          id    readouts
+      Readout         class readout
+      Pitch Readout   id    pitch_readout
+      Roll Readout    id    roll_readout
+ *  Invalid Holder    class invalid_holder
+      invalid         class invalid
+ *  Message Flag      id    message_flag
+ *  Overheat Flag     id    overheat_flag
+ *  G METERS          id    g_meter
+      Pointer         id    g_pointer
+      Text            class g_text
+      Ptr Triangle    id    g_pointer_triangle
+ *  Sat Count         id    sat_count
+      Sat Count Text  id    sat_count_text
+ *  FMU (Horizontal)  class fmu_h
+    FMU (Verticle)    class fmu_v
+      Alt FMU         id    alt_fmu
+      Speed FMU       id    speed_fmu
+      Heading FMU     id    hdg_fmu
+      Hdg Arrow       id    hdg_fmu_arrow
+ */
+
+ html {
+   --flight_angle:          0deg;
+   --speed_counter_speed:   1s;
+   --ease_time:             0.2s;   /* AHRS EASING */
+   --hdg_ease_time:         0.2s;   /* HEADING EASING */
+   --aux_ease_time:         0.2s;   /* OTHER EASING */
+   --pitch_amount:          0px;
+  background-color: #000;
+ }
+
+ body {
+   margin: 0px;
+   overflow: hidden;
+ }
+
+#ahrs_container {
+  width:  100%;
+  height: 555px;
+  background-color: #53350e;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+#scroll_prevent {
+
+}
+
+#sky_container {
+  width:  100%;
+  height: 100%;
+  transform:rotate(var(--flight_angle));
+  transition: transform var(--ease_time) ease-out 0s;
+}
+
+#sky_mask {
+  width:  200%;
+  height: 200%;
+  /* Mask sky colors */
+  background: linear-gradient(to bottom, #2a48fb, #4f60e0);
+  border-bottom: 4px solid white;
+  position:relative;
+  bottom:   150%;
+  left: -50%;
+  transform: translateY(var(--pitch_amount));
+  transition: transform var(--ease_time) ease-out 0s;
+}
+
+/* ---------------- Tapes ---------------- */
+
+.tape {
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  border: 1px solid #333333;
+  position: absolute;
+  top: 0;
+  overflow: hidden;
+}
+
+
+.h_tick {
+  width: 110%;
+  height: 4px;
+  background-color: #FFF;
+  position: absolute;
+  right: 1px;
+  z-index: -2;
+}
+
+.v_tick {
+  height: 10px;
+  width: 4px;
+  background-color: #FFF;
+  position: absolute;
+  top: 0px;
+  transition: unset;
+  z-index: -2;
+}
+
+.tape_shadow {
+  position: absolute;
+  left: -20px;
+  top: 0px;
+  right: -20px;
+  bottom: 0px;
+  box-shadow: inset 0px 0px 46px 2px #000;
+}
+
+/* --------- Speed Tape --------- */
+
+#speed_tape {
+  width:  180px;
+  left: 0px;
+}
+
+#speed_tape_scroll{
+  position: relative;
+  transition: all var(--aux_ease_time) ease-out 0s;
+  top: -81px;
+  transform: translateZ(0);
+}
+
+#speed_tape_index_holder {
+  width: 70%;
+  height: auto;
+  position: relative;
+  float: left;
+}
+
+#speed_tape_tick_holder {
+  position: relative;
+  width: 20px;
+  float: right;
+  /*margin-top: 17px;
+  margin-bottom: 10px;*/
+}
+
+#speed_tape_text {
+  width: 100%;
+  height: 500px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  position: absolute;
+  right:5px;
+  line-height: 40px;
+  display: block;
+  font-family: 'Monaco';
+  font-size: 40px;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.9);
+  top: 0px;
+}
+
+.speed_tape_index {
+  height: 75px;
+  margin-bottom: 25px;
+}
+
+.speed_tape_index:last-of-type {
+  margin-bottom: 0px;
+}
+
+.speed_tape_color_bar {
+  width:  100%;
+  right: 0px;
+  position: absolute;
+  z-index: -2;
+}
+
+#speed_counter_holder {
+  height: 100%;
+  width: 100%;
+}
+
+#speed_counter {
+  width: 131px;
+  height: 80px;
+  background-color: rgba(0,0,0,1);
+  position: relative;
+  top: 50%;
+  right: 14px;
+  float: right;
+  display:  inline-block;
+  transform: translateY(-50%);
+  padding-left: 4px;
+  border: 4px solid white;
+}
+
+#speed_counter_text {
+  line-height: 80px;
+  display: block;
+  font-family: 'Monaco';
+  font-size: 70px;
+  color: #FFF;
+}
+
+#speed_annun {
+  width: 100%;
+  height: 40px;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  background-color: black;
+  z-index: 12;
+  border-top: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: translateZ(0);
+}
+
+#speed_annun_text {
+  color: #f300ee;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 30px;
+  font-size: 26px;
+  font-family: 'Monaco';
+  top: 50%;
+  transform: translateY(-50%);
+  position: relative;
+}
+
+/* --------- Alt Tape --------- */
+
+#alt_tape {
+  width:  220px;
+  right: 0px;
+}
+
+#alt_tape_scroll{
+  position: relative;
+  transition: all var(--aux_ease_time) ease-out 0s;
+  top: -81px;
+  transform: translateZ(0);
+}
+
+#alt_tape_index_holder {
+  width: 70%;
+  height: auto;
+  position: relative;
+  float: left;
+}
+
+#alt_tape_tick_holder {
+  position: relative;
+  width: 20px;
+  float: right;
+  left: 20px;
+  /*margin-top: 17px;
+  margin-bottom: 10px;*/
+}
+
+#alt_tape_text {
+  width: 100%;
+  height: 500px;
+  margin-top: 2px;
+  margin-bottom: 10px;
+  position: absolute;
+  left: 45px;
+  display: block;
+  font-family: 'Monaco';
+  font-size: 40px;
+  text-align: left;
+  color: rgba(255, 255, 255, 0.9);
+  top: 0px;
+}
+
+.alt_tape_index {
+  height: 110px;
+  vertical-align: middle;
+}
+
+.alt_tape_index::first-letter {
+  font-size: 45px;
+}
+
+.alt_tape_index:last-of-type {
+  margin-bottom: 0px;
+}
+
+#alt_counter_holder {
+  height: 100%;
+  width: 100%;
+}
+
+#alt_counter {
+  width: 131px;
+  height: 61px;
+  background-color: rgba(0,0,0,1);
+  position: relative;
+  top: 50%;
+  left: 10px;
+  float: right;
+  display:  inline-block;
+  transform: translateY(-50%);
+  padding-left: 4px;
+  border: 4px solid white;
+}
+
+#alt_counter_text {
+  line-height: 63px;
+  display: block;
+  font-family: 'Monaco';
+  font-size: 52px;
+  color: #FFF;
+  position: absolute;
+  top: -1px;
+  right: 4px;
+}
+
+#alt_counter_text::first-letter {
+  font-size: 58px;
+}
+
+.alt_tick {
+  left: -222px;
+  z-index: -2;
+}
+
+#alt_vspeed {
+  height: 100%;
+  width: 60px;
+  float: right;
+  border-left: 2px solid gray;
+}
+
+.vspeed_tick {
+  width: 7px;
+  z-index: 1 !important;
+}
+
+#vspeed_tape_index_holder {
+  width: 70%;
+  height: auto;
+  position: relative;
+  right: 18px;
+}
+
+#vspeed_tape_tick_holder {
+  position: absolute;
+  width: 20px;
+  float: right;
+  right: 0px;
+  /*margin-top: 17px;
+  margin-bottom: 10px;*/
+}
+
+#vspeed_tape_text {
+  width: 100%;
+  margin-top: 2px;
+  margin-bottom: 10px;
+  position: absolute;
+  display: block;
+  font-family: 'Monaco';
+  font-size: 15px;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.9);
+  top: 0px;
+}
+
+.vspeed_tape_index {
+  height: 20px;
+  position: absolute;
+  vertical-align: middle;
+  right: -2px;
+}
+
+.vspeed_tape_index:last-of-type {
+  margin-bottom: 0px;
+}
+
+#vspeed_trail {
+  width: 20px;
+  height: 5px;
+  background-color: red;
+  position: absolute;
+  right: 0px;
+  /*transition: all 0.25s linear 0s;*/
+}
+
+#vspeed_pointer {
+  right: -2px;
+  position: absolute;
+  /*transition: all 0.25s linear 0s;*/
+}
+
+#vspeed_pointer_outer {
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 16px solid white;
+  right: 13px;
+  position: absolute;
+}
+
+#alt_annun {
+  width: 100%;
+  height: 80px;
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  background-color: black;
+  z-index: 12;
+  border-top: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: translateZ(0);
+}
+
+#alt_annun_text {
+  color: #f300ee;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 30px;
+  font-size: 26px;
+  font-family: 'Monaco';
+  top: 50%;
+  transform: translateY(-50%);
+  position: relative;
+}
+
+#alt_annun_text span{
+  line-height: 20px;
+  font-size: 20px;
+}
+
+/* Heading Tape */
+
+#heading_tape {
+  height: 110px;
+  margin: 0 auto;
+  z-index: 5;
+  /* Some CSS details are calculated in "script.js" */
+}
+
+.annimate {
+  transition: all var(--hdg_ease_time) ease 0s;
+}
+
+.heading_text {
+  color: #FFF;
+  font-size: 20px;
+  line-height: 20px;
+  position: absolute;
+  font-family: 'Monaco';
+  top: 38px;
+}
+
+.card_text {
+  top: 75px;
+  font-size: 50px;
+}
+
+#heading_tape_holder {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  transform: translateZ(0);
+}
+
+#heading_tape_scroll {
+  position: absolute;
+  height:10px;
+}
+
+#heading_annun {
+  width: 178px;
+  height: 34px;
+  background-color: #000;
+  border: 2px solid white;
+  color: #f300ee;
+  line-height: 15px;
+  font-size: 26px;
+  font-family: 'Monaco';
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-36%);
+  padding-bottom: 3px;
+  padding-left: 2px;
+}
+
+#heading_text {
+  top: 50%;
+  transform: translateY(-50%);
+  position: relative;
+  margin: 3px;
+}
+
+#heading_text span {
+  font-size: 30px;
+  padding-left: 5px;
+  text-align: right;
+}
+
+#heading_pointer {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid white;
+  position: absolute;
+  top: -12px;
+  left: 76px;
+}
+
+/* ---------------- VHorizon ---------------- */
+
+#vhorizon {
+  position: absolute;
+  width: 550px;
+  height: 100%;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  /*background-color: red;*/
+}
+
+#user_bars {
+
+}
+
+#user_angle_pointer {
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-bottom: 20px solid #FFF;
+
+  position: absolute;
+  left: 50%;
+  top: 100px;
+  transform: translateX(-50%);
+}
+
+#left_user_bar {
+  width: 50px;
+  height: 0px;
+  border-top: 10px solid #f2f950;
+  border-bottom: 10px solid #7e7e16;
+  border-left: 16px solid transparent;
+
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#center_user_bar {
+  width: 0;
+  height: 0;
+  border-left: 80px solid transparent;
+  border-right: 80px solid transparent;
+  border-bottom: 25px solid #f2f950;
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%);
+}
+
+#center_user_bar_mask {
+  width: 0;
+  height: 0;
+  border-left: 80px solid transparent;
+  border-right: 80px solid transparent;
+  border-bottom: 13px solid #7e7e16;
+
+  padding-top: 13px;
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translateX(-50%);
+}
+
+#right_user_bar {
+  width: 50px;
+  height: 0px;
+  border-top: 10px solid #f2f950;
+  border-bottom: 10px solid #7e7e16;
+  border-right: 16px solid transparent;
+
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#vhor_bar {
+  position: absolute;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+}
+
+#pitch_indicator {
+  width: 200px;
+  height: 450px;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  position: absolute;
+  bottom: -3px;
+  transition: transform var(--ease_time) ease-out 0s;
+}
+
+#pitch_tape_scroll {
+  width: 100%;
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ahrs_tick {
+  width: 40px;
+  right: unset;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: background-color var(--ease_time) ease-out 0s;
+}
+
+.ahrs_text {
+  color: #FFF;
+  font-size: 20px;
+  line-height: 20px;
+  position: absolute;
+  font-family: 'Monaco';
+  transition: color var(--ease_time) ease-out 0s;
+}
+
+.ahrs_chevron {
+  position:absolute;
+  top:0px;
+  width: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ---------------- Readouts ---------------- */
+
+#readouts {
+  position: absolute;
+  top: 0px;
+  height: 24px;
+  transform: translateZ(0);
+}
+
+.readout {
+  height: 100%;
+  width:auto;
+  margin: 5px;
+  border: 3px solid white;
+  background-color: black;
+  color: #f300ee;
+  font-size: 25px;
+  line-height: 20px;
+  vertical-align: middle;
+  padding: 2px;
+  padding-top: 5px;
+  font-family: 'Monaco';
+  display: inline-block;
+}
+
+.readout span{
+  padding-left: 10px;
+}
+
+#pitch_readout {
+  position: absolute;
+  left: 0px;
+}
+
+#roll_readout {
+  right: 0px;
+  position: absolute;
+}
+
+/* ---------------- Invalid ---------------- */
+
+.invalid_holder {
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  display: none;
+}
+
+.invalid_holder::after {
+  content: none;
+}
+
+.invalid {
+  color: rgba(255,0,0,0.8);
+  font-size: 200px;
+  line-height: 200px;
+  vertical-align: middle;
+  font-family: 'Monaco';
+  background-color: rgba(0,0,0,0.3);
+  background-image: url(../images/chevron-dark-blue.png);
+  background-repeat: repeat;
+  display: block;
+}
+
+.invalid::after{
+  content: 'X';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ---------------- Message Flag ---------------- */
+
+#message_flag {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.bright {
+  background-color: red !important;
+}
+
+#overheat_flag {
+  position: absolute;
+  left: 53px;
+  bottom: 53px;
+  width: 60px;
+  height: 30px;
+  border: 3px solid white;
+  border-radius: 30px;
+  background-color: black;
+
+}
+#overheat_flag_text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: red;
+  font-size: 20px;
+  line-height: 20px;
+  vertical-align: middle;
+  font-family: 'Monaco';
+}
+
+#g_meter {
+  position: absolute;
+  background-color: black;
+  width: 45px;
+  height: 45px;
+  border-radius: 45px;
+}
+
+#g_pointer {
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  top: 18px;
+  left: 16px;
+}
+
+#g_pointer_triangle{
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right:14px solid red;
+  position: absolute;
+  left: -5px;
+}
+
+.g_text {
+  color: white;
+  font-size: 10px;
+  line-height: 10px;
+  font-family: 'Monaco';
+  position: absolute;
+}
+
+/* ---------------- Sat Count ---------------- */
+
+#sat_count {
+  position: absolute;
+  left: 6px;
+  bottom: 53px;
+  width: 30px;
+  height: 30px;
+  border-radius: 30px;
+  border: 3px solid white;
+  background-color: black;
+}
+
+#sat_count_text {
+  color: white;
+  font-size: 20px;
+  line-height: 20px;
+  font-family: 'Monaco';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ----------------- FMU ----------------- */
+
+#alt_fmu {
+  width:160px;
+}
+
+#speed_fmu {
+  width:182px;
+}
+
+#hdg_fmu {
+  height:182px;
+}
+
+#hdg_fmu_arrow{
+  width: 0;
+  height: 0;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-right:15px solid red;
+  position: absolute;
+  bottom: 10px;
+  left: 5px;
+}
+
+.fmu_h {
+  position: absolute;
+  height:5px;
+  bottom: 0px;
+  background-color: red;
+  z-index: -1;
+}
+
+.fmu_v {
+  position: absolute;
+  width:5px;
+  left: 0px;
+  background-color: red;
+  z-index: -1;
+}
+
+/* ---------------- Other ---------------- */
+.shadow {
+   -moz-box-shadow:    inset 0 0 15px rgba(0, 0, 0, 0.3);
+   -webkit-box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+   box-shadow:         inset 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.arrow-right {
+  width: 0;
+  height: 0;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+  border-left: 15px solid white;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -18px;
+}
+
+.arrow-left {
+  width: 0;
+  height: 0;
+  border-top: 15px solid transparent;
+  border-bottom: 15px solid transparent;
+
+  border-right:15px solid white;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: -18px;
+}
+
+.teal {
+  color: #1eecec !important;
+}

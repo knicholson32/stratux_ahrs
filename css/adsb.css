@@ -1,0 +1,24 @@
+@charset "UTF-8";
+
+/*@font-face {
+    font-family: 'Monaco';
+    src: url('../fonts/monaco.ttf');
+}*/
+
+/* AHRS CSS STYLESHEET */
+/* Components:
+ *  Main Container    id    adsb_container
+
+ *  Speed Tape        id    speed_tape
+      Tape Scroll     id    speed_tape_scroll
+      Tape Text       id    speed_tape_text
+ */
+
+
+#adsb_container {
+  background-color: red;
+  width: 100%;
+  /*height: 800px;*/
+  height: 800px;
+  display: block;
+}
