@@ -61,12 +61,6 @@ $( document ).ready(function() {
 
       $('#message_flag').toggleClass('bright')
 
-      // headingTape.update(0);
-      // ahrsTape.update(0, 0);
-      // speedTape.update(55);
-      // altTape.update(1000);
-      // vspeedTape.update(5);
-      // gMeter.update(Math.sin(interval_val/10)*1+1)
 
       satCount.update(7);
 
@@ -78,20 +72,22 @@ $( document ).ready(function() {
   setInterval(refreshIfInvalidTimeout, system.checkActiveTime);
 
 
+  // Init AHRS
+  ahrsWSInit();
+  setInterval(ahrsWS.checkActive, 250);
 
-//  setTimeout(function(){halt = false}, 2000);
+  // Init FMU
+  if(system.enable_fmu === true){
+    fmuInit();
+    setInterval(fmuWS.checkActive, 1000);
+  }
 
-  // Set up the valid check processer
 
-  trafficInit();
-  fmuInit();
 
-  setInterval(trafficWS.checkActive, 250);
-  setInterval(fmuWS.checkActive, 1000);
 
 });
 
-var trafficWS;
+var ahrsWS;
 var avgCount = 0;
 var headingAvg = [0,0,0,0,0,0,0,0,0,0];
 var system_status = {};
@@ -105,22 +101,22 @@ function avg(arr){
   }
   return sum / arr.length;
 }
-function trafficInit(){
+function ahrsWSInit(){
   console.log("Attempting to connect to " + system.websocket_url);
-  trafficWS = new WebSocket(system.websocket_url);
-  trafficWS.closed = true;
-  trafficWS.lastMessage = new Date().getTime();
+  ahrsWS = new WebSocket(system.websocket_url);
+  ahrsWS.closed = true;
+  ahrsWS.lastMessage = new Date().getTime();
 
 
 
-  trafficWS.onopen = function(e) {
+  ahrsWS.onopen = function(e) {
     console.log("Connection established!");
     console.log(e);
-    trafficWS.closed = false;
+    ahrsWS.closed = false;
   };
 
-  trafficWS.onclose = function(e) {
-    trafficWS.closed = true;
+  ahrsWS.onclose = function(e) {
+    ahrsWS.closed = true;
     var name = e.target.url.substr(e.target.url.lastIndexOf('/') + 1);
     if(e.wasClean){
       console.log("Websocket \"" + name + "\" closed cleanly.");
@@ -129,23 +125,23 @@ function trafficInit(){
     }
     console.log("Reconnecting after 0.5 seconds:");
     setTimeout(function(){
-      trafficInit();
+      ahrsWSInit();
     },500);
   };
 
-  trafficWS.checkActive = function(){
-    if(system.checkWS === false || trafficWS.closed === true)
+  ahrsWS.checkActive = function(){
+    if(system.checkWS === false || ahrsWS.closed === true)
       return;
     // Get the current time
     var d = new Date().getTime();
     // If it has been too long since a message, restart the connection
-    if(d - system.ahrs.updateTimeout > trafficWS.lastMessage){
-      trafficWS.close();
+    if(d - system.ahrs.updateTimeout > ahrsWS.lastMessage){
+      ahrsWS.close();
     }
   }
 
-  trafficWS.onmessage = function(message){
-    trafficWS.lastMessage = new Date().getTime();
+  ahrsWS.onmessage = function(message){
+    ahrsWS.lastMessage = new Date().getTime();
     $('#message_flag').toggleClass('bright');
     if(message.isTrusted){
       var data = JSON.parse(message.data);
@@ -217,10 +213,10 @@ function trafficInit(){
 
   };
 
-  trafficWS.onerror = function(message) {
+  ahrsWS.onerror = function(message) {
     var name = message.target.url.substr(message.target.url.lastIndexOf('/') + 1);
     console.error("Websocket \"" + name + "\" had an error.");
-    trafficWS.close();
+    ahrsWS.close();
   };
 
   // Get status at interval
@@ -1192,7 +1188,7 @@ function refreshIfInvalidTimeout(){
     if(invalidList[i] === false)
       return;
   }
-  trafficWS.close();
+  ahrsWS.close();
   fmuWS.close();
 }
 

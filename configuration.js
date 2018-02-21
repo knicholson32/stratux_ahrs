@@ -23,6 +23,7 @@ var system = {            // Overall system settings
     "ws://192.168.10.1/situation",
   fmu_url:                // Websocket URL for FMU Update
     "ws://192.168.10.1:8888",
+  enable_fmu: false,      // Enable FMU support - in development
   status_url:
     "http://192.168.10.1/getStatus"
 };
