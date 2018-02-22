@@ -57,4 +57,4 @@ This display uses data directly from stratux. As a result, I'll quote [cyoung](h
 
 >If this software ever serves just to provide some comfort to a pilot in an event such as I experienced, it will have served its purpose. Its purpose is not to save your life."
 
-I would like to further add that this display is not perfect, and is under development. Use of this display in life threatening situations is seriously cautioned.
+I would like to further add that this display is not perfect, and is under development. It may disconnect unexpectedly, causing invalid data to be displayed. Use of this display in life threatening situations is seriously cautioned, and this display is in no way intended to be relied on or override data coming from certified equipment. Please use at your own risk.
