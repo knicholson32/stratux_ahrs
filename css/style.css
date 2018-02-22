@@ -952,3 +952,15 @@
 .teal {
   color: #1eecec !important;
 }
+
+/* TODO: Review this and correct it so it actually works. */
+/* if portrait mode is detected, rotate the entire site -90 degrees to hint rotating to landscape */
+@media (orientation: portrait) {
+  body {
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+  }
+}

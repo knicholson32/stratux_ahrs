@@ -72,13 +72,13 @@ $( document ).ready(function() {
   setInterval(refreshIfInvalidTimeout, system.checkActiveTime);
 
 
-  // Init AHRS
-  ahrsWSInit();
+  Init AHRS
+  /ahrsWSInit();
   setInterval(ahrsWS.checkActive, 250);
 
-  // Init FMU
+  Init FMU
   if(system.enable_fmu === true){
-    fmuInit();
+   fmuInit();
     setInterval(fmuWS.checkActive, 1000);
   }
 
