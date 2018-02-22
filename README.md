@@ -6,6 +6,11 @@ AHRS Display for the Raspberry pi powered Stratux software.
 
 Extension to the [Stratux](https://github.com/cyoung/stratux) project that allows an iPhone to be used to display AHRS information.
 
+### Example Screenshot
+This example image was created using simulated data, and shows all visual features of the device.
+![alt text](https://github.com/knicholson32/stratux_ahrs/blob/master/images/demo.png "AHRS Demo")
+
+
 ### Installation:
 "stratux_ahrs" is simply a webpage that needs to be copied to the Raspberry pi's /var/www folder.
 - Connect the Raspberry pi with Stratux on it to internet via the ethernet jack.
