@@ -25,7 +25,8 @@ var system = {            // Overall system settings
     "ws://192.168.10.1:8888",
   enable_fmu: false,      // Enable FMU support - in development
   status_url:
-    "http://192.168.10.1/getStatus"
+    "http://192.168.10.1/getStatus",
+  simulate: false
 };
 /** ******************************** ****** ******************************** **/
 

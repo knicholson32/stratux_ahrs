@@ -1,7 +1,6 @@
 var ahrs = {};
 
 var interval_val = 0;
-var halt = true;
 
 //document.ontouchstart = function(e){
     //e.preventDefault();
@@ -49,11 +48,10 @@ function systemInit() {
     requestFullScreen(elem);
   },100);*/
 
-  halt = true;
-  if(!halt){
+  if(system.simulate){
     setInterval(function(){
       interval_val++;
-      if(halt)
+      if(!system.simulate)
         return;
       headingTape.update(+interval_val);
       ahrsTape.update(Math.sin(interval_val/10)*7, Math.cos(interval_val/15+0.7)*12);
