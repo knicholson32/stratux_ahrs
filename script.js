@@ -1196,8 +1196,10 @@ function refreshIfInvalidTimeout(){
     if(invalidList[i] === false)
       return;
   }
-  ahrsWS.close();
-  fmuWS.close();
+  try{
+    ahrsWS.close();
+    fmuWS.close();
+  }catch(error){};
 }
 
 
