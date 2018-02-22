@@ -41,7 +41,7 @@ ls ahrs
 sudo shutdown –h now
 ```
 - Install pi back in aircraft!
-- Visit [192.168.10.1/stratux_ahrs](192.168.10.1/stratux_ahrs) on your iPhone in Safari when connected to Stratux.
+- Visit 192.168.10.1/stratux_ahrs on your iPhone in Safari when connected to Stratux.
 - [Save an icon to the home screen](http://www.knowyourmobile.com/apple/iphone-4/15554/user-guide-how-save-websites-desktop-icons-your-iphone-4s).
 
 # Disclamer
