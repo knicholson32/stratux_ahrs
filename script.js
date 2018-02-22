@@ -7,7 +7,9 @@ var halt = true;
     //e.preventDefault();
 //}
 
-$( document ).ready(function() {
+$( document ).ready(systemInit);
+
+function systemInit() {
 
   console.log("JS INIT");
 
@@ -72,11 +74,11 @@ $( document ).ready(function() {
   setInterval(refreshIfInvalidTimeout, system.checkActiveTime);
 
 
-  Init AHRS
-  /ahrsWSInit();
+  //Init AHRS
+  ahrsWSInit();
   setInterval(ahrsWS.checkActive, 250);
 
-  Init FMU
+  //Init FMU
   if(system.enable_fmu === true){
    fmuInit();
     setInterval(fmuWS.checkActive, 1000);
@@ -85,7 +87,7 @@ $( document ).ready(function() {
 
 
 
-});
+}
 
 var ahrsWS;
 var avgCount = 0;
@@ -103,6 +105,9 @@ function avg(arr){
 }
 function ahrsWSInit(){
   console.log("Attempting to connect to " + system.websocket_url);
+  try{
+    ahrsWS.close();
+  }catch(error){}
   ahrsWS = new WebSocket(system.websocket_url);
   ahrsWS.closed = true;
   ahrsWS.lastMessage = new Date().getTime();
@@ -230,6 +235,9 @@ function ahrsWSInit(){
 var fmuWS;
 function fmuInit(){
   console.log("Attempting to connect to " + system.fmu_url);
+  try{
+    fmuWS.close();
+  }catch(error){}
   fmuWS = new WebSocket(system.fmu_url);
   fmuWS.lastMessage = new Date().getTime();
   fmuWS.closed = true;

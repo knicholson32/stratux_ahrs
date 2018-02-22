@@ -109,7 +109,8 @@
 }
 
 #scroll_prevent {
-
+  width: 100%;
+  height: 100%;
 }
 
 #sky_container {
@@ -962,5 +963,9 @@
     -o-transform: rotate(-90deg);
     -ms-transform: rotate(-90deg);
     transform: rotate(-90deg);
+  }
+  #ahrs_container{
+    height: 555px;
+    width: 555px;
   }
 }
