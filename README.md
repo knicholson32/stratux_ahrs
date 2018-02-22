@@ -44,6 +44,13 @@ sudo shutdown –h now
 - Visit 192.168.10.1/stratux_ahrs on your iPhone in Safari when connected to Stratux.
 - [Save an icon to the home screen](http://www.knowyourmobile.com/apple/iphone-4/15554/user-guide-how-save-websites-desktop-icons-your-iphone-4s).
 
+## Usage
+Ensure you are connected to the "stratux" wifi network. 
+
+To open the display, ensure that your phone does _not_ have "[Portrait Orientation Lock](http://www.solveyourtech.com/disable-portrait-orientation-lock-iphone-6/)" on. Open the app _while holding the phone in a "landscape" position_. This is required to counter a known bug with both the display and iOS web apps. 
+
+For more details, refer to the [wiki](https://github.com/knicholson32/stratux_ahrs/wiki) for this project.
+
 # Disclamer
 This display uses data directly from stratux. As a result, I'll quote [cyoung](https://github.com/cyoung/stratux/wiki/All-About-AHRS) (the creater of stratux):
 
