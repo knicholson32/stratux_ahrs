@@ -1,7 +1,8 @@
 # stratux_ahrs
 AHRS Display for the Raspberry pi powered Stratux software.
 
-![AHRS Logo](https://github.com/knicholson32/stratux_ahrs/tree/master/images/icons/icon.png)
+![alt text](https://raw.githubusercontent.com/knicholson32/stratux_ahrs/master/images/icons/icon.png "AHRS Logo")
+
 
 Extension to the [Stratux](https://github.com/cyoung/stratux) project that allows an iPhone to be used to display AHRS information.
 
