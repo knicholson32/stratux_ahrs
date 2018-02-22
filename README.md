@@ -8,9 +8,36 @@ Extension to the [Stratux](https://github.com/cyoung/stratux) project that allow
 
 ### Installation:
 "stratux_ahrs" is simply a webpage that needs to be copied to the Raspberry pi's /var/www folder.
-- Download this repo and unzip it.
-- Use SFTP [GUI example here](https://barnesian.com/how-to-transfer-files-to-the-raspberry-pi-using-sftp/) to transfer the contents to a new folder, "/var/www/ahrs" on the pi.
-- Visit [192.168.10.1/stratux_ahrs](192.168.10.1/stratux_ahrs) when connected to Stratux to connect.
+- Connect the Raspberry pi with Stratux on it to internet via the ethernet jack.
+- Login to the pi using ssh: (Password should be 'raspberry')
+```unix
+ssh <address of pi> -l pi
+```
+- CD and make the proper directory:
+```unix
+cd /var/www/
+mkdir ahrs
+```
+- Clone this repository:
+```unix
+git clone https://github.com/knicholson32/stratux_ahrs
+```
+- Move contents to correct folder and remove extras:
+```unix
+mkdir ahrs
+mv stratux_ahrs/* ahrs
+rm -rf stratux_ahrs
+```
+- Ensure files have been moved:
+```unix
+ls ahrs
+```
+- Shutdown pi:
+```unix
+sudo shutdown –h now
+```
+- Install pi back in aircraft!
+- Visit [192.168.10.1/stratux_ahrs](192.168.10.1/stratux_ahrs) on your iPhone in Safari when connected to Stratux.
 - [Save an icon to the home screen](http://www.knowyourmobile.com/apple/iphone-4/15554/user-guide-how-save-websites-desktop-icons-your-iphone-4s).
 
 # Disclamer
