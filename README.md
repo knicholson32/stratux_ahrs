@@ -24,7 +24,6 @@ git clone https://github.com/knicholson32/stratux_ahrs
 ```
 - Move contents to correct folder and remove extras:
 ```unix
-mkdir ahrs
 mv stratux_ahrs/* ahrs
 rm -rf stratux_ahrs
 ```
