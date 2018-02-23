@@ -8,15 +8,21 @@ Extension to the [Stratux](https://github.com/cyoung/stratux) project that allow
 
 ### Example Screenshot
 This example image was created using simulated data, and shows all visual features of the device.
+
 ![alt text](https://github.com/knicholson32/stratux_ahrs/blob/master/images/demo.png "AHRS Demo")
 
 
 ### Installation:
 "stratux_ahrs" is simply a webpage that needs to be copied to the Raspberry pi's /var/www folder.
-- Connect the Raspberry pi with Stratux on it to internet via the ethernet jack.
-- Login to the pi using ssh: (Password should be 'raspberry')
+- Connect the Raspberry pi with Stratux on it to internet via the ethernet jack. Also connect your computer to the stratux wifi network that is created.
+- [Login to the pi using ssh](https://github.com/cyoung/stratux/wiki/SSH-into-Stratux): (Password should be 'raspberry')
 ```unix
-ssh <address of pi> -l pi
+ssh 192.168.10.1 -l pi
+```
+- Refresh ethernet interface: (Password should be 'raspberry')
+```unix
+sudo ifdown eth0
+sudo ifup eth0
 ```
 - CD and make the proper directory:
 ```unix
@@ -41,7 +47,7 @@ ls ahrs
 sudo shutdown –h now
 ```
 - Install pi back in aircraft!
-- Visit 192.168.10.1/stratux_ahrs on your iPhone in Safari when connected to Stratux.
+- Visit 192.168.10.1/stratux_ahrs on your iPhone in Safari when connected to stratux wifi.
 - [Save an icon to the home screen](http://www.knowyourmobile.com/apple/iphone-4/15554/user-guide-how-save-websites-desktop-icons-your-iphone-4s).
 
 ## Usage
