@@ -47,13 +47,13 @@ ls ahrs
 sudo shutdown –h now
 ```
 - Install pi back in aircraft!
-- Visit 192.168.10.1/stratux_ahrs on your iPhone in Safari when connected to stratux wifi.
+- Visit _192.168.10.1/ahrs_ on your iPhone in Safari when connected to stratux wifi.
 - [Save an icon to the home screen](http://www.knowyourmobile.com/apple/iphone-4/15554/user-guide-how-save-websites-desktop-icons-your-iphone-4s).
 
 ## Usage
-Ensure you are connected to the "stratux" wifi network. 
+Ensure you are connected to the "stratux" wifi network and navigate to _192.168.10.1/ahrs_.
 
-To open the display, ensure that your phone does _not_ have "[Portrait Orientation Lock](http://www.solveyourtech.com/disable-portrait-orientation-lock-iphone-6/)" on. Open the app _while holding the phone in a "landscape" position_. This is required to counter a known bug with both the display and iOS web apps. 
+Once the page opens, add the page to your home screen for ease of access (procedure varies for each device).
 
 For more details, refer to the [wiki](https://github.com/knicholson32/stratux_ahrs/wiki) for this project.
 
