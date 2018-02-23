@@ -8,6 +8,7 @@ Extension to the [Stratux](https://github.com/cyoung/stratux) project that allow
 
 ### Example Screenshot
 This example image was created using simulated data, and shows all visual features of the device.
+
 ![alt text](https://github.com/knicholson32/stratux_ahrs/blob/master/images/demo.png "AHRS Demo")
 
 
