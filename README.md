@@ -14,10 +14,10 @@ This example image was created using simulated data, and shows all visual featur
 
 ### Installation:
 "stratux_ahrs" is simply a webpage that needs to be copied to the Raspberry pi's /var/www folder.
-- Connect the Raspberry pi with Stratux on it to internet via the ethernet jack.
-- Login to the pi using ssh: (Password should be 'raspberry')
+- Connect the Raspberry pi with Stratux on it to internet via the ethernet jack. Also connect your computer to the stratux wifi network that is created.
+- [Login to the pi using ssh](https://github.com/cyoung/stratux/wiki/SSH-into-Stratux): (Password should be 'raspberry')
 ```unix
-ssh <address of pi> -l pi
+ssh 192.168.10.1 -l pi
 ```
 - CD and make the proper directory:
 ```unix
