@@ -14,39 +14,10 @@ function systemInit() {
 
   $('body').bind('touchmove', function(e){e.preventDefault()})
 
-  // Record total sizes
-  ahrs.width = $( '#ahrs_container' ).outerWidth();
-  ahrs.height = $( '#ahrs_container' ).outerHeight();
-
-  // Configure specific div sizes based on the current window size
-  $('#heading_tape').css('width', ahrs.width - $( '#speed_tape' ).outerWidth() - $( '#alt_tape ').outerWidth() - 1);
-  $('#heading_tape').css('left', $( '#speed_tape' ).outerWidth());
-  $('#readouts').css('width', ahrs.width - $( '#speed_tape' ).outerWidth() - $( '#alt_tape ').outerWidth() - 1);
-  $('#readouts').css('left', $( '#speed_tape' ).outerWidth());
-  $('#heading_tape').css('top', $( '#speed_tape' ).outerHeight() - $( '#heading_tape' ).outerHeight());
-  $('#speed_counter').css('margin-right',$( '#speed_tape_tick_holder' ).outerWidth() - 2);
-  $('#g_meter').css('bottom', $( '#heading_tape' ).outerHeight() + 10);
-  $('#g_meter').css('right' ,$( '#alt_tape ').outerWidth() + 10);
-  $('#overheat_flag').css('display', 'none');
-
+  orientationInit();
+  initButtons();
   // Generate all tapes
   generateTapes();
-
-  // Initialize the tapes
-  ahrsTape.update(0, 0, true);
-  headingTape.update(0, true);
-  speedTape.update(0, true);
-  altTape.update(0, true);
-  vspeedTape.update(0, true);
-
-  // Add invalid flags.
-  setInvalid(AHRS_TYPE.ALL, true);
-
-
-  /*setTimeout(function(){
-    var elem = document.body; // Make the body go full screen.
-    requestFullScreen(elem);
-  },100);*/
 
   if(system.simulate){
     setInterval(function(){
@@ -73,17 +44,16 @@ function systemInit() {
 
 
   //Init AHRS
-  ahrsWSInit();
-  setInterval(ahrsWS.checkActive, 250);
+  if(system.enable_ahrs === true){
+    ahrsWSInit();
+    setInterval(ahrsWS.checkActive, 250);
+  }
 
   //Init FMU
   if(system.enable_fmu === true){
    fmuInit();
     setInterval(fmuWS.checkActive, 1000);
   }
-
-
-
 
 }
 
@@ -289,9 +259,80 @@ function fmuInit(){
 
 // NOTICE: ALL INPUTS TO UPDATE FUNCTIONS ARE TO BE IN SI UNITS
 
+function initButtons(){
+  // Set Pitch On-Click
+  $('#pitch_readout').click(function(){
+    var r = confirm("Center AHRS?");
+    if (r == true) {
+      post('cageAHRS');
+    }
+  });
+
+  $('#roll_readout').click(function(){
+    var r = confirm("Calibrate GYRO?");
+    if (r == true) {
+      post('calibrateAHRS');
+    }
+  });
+
+  // Set altitude button up
+  $('#alt_annun').click(function(){
+    var loc = 0;
+    for(var i = 0; i < altTape.possibleSources.length; i++){
+      if(altTape.possibleSources[i] === altTape.source){
+        loc = i;
+        break;
+      }
+    }
+    loc++;
+    if(loc >= altTape.possibleSources.length){
+      loc = 0;
+    }
+    altTape.source = altTape.possibleSources[loc];
+    switch(altTape.source){
+      case SOURCE.BARO:
+        $('#alt_annun_text').html('Baro Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
+        break;
+      case SOURCE.GPS:
+        $('#alt_annun_text').html('GPS Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
+        break;
+      case SOURCE.INPUT:
+        return;
+        $('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
+        break;
+    }
+    vspeedTape.source = altTape.source;
+  });
+
+  system.checkWS = true;
+  system.smooth = true;
+  $('#sat_count').click(function(){
+    var r = confirm((system.smooth?"Disable":"Enable") + " Smoothing?");
+    if(r == false){
+      r = confirm((system.checkWS?"Disable":"Enable") + " Check WS?");
+      if(r == true)
+        system.checkWS = !system.checkWS;
+    }else{
+      system.smooth = !system.smooth;
+      if(system.smooth){
+        $('html').css('--ease_time','0.2s');
+        $('html').css('--hdg_ease_time','0.2s');
+        $('html').css('--aux_ease_time','0.2s');
+      }else{
+        $('html').css('--ease_time','0s');
+        $('html').css('--hdg_ease_time','0s');
+        $('html').css('--aux_ease_time','0s');
+      }
+    }
+
+  });
+}
+
 var currentHeading = 0;
 var updateHeading = 0;
 function generateTapes(){
+
+  $("div.volitile").remove();
 
   // Define height and width characteristics
   speedTape.width = $( '#speed_tape' ).outerWidth();
@@ -427,7 +468,7 @@ function generateTapes(){
   }
   // Add all speeds as text
   for(var i = speedTape.upperSpeed; i >= speedTape.lowerSpeed; i-= space){
-    var val = $('#speed_tape_text').append('<div class="speed_tape_index">' + i + '</div>');
+    var val = $('#speed_tape_text').append('<div class="speed_tape_index volitile">' + i + '</div>');
   }
   // Calculate speed tape total height
   speedTape.total_height = number_height * (speedTape.upperSpeed - speedTape.lowerSpeed) / space;
@@ -440,7 +481,7 @@ function generateTapes(){
     var bar = speedTape.speeds[i];
     // Generate the color bar
     var color_bar = $('<div/>', {
-      class: 'speed_tape_color_bar',
+      class: 'speed_tape_color_bar volitile',
     });
     // Change some settings based on where the color bar is located
     if(bar.start === speedTape.lowerSpeed){
@@ -478,7 +519,7 @@ function generateTapes(){
   for(var i = speedTape.upperSpeed; i >= speedTape.lowerSpeed; i-= tick){
     // Generate a tick
     var tick_div = $('<div/>', {
-      class: 'h_tick',
+      class: 'h_tick volitile',
     });
     // Set the tick's location
     tick_div.css('top', i * speedTape.pixels_per_number + speedTape.offset - tick_offset);
@@ -491,7 +532,7 @@ function generateTapes(){
     // Update the total height
     speedTape.total_height = Math.max(speedTape.total_height, i * speedTape.pixels_per_number + speedTape.offset - tick_offset);
   }
-  $('#speed_tape_scroll').append('<div id="speed_fmu" class="fmu_h"></div>');
+  $('#speed_tape_scroll').append('<div id="speed_fmu" class="fmu_h volitile"></div>');
 
   // Define the speed tape update method
   speedTape.update = function(s, override){
@@ -534,12 +575,12 @@ function generateTapes(){
   altTape.updateFMU = function(alt){
     altTape.fmu_alt = alt;
   }
-  $('#alt_tape_scroll').append('<div id="alt_fmu" class="fmu_h"></div>');
+  $('#alt_tape_scroll').append('<div id="alt_fmu" class="fmu_h volitile"></div>');
   // Loop through altitudes (0 - 10,000 ft)
   for(var i = 1000; i >= 0; i-=10){
     // Generate a tick
     var tick_div = $('<div/>', {
-      class: 'h_tick alt_tick',
+      class: 'h_tick alt_tick volitile',
     });
     // Set the tick location
     tick_div.css('top', i * altTape.pixels_per_number + altTape.offset - tick_offset);
@@ -553,11 +594,11 @@ function generateTapes(){
     altTape.total_height = Math.max(altTape.total_height, i * altTape.pixels_per_number + altTape.offset - tick_offset);
   }
   // Add the text for each altitude
-  $('#alt_tape_text').append('<div class="alt_tape_index"></div>');
+  $('#alt_tape_text').append('<div class="alt_tape_index volitile"></div>');
   for(var i = 950; i > 0; i-= 50){
-    $('#alt_tape_text').append('<div class="alt_tape_index">' + i + '0</div>');
+    $('#alt_tape_text').append('<div class="alt_tape_index volitile">' + i + '0</div>');
   }
-  $('#alt_tape_text').append('<div class="alt_tape_index">0</div>');
+  $('#alt_tape_text').append('<div class="alt_tape_index volitile">0</div>');
 
   // Define the altitude tape update method
   altTape.update = function(alt, override){
@@ -593,35 +634,6 @@ function generateTapes(){
   altTape.source = SOURCE.BARO;
   vspeedTape.source = altTape.source;
 
-  // Set altitude button up
-  $('#alt_annun').click(function(){
-    var loc = 0;
-    for(var i = 0; i < altTape.possibleSources.length; i++){
-      if(altTape.possibleSources[i] === altTape.source){
-        loc = i;
-        break;
-      }
-    }
-    loc++;
-    if(loc >= altTape.possibleSources.length){
-      loc = 0;
-    }
-    altTape.source = altTape.possibleSources[loc];
-    switch(altTape.source){
-      case SOURCE.BARO:
-        $('#alt_annun_text').html('Baro Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
-        break;
-      case SOURCE.GPS:
-        $('#alt_annun_text').html('GPS Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
-        break;
-      case SOURCE.INPUT:
-        return;
-        $('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
-        break;
-    }
-    vspeedTape.source = altTape.source;
-  });
-
   // ------------------------------------------------------------------------ //
   // Generate vertical speed tape                                             //
   // ------------------------------------------------------------------------ //
@@ -635,7 +647,7 @@ function generateTapes(){
   for(var i = 15; i >= -15; i-= 1){
     // Generate a tick
     var tick_div = $('<div/>', {
-      class: 'h_tick vspeed_tick',
+      class: 'h_tick vspeed_tick volitile',
     });
     // Set the tick location
     tick_div.css('top', i * vspeedTape.pixels_per_number + vspeedTape.offset - tick_offset);
@@ -655,7 +667,7 @@ function generateTapes(){
   // Loop through each number and add it
   for(var i = 15; i >= 0; i-=5){
     var val = $('<div/>', {
-      class: 'vspeed_tape_index',
+      class: 'vspeed_tape_index volitile',
       html: i
     });
     val.css('top', text_pos);
@@ -664,7 +676,7 @@ function generateTapes(){
   }
   for(var i = 5; i <= 15; i+=5){
     var val = $('<div/>', {
-      class: 'vspeed_tape_index',
+      class: 'vspeed_tape_index volitile',
       html: i,
     });
     val.css('top', text_pos);
@@ -703,7 +715,7 @@ function generateTapes(){
   for(var c = 0; c < ahrsTape.chevrons; c++){
     // Generate chevron from svg
     var chevron = $('<img/>', {
-      class: 'ahrs_chevron',
+      class: 'ahrs_chevron volitile',
       src: 'images/chevron.svg'
     });
     // Set chevron position
@@ -717,7 +729,7 @@ function generateTapes(){
   for(var i = ahrsTape.limits[0]; i >= ahrsTape.limits[1]; i-= 2.5){
     // Generate a tick
     var tick_div = $('<div/>', {
-      class: 'h_tick ahrs_tick'
+      class: 'h_tick ahrs_tick volitile'
     });
     // Position the tick
     tick_div.css('top', pos_index * ahrsTape.pixels_per_tick);
@@ -736,7 +748,7 @@ function generateTapes(){
         for(var j = 0; j < 2; j++){
           // Generate text
           var text = $('<div/>', {
-            class: 'ahrs_text'
+            class: 'ahrs_text volitile'
           });
           // Set the html as the degree in question
           text.html((i<0?-i:i));
@@ -769,7 +781,7 @@ function generateTapes(){
   for(var c = 0; c < ahrsTape.chevrons; c++){
     // Generate chevron from svg
     var chevron = $('<img/>', {
-      class: 'ahrs_chevron',
+      class: 'ahrs_chevron volitile',
       src: 'images/chevron_flip.svg'
     });
     // Set chevron position
@@ -831,44 +843,6 @@ function generateTapes(){
     }
     checkIn(AHRS_TYPE.AHRS, override);
   }
-
-  // Set Pitch On-Click
-  $('#pitch_readout').click(function(){
-    var r = confirm("Center AHRS?");
-    if (r == true) {
-      post('cageAHRS');
-    }
-  });
-
-  $('#roll_readout').click(function(){
-    var r = confirm("Calibrate GYRO?");
-    if (r == true) {
-      post('calibrateAHRS');
-    }
-  });
-
-  system.checkWS = true;
-  system.smooth = true;
-  $('#sat_count').click(function(){
-    var r = confirm((system.smooth?"Disable":"Enable") + " Smoothing?");
-    if(r == false){
-      r = confirm((system.checkWS?"Disable":"Enable") + " Check WS?");
-      if(r == true)
-        system.checkWS = !system.checkWS;
-    }else{
-      system.smooth = !system.smooth;
-      if(system.smooth){
-        $('html').css('--ease_time','0.2s');
-        $('html').css('--hdg_ease_time','0.2s');
-        $('html').css('--aux_ease_time','0.2s');
-      }else{
-        $('html').css('--ease_time','0s');
-        $('html').css('--hdg_ease_time','0s');
-        $('html').css('--aux_ease_time','0s');
-      }
-    }
-
-  });
 
 
 
@@ -974,7 +948,7 @@ function generateTapes(){
     while(pointer != headingTape.right_heading){
       // Generate a tick
       var tick_div = $('<div/>', {
-        class: 'v_tick',
+        class: 'v_tick volitile',
       });
       // Set the tick's location
       tick_div.css('left', index * headingTape.pixels_per_tick);
@@ -984,7 +958,7 @@ function generateTapes(){
         tick_div.css('height', '30px');
         // Generate a number
         var text = $('<div/>', {
-          class: 'heading_text',
+          class: 'heading_text volitile',
         });
         // Set the number text to the current degree
         text.html(pointer);
@@ -1008,7 +982,7 @@ function generateTapes(){
       if(pointer % 90 === 0){
         // Generate cardinal coord text
         var text = $('<div/>', {
-          class: 'heading_text card_text'
+          class: 'heading_text card_text volitile'
         });
         // Associate headings with leters
         if(pointer === 360){
@@ -1064,7 +1038,7 @@ function generateTapes(){
     var pos = [[19,4,'1'], [7,30,'2'], [31,30,'0']];
     for(var i = 0; i < pos.length; i++){
       var text = $('<div/>', {
-        class: 'g_text'
+        class: 'g_text volitile'
       });
       // Position text
       text.css('top', pos[i][0]);
@@ -1099,6 +1073,15 @@ function generateTapes(){
     satCount.update = function(count){};
   }
 
+  // Initialize the tapes
+  ahrsTape.update(0, 0, true);
+  headingTape.update(0, true);
+  speedTape.update(0, true);
+  altTape.update(0, true);
+  vspeedTape.update(0, true);
+
+  // Add invalid flags.
+  setInvalid(AHRS_TYPE.ALL, true);
 
 }
 

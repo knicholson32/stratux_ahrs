@@ -176,6 +176,7 @@
 #speed_tape {
   width:  180px;
   left: 0px;
+  z-index: 0;
 }
 
 #speed_tape_scroll{
@@ -183,6 +184,7 @@
   transition: all var(--aux_ease_time) ease-out 0s;
   top: -81px;
   transform: translateZ(0);
+  z-index: -1;
 }
 
 #speed_tape_index_holder {
@@ -235,6 +237,8 @@
 #speed_counter_holder {
   height: 100%;
   width: 100%;
+  position: relative;
+  z-index: 0;
 }
 
 #speed_counter {
@@ -289,6 +293,7 @@
 #alt_tape {
   width:  220px;
   right: 0px;
+  z-index: 0;
 }
 
 #alt_tape_scroll{
@@ -296,6 +301,7 @@
   transition: all var(--aux_ease_time) ease-out 0s;
   top: -81px;
   transform: translateZ(0);
+  z-index: -2;
 }
 
 #alt_tape_index_holder {
@@ -520,6 +526,7 @@
   height: 100%;
   position: absolute;
   transform: translateZ(0);
+  z-index: -1;
 }
 
 #heading_tape_scroll {
@@ -955,15 +962,16 @@
 /* TODO: Review this and correct it so it actually works. */
 /* if portrait mode is detected, rotate the entire site -90 degrees to hint rotating to landscape */
 @media (orientation: portrait) {
-  body {
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    -o-transform: rotate(-90deg);
-    -ms-transform: rotate(-90deg);
-    transform: rotate(-90deg);
+  #scroll_prevent {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
   }
-  #ahrs_container{
-    height: 555px;
-    width: 555px;
-  }
+  /*#ahrs_container{
+    height: 514px;
+    width: 919px;
+    zoom: 190%;
+  }*/
 }
