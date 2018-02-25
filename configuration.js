@@ -21,7 +21,7 @@ var system = {            // Overall system settings
   checkActiveTime: 2000,
   websocket_url:          // Websocket URL for situation
     "ws://192.168.10.1/situation",
-  enable_ahrs: true,
+  enable_ahrs: false,
   fmu_url:                // Websocket URL for FMU Update
     "ws://192.168.10.1:8888",
   enable_fmu: false,      // Enable FMU support - in development
