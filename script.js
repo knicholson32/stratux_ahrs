@@ -748,7 +748,7 @@ function generateTapes(){
         for(var j = 0; j < 2; j++){
           // Generate text
           var text = $('<div/>', {
-            class: 'ahrs_text volitile'
+            class: 'ahrs_text volitile noselect'
           });
           // Set the html as the degree in question
           text.html((i<0?-i:i));
@@ -1038,7 +1038,7 @@ function generateTapes(){
     var pos = [[19,4,'1'], [7,30,'2'], [31,30,'0']];
     for(var i = 0; i < pos.length; i++){
       var text = $('<div/>', {
-        class: 'g_text volitile'
+        class: 'g_text volitile noselect'
       });
       // Position text
       text.css('top', pos[i][0]);
