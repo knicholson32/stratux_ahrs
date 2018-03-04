@@ -110,6 +110,11 @@ function ahrsWSInit(){
     // If it has been too long since a message, restart the connection
     if(d - system.ahrs.updateTimeout > ahrsWS.lastMessage){
       ahrsWS.close();
+      console.log("Reconnecting after 0.5 seconds:");
+      setTimeout(function(){
+        ahrsWS=undefined;
+        ahrsWSInit();
+      },500);
     }
   }
 
