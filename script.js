@@ -1,47 +1,55 @@
-var ahrs = {};
+// ============================================== //
+// script.js :: Stratux AHRS
+//
+// View the repo at
+// https://github.com/knicholson32/stratux_ahrs
+//
+// Run with via webserver. Entry point is
+// 'index.html'
+// ============================================== //
 
-var interval_val = 0;
 
-//document.ontouchstart = function(e){
-    //e.preventDefault();
-//}
-
+// Run systemInit when the DOM is ready for modifications.
 $( document ).ready(systemInit);
 
+// System Initialization function
 function systemInit() {
-
+  // Print init message
   console.log("JS INIT");
-
+  // Prevent touch moves to ensure the user can't scroll off the screen
   $('body').bind('touchmove', function(e){e.preventDefault()})
-
+  // Initialize the orientation system
   orientationInit();
+  // Bind button interactions to their functions
   initButtons();
-  // Generate all tapes
-  generateTapes();
-
+  // Set up simulation if simulate is enabled
   if(system.simulate){
+    // Init the simulation pace variable
+    var interval_val = 0;
+    // Repeating function every 1/4 second
     setInterval(function(){
-      interval_val++;
+      // Exit simulation if it has been canceled
       if(!system.simulate)
         return;
+      // Increment interval
+      interval_val++;
+      // Send artificial updates for simulation
       headingTape.update(+interval_val);
       ahrsTape.update(Math.sin(interval_val/10)*7, Math.cos(interval_val/15+0.7)*12);
       speedTape.update(Math.sin(interval_val/20 + 0.5) * 9 + 70);
       altTape.update(Math.cos(interval_val/18 + 0.3) * 75 + 1423);
       vspeedTape.update(Math.sin(interval_val/18 + 0.3) * 2 + 4);
-
-      $('#message_flag').toggleClass('bright')
-
-
       satCount.update(7);
-
-
+      // Toggle message flag to show updates
+      $('#message_flag').toggleClass('bright')
     }, 250);
   }
 
+  // Check for valid date every 1/4 second
   setInterval(checkValid, 250);
+  // Refresh the websock connections after set time (checkActiveTime) if the
+  // data is not valid for too long
   setInterval(refreshIfInvalidTimeout, system.checkActiveTime);
-
 
   //Init AHRS
   if(system.enable_ahrs === true){
@@ -49,12 +57,11 @@ function systemInit() {
     setInterval(ahrsWS.checkActive, 250);
   }
 
-  //Init FMU
+  //Init FMU - BETA
   if(system.enable_fmu === true){
    fmuInit();
     setInterval(fmuWS.checkActive, 1000);
   }
-
 }
 
 var ahrsWS;
@@ -544,7 +551,7 @@ function generateTapes(){
     // Unit conversion
     s *= speedTape.conv;
     // Position the scroll div
-    $('#speed_tape_scroll').css('top',s*speedTape.pixels_per_number-speedTape.total_height + ahrs.height/2 - 2);
+    $('#speed_tape_scroll').css('top',s*speedTape.pixels_per_number-speedTape.total_height + system.ahrs.height/2 - 2);
     // Round speed for text display
     s = Math.round(s);
     // Pad and display speed in the speed box
@@ -610,7 +617,7 @@ function generateTapes(){
     // Unit conversion
     alt *= altTape.conv;
     // Position the scroll div
-    $('#alt_tape_scroll').css('top',alt/10*altTape.pixels_per_number-altTape.total_height + ahrs.height/2 - 2);
+    $('#alt_tape_scroll').css('top',alt/10*altTape.pixels_per_number-altTape.total_height + system.ahrs.height/2 - 2);
     // Round the altitude for text display
     alt = Math.round(alt);
     // Pad and display the altitude in the altitude box
@@ -932,7 +939,7 @@ function generateTapes(){
     // Clear current system
     $('#heading_tape_scroll').html('');
     // Calculate pixels per tick using dimenstions and range
-    headingTape.pixels_per_tick = (ahrs.width - 2*$('#speed_tape').outerWidth())/headingTape.range;
+    headingTape.pixels_per_tick = (system.ahrs.width - 2*$('#speed_tape').outerWidth())/headingTape.range;
     // Calculate direction
     var direction = !(constrainDegree(updateHeading - heading) < 180);
     // Calculate side padding to reduce redraws
