@@ -26,6 +26,9 @@ function systemInit() {
   if(system.simulate){
     // Init the simulation pace variable
     var interval_val = 0;
+    // Don't init ahrs_ws if we are simulating
+    system.enable_ahrs_ws = false;
+    $('#simulate_tag').css('display','unset');
     // Repeating function every 1/4 second
     setInterval(function(){
       // Exit simulation if it has been canceled
@@ -52,7 +55,7 @@ function systemInit() {
   setInterval(refreshIfInvalidTimeout, system.checkActiveTime);
 
   //Init AHRS
-  if(system.enable_ahrs === true){
+  if(system.enable_ahrs_ws === true){
     ahrsWSInit();
     setInterval(ahrsWS.checkActive, 250);
   }

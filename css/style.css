@@ -12,6 +12,8 @@
  *  Sky Container     id    sky_container
  *  Sky Mask          id    sky_mask
  *
+ *  Simulate Tag      id    simulate_tag
+ *
  *  Tape Class        class tape
  *  Speed Tape        id    speed_tape
       Tape Scroll     id    speed_tape_scroll
@@ -129,6 +131,20 @@
   left: -50%;
   transform: translateY(var(--pitch_amount));
   transition: transform var(--ease_time) ease-out 0s;
+}
+
+#simulate_tag{
+  position: absolute;
+  top: 28px;
+  left: 7px;
+  font-family: 'Monaco';
+  font-size: 23px;
+  color: white;
+  background-color: rgba(250, 0, 0, 0.7);
+  border-radius: 20px;
+  padding: 5px;
+  z-index: 5;
+  display: none;
 }
 
 /* ---------------- Tapes ---------------- */
