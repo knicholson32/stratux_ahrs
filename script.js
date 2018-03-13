@@ -18,6 +18,18 @@ function systemInit() {
   console.log("JS INIT");
   // Prevent touch moves to ensure the user can't scroll off the screen
   $('body').bind('touchmove', function(e){e.preventDefault()})
+  // Init Overlay
+  if(system.overlay_active === true){
+    $('#overlay').css('display','unset');
+    $('#overlay').click(function(){
+      console.warn("User acknowledged warning. View './README.md' for more information.");
+      $('#overlay').css('opacity','0');
+      setTimeout(function(){
+        system.overlay_active = false;
+        $('#overlay').remove();
+      },500)
+    });
+  }
   // Initialize the orientation system
   orientationInit();
   // Bind button interactions to their functions

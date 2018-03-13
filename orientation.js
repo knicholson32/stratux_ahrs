@@ -5,7 +5,7 @@ function orientationInit(){
 
   // Set some system variables
   system.ios = {};
-  
+
   system.ios.correction = false;
 
   // Run orientationChange to initialize the orientation
@@ -74,6 +74,16 @@ function orientationChange(){
     $('#ahrs_container').css('width','100%');
     $('#ahrs_container').css('zoom','100%');
     $('#ahrs_container').css('left','unset');
+
+    if(system.overlay_active === true){
+      $('#overlay').css('height', system.screen_height);
+      $('#overlay').css('width','100%');
+      $('#overlay').css('zoom','100%');
+      $('#overlay').css('left','unset');
+      $('#overlay').css('top','unset');
+      $('#overlay').css('transform','unset');
+    }
+
     // Set the system scale value ratio
     system.scale = system.screen_height/system.screen_width;
   }else{
@@ -88,10 +98,22 @@ function orientationChange(){
     // Set the system scale value ratio
     system.scale = system.screen_height/system.screen_width;
     // Update the width to fit the portrait mode
-    $('#ahrs_container').css('width',system.screen_height / system.scale);
-    $('#ahrs_container').css('height',system.screen_width / system.scale);
+    let width = system.screen_height / system.scale;
+    let height = system.screen_width / system.scale;
+    $('#ahrs_container').css('width',width);
+    $('#ahrs_container').css('height',height);
     // Set the scale to fit the portrait mode
     $('#ahrs_container').css('zoom',(system.scale*100+1)+'%');
+
+    if(system.overlay_active === true){
+      $('#overlay').css('width',width+20);
+      $('#overlay').css('height',height);
+      // Set the scale to fit the portrait mode
+      $('#overlay').css('zoom',(system.scale*100+1)+'%');
+      $('#overlay').css('transform','rotate(90deg)');
+      $('#overlay').css('left',-(width/2-height/2));
+      $('#overlay').css('top',(width/2 - height/2)-10);
+    }
   }
 
   // Record total sizes

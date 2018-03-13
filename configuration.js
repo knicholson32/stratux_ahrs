@@ -12,6 +12,7 @@ var SOURCE = {AHRS:0, GPS:1, BARO:2, INPUT:3, AUTO:4};
 
 /** ******************************** SYSTEM ******************************** **/
 var system = {            // Overall system settings
+  overlay_active: true,   // Enable warning overlay on startup
   ahrs: {                 // Settings for the overall AHRS
     updateTimeout: 500    // Time required for a metric to be set as invalid
   },
