@@ -191,10 +191,10 @@ function ahrsWSInit(){
         gMeter.update(data.AHRSGLoad);
       }
 
-      if(presist.overheat === false && system_status.CPUTemp > 60){
+      if(presist.overheat === false && system_status.CPUTemp > system.cpu_temp_warn){
         presist.overheat = true;
         $('#overheat_flag').css('display', 'block');
-      }else if(presist.overheat === true && system_status.CPUTemp < 60){
+      }else if(presist.overheat === true && system_status.CPUTemp < system.cpu_temp_warn){
         presist.overheat = false;
         $('#overheat_flag').css('display', 'none');
       }
