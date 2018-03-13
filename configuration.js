@@ -25,7 +25,7 @@ var system = {            // Overall system settings
   fmu_url:                // Websocket URL for FMU Update
     "ws://192.168.10.1:8888",
   enable_fmu: false,      // Enable FMU support - in development
-  cpu_temp_warn: 60,      // Temp at which the 'Temp' banner will be displayed (C)
+  cpu_temp_warn: 70,      // Temp at which the 'Temp' banner will be displayed (C)
   status_url:
     "http://192.168.10.1/getStatus",
   simulate: true
