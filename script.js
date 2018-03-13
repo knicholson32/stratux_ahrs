@@ -215,10 +215,16 @@ function ahrsWSInit(){
   };
 
   // Get status at interval
+  var getRequest = true;
   setInterval(function(){
-    $.getJSON(system.status_url, function(data){
-      system_status = data;
-    });
+    if(getRequest === true){
+      getRequest = false;
+      $.getJSON(system.status_url, function(data){
+        system_status = data;
+      }).always(function() {
+        getRequest = true;
+      });
+    }
   },1000);
 }
 
