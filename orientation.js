@@ -5,6 +5,7 @@ function orientationInit(){
 
   // Set some system variables
   system.ios = {};
+  
   system.ios.correction = false;
 
   // Run orientationChange to initialize the orientation

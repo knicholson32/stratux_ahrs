@@ -54,16 +54,8 @@ function systemInit() {
   // data is not valid for too long
   setInterval(refreshIfInvalidTimeout, system.checkActiveTime);
 
-  //Init AHRS
-  if(system.enable_ahrs_ws === true){
-    ahrsWSInit();
-    setInterval(ahrsWS.checkActive, 250);
-  }
-
-  //Init FMU - BETA
-  if(system.enable_fmu === true){
-   fmuInit();
-    setInterval(fmuWS.checkActive, 1000);
+  if(system.simulate === false){
+    initWS();
   }
 }
 
@@ -74,6 +66,21 @@ var system_status = {};
 var presist = {
   overheat: false
 };
+
+function initWS(){
+  //Init AHRS
+  if(system.enable_ahrs_ws === true){
+    ahrsWSInit();
+    setInterval(ahrsWS.checkActive, 250);
+  }
+
+  //Init FMU - BETA
+  if(system.enable_fmu === true){
+    fmuInit();
+    setInterval(fmuWS.checkActive, 1000);
+  }
+}
+
 function avg(arr){
   var sum = 0;
   for(var i = 0; i < arr.length; i++){
@@ -287,6 +294,15 @@ function initButtons(){
     var r = confirm("Calibrate GYRO?");
     if (r == true) {
       post('calibrateAHRS');
+    }
+  });
+
+  $('#simulate_tag').click(function(){
+    if(system.simulate === true){
+      system.simulate = false;
+      system.enable_ahrs_ws = true;
+      initWS();
+      $('#simulate_tag').css('display','none');
     }
   });
 
