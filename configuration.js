@@ -14,12 +14,12 @@ var SOURCE = {AHRS:0, GPS:1, BARO:2, INPUT:3, AUTO:4};
 var system = {            // Overall system settings
   overlay_active: true,   // Enable warning overlay on startup
   ahrs: {                 // Settings for the overall AHRS
-    updateTimeout: 500    // Time required for a metric to be set as invalid
+    updateTimeout: 750    // Time required for a metric to be set as invalid
   },
   fmu: {                  // Settings for the overall AHRS
     updateTimeout: 1500   // Time required for a metric to be set as invalid
   },
-  checkActiveTime: 2000,
+  checkActiveTime: 2250,
   websocket_url:          // Websocket URL for situation
     "ws://192.168.10.1/situation",
   enable_ahrs_ws: true,
