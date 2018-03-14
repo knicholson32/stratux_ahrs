@@ -1,11 +1,11 @@
 @charset "UTF-8";
-
 @font-face {
-    font-family: 'Monaco';
-    src: url('../fonts/monaco.ttf');
+  font-family: 'Monaco';
+  src: url('../fonts/monaco.ttf');
 }
 
 /* AHRS CSS STYLESHEET */
+
 /* Components:
  *  Main Container    id    ahrs_container
  *  Scroll Precvent   id    scroll_prevent
@@ -86,23 +86,26 @@
       Hdg Arrow       id    hdg_fmu_arrow
  */
 
- html {
-   --flight_angle:          0deg;
-   --speed_counter_speed:   1s;
-   --ease_time:             0.2s;   /* AHRS EASING */
-   --hdg_ease_time:         0.2s;   /* HEADING EASING */
-   --aux_ease_time:         0.2s;   /* OTHER EASING */
-   --pitch_amount:          0px;
+html {
+  --flight_angle: 0deg;
+  --speed_counter_speed: 1s;
+  --ease_time: 0.2s;
+  /* AHRS EASING */
+  --hdg_ease_time: 0.2s;
+  /* HEADING EASING */
+  --aux_ease_time: 0.2s;
+  /* OTHER EASING */
+  --pitch_amount: 0px;
   background-color: #000;
- }
+}
 
- body {
-   margin: 0px;
-   overflow: hidden;
- }
+body {
+  margin: 0px;
+  overflow: hidden;
+}
 
 #ahrs_container {
-  width:  100%;
+  width: 100%;
   height: 555px;
   background-color: #53350e;
   margin: 0 auto;
@@ -110,31 +113,29 @@
   overflow: hidden;
 }
 
-#scroll_prevent {
-}
+#scroll_prevent {}
 
 #sky_container {
-  width:  100%;
+  width: 100%;
   height: 100%;
-  transform:rotate(var(--flight_angle));
+  transform: rotate(var(--flight_angle));
   transition: transform var(--ease_time) ease-out 0s;
 }
 
-
 #sky_mask {
-  width:  200%;
+  width: 200%;
   height: 200%;
   /* Mask sky colors */
   background: linear-gradient(to bottom, #2a48fb, #4f60e0);
   border-bottom: 4px solid white;
-  position:relative;
-  bottom:   150%;
+  position: relative;
+  bottom: 150%;
   left: -50%;
   transform: translateY(var(--pitch_amount));
   transition: transform var(--ease_time) ease-out 0s;
 }
 
-#simulate_tag{
+#simulate_tag {
   position: absolute;
   top: 28px;
   left: 7px;
@@ -158,7 +159,6 @@
   top: 0;
   overflow: hidden;
 }
-
 
 .h_tick {
   width: 110%;
@@ -191,12 +191,12 @@
 /* --------- Speed Tape --------- */
 
 #speed_tape {
-  width:  180px;
+  width: 180px;
   left: 0px;
   z-index: 0;
 }
 
-#speed_tape_scroll{
+#speed_tape_scroll {
   position: relative;
   transition: all var(--aux_ease_time) ease-out 0s;
   top: -81px;
@@ -225,7 +225,7 @@
   margin-top: 10px;
   margin-bottom: 10px;
   position: absolute;
-  right:5px;
+  right: 5px;
   line-height: 40px;
   display: block;
   font-family: 'Monaco';
@@ -245,7 +245,7 @@
 }
 
 .speed_tape_color_bar {
-  width:  100%;
+  width: 100%;
   right: 0px;
   position: absolute;
   z-index: -2;
@@ -261,12 +261,12 @@
 #speed_counter {
   width: 131px;
   height: 80px;
-  background-color: rgba(0,0,0,1);
+  background-color: rgba(0, 0, 0, 1);
   position: relative;
   top: 50%;
   right: 14px;
   float: right;
-  display:  inline-block;
+  display: inline-block;
   transform: translateY(-50%);
   padding-left: 4px;
   border: 4px solid white;
@@ -308,12 +308,12 @@
 /* --------- Alt Tape --------- */
 
 #alt_tape {
-  width:  220px;
+  width: 220px;
   right: 0px;
   z-index: 0;
 }
 
-#alt_tape_scroll{
+#alt_tape_scroll {
   position: relative;
   transition: all var(--aux_ease_time) ease-out 0s;
   top: -81px;
@@ -373,12 +373,12 @@
 #alt_counter {
   width: 131px;
   height: 61px;
-  background-color: rgba(0,0,0,1);
+  background-color: rgba(0, 0, 0, 1);
   position: relative;
   top: 50%;
   left: 10px;
   float: right;
-  display:  inline-block;
+  display: inline-block;
   transform: translateY(-50%);
   padding-left: 4px;
   border: 4px solid white;
@@ -506,7 +506,7 @@
   position: relative;
 }
 
-#alt_annun_text span{
+#alt_annun_text span {
   line-height: 20px;
   font-size: 20px;
 }
@@ -548,7 +548,7 @@
 
 #heading_tape_scroll {
   position: absolute;
-  height:10px;
+  height: 10px;
 }
 
 #heading_annun {
@@ -604,9 +604,7 @@
   /*background-color: red;*/
 }
 
-#user_bars {
-
-}
+#user_bars {}
 
 #user_angle_pointer {
   width: 0;
@@ -614,7 +612,6 @@
   border-left: 20px solid transparent;
   border-right: 20px solid transparent;
   border-bottom: 20px solid #FFF;
-
   position: absolute;
   left: 50%;
   top: 100px;
@@ -627,7 +624,6 @@
   border-top: 10px solid #f2f950;
   border-bottom: 10px solid #7e7e16;
   border-left: 16px solid transparent;
-
   position: absolute;
   left: 40px;
   top: 50%;
@@ -640,7 +636,6 @@
   border-left: 80px solid transparent;
   border-right: 80px solid transparent;
   border-bottom: 25px solid #f2f950;
-
   position: absolute;
   left: 50%;
   top: 50%;
@@ -653,9 +648,7 @@
   border-left: 80px solid transparent;
   border-right: 80px solid transparent;
   border-bottom: 13px solid #7e7e16;
-
   padding-top: 13px;
-
   position: absolute;
   left: 50%;
   top: 50%;
@@ -668,7 +661,6 @@
   border-top: 10px solid #f2f950;
   border-bottom: 10px solid #7e7e16;
   border-right: 16px solid transparent;
-
   position: absolute;
   right: 40px;
   top: 50%;
@@ -719,8 +711,8 @@
 }
 
 .ahrs_chevron {
-  position:absolute;
-  top:0px;
+  position: absolute;
+  top: 0px;
   width: 200px;
   left: 50%;
   transform: translateX(-50%);
@@ -737,7 +729,7 @@
 
 .readout {
   height: 100%;
-  width:auto;
+  width: auto;
   margin: 5px;
   border: 3px solid white;
   background-color: black;
@@ -751,7 +743,7 @@
   display: inline-block;
 }
 
-.readout span{
+.readout span {
   padding-left: 10px;
 }
 
@@ -783,18 +775,18 @@
 }
 
 .invalid {
-  color: rgba(255,0,0,0.8);
+  color: rgba(255, 0, 0, 0.8);
   font-size: 200px;
   line-height: 200px;
   vertical-align: middle;
   font-family: 'Monaco';
-  background-color: rgba(0,0,0,0.3);
+  background-color: rgba(0, 0, 0, 0.3);
   background-image: url(../images/chevron-dark-blue.png);
   background-repeat: repeat;
   display: block;
 }
 
-.invalid::after{
+.invalid::after {
   content: 'X';
   position: absolute;
   left: 50%;
@@ -827,8 +819,8 @@
   border: 3px solid white;
   border-radius: 30px;
   background-color: black;
-
 }
+
 #overheat_flag_text {
   position: absolute;
   left: 50%;
@@ -857,12 +849,12 @@
   left: 16px;
 }
 
-#g_pointer_triangle{
+#g_pointer_triangle {
   width: 0;
   height: 0;
   border-top: 5px solid transparent;
   border-bottom: 5px solid transparent;
-  border-right:14px solid red;
+  border-right: 14px solid red;
   position: absolute;
   left: -5px;
 }
@@ -902,23 +894,23 @@
 /* ----------------- FMU ----------------- */
 
 #alt_fmu {
-  width:160px;
+  width: 160px;
 }
 
 #speed_fmu {
-  width:182px;
+  width: 182px;
 }
 
 #hdg_fmu {
-  height:182px;
+  height: 182px;
 }
 
-#hdg_fmu_arrow{
+#hdg_fmu_arrow {
   width: 0;
   height: 0;
   border-top: 15px solid transparent;
   border-bottom: 15px solid transparent;
-  border-right:15px solid red;
+  border-right: 15px solid red;
   position: absolute;
   bottom: 10px;
   left: 5px;
@@ -926,7 +918,7 @@
 
 .fmu_h {
   position: absolute;
-  height:5px;
+  height: 5px;
   bottom: 0px;
   background-color: red;
   z-index: -1;
@@ -934,17 +926,18 @@
 
 .fmu_v {
   position: absolute;
-  width:5px;
+  width: 5px;
   left: 0px;
   background-color: red;
   z-index: -1;
 }
 
 /* ---------------- Other ---------------- */
+
 .shadow {
-   -moz-box-shadow:    inset 0 0 15px rgba(0, 0, 0, 0.3);
-   -webkit-box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
-   box-shadow:         inset 0 0 15px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
 .arrow-right {
@@ -964,8 +957,7 @@
   height: 0;
   border-top: 15px solid transparent;
   border-bottom: 15px solid transparent;
-
-  border-right:15px solid white;
+  border-right: 15px solid white;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -973,17 +965,24 @@
 }
 
 #overlay {
-  position: fixed; /* Sit on top of the page content */
-  display: none; /* Hidden by default */
-  width: 100%; /* Full width (cover the whole page) */
-  height: 100%; /* Full height (cover the whole page) */
+  position: fixed;
+  /* Sit on top of the page content */
+  display: none;
+  /* Hidden by default */
+  width: 100%;
+  /* Full width (cover the whole page) */
+  height: 100%;
+  /* Full height (cover the whole page) */
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.7); /* Black background with opacity */
-  z-index: 20; /* Specify a stack order in case you're using a different order for other elements */
-  cursor: pointer; /* Add a pointer on hover */
+  background-color: rgba(0, 0, 0, 0.7);
+  /* Black background with opacity */
+  z-index: 20;
+  /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer;
+  /* Add a pointer on hover */
   color: white;
   font-size: 20px;
   line-height: 20px;
@@ -993,9 +992,7 @@
   transition: opacity 0.5s ease;
 }
 
-code{
-
-}
+code {}
 
 #overlay h1 {
   font-size: 40px;
@@ -1022,7 +1019,9 @@ code{
 }
 
 /* TODO: Review this and correct it so it actually works. */
+
 /* if portrait mode is detected, rotate the entire site -90 degrees to hint rotating to landscape */
+
 @media (orientation: portrait) {
   #scroll_prevent {
     -webkit-transform: rotate(90deg);
@@ -1038,22 +1037,34 @@ code{
   }*/
 }
 
-img{
-  -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+img {
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }
 
 .noselect {
-  -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
-       -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-            user-select: none; /* Non-prefixed version, currently
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }
