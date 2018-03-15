@@ -21,7 +21,7 @@ var system = { // Overall system settings
   enable_fmu: false, // Enable FMU support - in development
   cpu_temp_warn: 70, // Temp at which the 'Temp' banner will be displayed (C)
   status_url: "http://192.168.10.1/getStatus",
-  simulate: false
+  simulate: true
 };
 /** ******************************** ****** ******************************** **/
 

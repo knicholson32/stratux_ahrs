@@ -18,8 +18,8 @@ function systemInit() {
   console.log("JS INIT");
   // Prevent touch moves to ensure the user can't scroll off the screen
   $('body').bind('touchmove', function(e) {
-    e.preventDefault()
-  })
+    e.preventDefault();
+  });
   // Init Overlay
   if (system.overlay_active === true) {
     $('#overlay').css('display', 'unset');
@@ -29,7 +29,7 @@ function systemInit() {
       setTimeout(function() {
         system.overlay_active = false;
         $('#overlay').remove();
-      }, 500)
+      }, 500);
     });
   }
   // Initialize the orientation system
@@ -58,7 +58,7 @@ function systemInit() {
       vspeedTape.update(Math.sin(interval_val / 18 + 0.3) * 2 + 4);
       satCount.update(7);
       // Toggle message flag to show updates
-      $('#message_flag').toggleClass('bright')
+      $('#message_flag').toggleClass('bright');
     }, 250);
   }
 
@@ -148,7 +148,7 @@ function ahrsWSInit() {
         ahrsWSInit();
       }, 500);
     }
-  }
+  };
 
   ahrsWS.onmessage = function(message) {
     ahrsWS.lastMessage = new Date().getTime();
@@ -177,6 +177,7 @@ function ahrsWSInit() {
           break;
         case 6: // Dead Reckoning
         case 0: // NONE
+          break;
         default:
           // No fix / unreliable fix
           break;
@@ -280,7 +281,7 @@ function fmuInit() {
     if (new Date().getTime() - system.fmu.updateTimeout > fmuWS.lastMessage) {
       fmuWS.close();
     }
-  }
+  };
 
   fmuWS.onmessage = function(message) {
     fmuWS.lastMessage = new Date().getTime();
@@ -351,8 +352,9 @@ function initButtons() {
         break;
       case SOURCE.INPUT:
         return;
-        $('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
-        break;
+        /*$('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');*/
+        // TODO: Implement user defined altimiter setting
+        //break;
     }
     vspeedTape.source = altTape.source;
   });
@@ -519,9 +521,9 @@ function generateTapes() {
   speedTape.fmu_speed = NaN;
   speedTape.updateFMU = function(speed) {
     speedTape.fmu_speed = speed;
-  }
+  };
   // Add all speeds as text
-  for (var i = speedTape.upperSpeed; i >= speedTape.lowerSpeed; i -= space) {
+  for (i = speedTape.upperSpeed; i >= speedTape.lowerSpeed; i -= space) {
     var val = $('#speed_tape_text').append('<div class="speed_tape_index volitile">' + i + '</div>');
   }
   // Calculate speed tape total height
@@ -530,7 +532,7 @@ function generateTapes() {
   speedTape.offset = parseInt($('#speed_tape_text').css('margin-top').replace('px', '')) + parseInt($('#speed_tape_text').css('line-height').replace('px', '')) / 2 + 4;
 
   // Loop through each speed and add color bars
-  for (var i = 0; i < speedTape.speeds.length; i++) {
+  for (i = 0; i < speedTape.speeds.length; i++) {
     // Grab the current color bar from config
     var bar = speedTape.speeds[i];
     // Generate the color bar
@@ -570,7 +572,7 @@ function generateTapes() {
   }
   // Generte the ticks for the speed tape
   var tick_offset = 4;
-  for (var i = speedTape.upperSpeed; i >= speedTape.lowerSpeed; i -= tick) {
+  for (i = speedTape.upperSpeed; i >= speedTape.lowerSpeed; i -= tick) {
     // Generate a tick
     var tick_div = $('<div/>', {
       class: 'h_tick volitile',
@@ -619,7 +621,7 @@ function generateTapes() {
   // ------------------------------------------------------------------------ //
 
   // Define some constants
-  var tick_offset = 4;
+  tick_offset = 4;
   altTape.pixels_per_number = 2.2;
   altTape.total_height = 0;
   // Calculate tick offset based on text size
@@ -628,10 +630,10 @@ function generateTapes() {
   altTape.fmu_alt = NaN;
   altTape.updateFMU = function(alt) {
     altTape.fmu_alt = alt;
-  }
+  };
   $('#alt_tape_scroll').append('<div id="alt_fmu" class="fmu_h volitile"></div>');
   // Loop through altitudes (0 - 10,000 ft)
-  for (var i = 1000; i >= 0; i -= 10) {
+  for (i = 1000; i >= 0; i -= 10) {
     // Generate a tick
     var tick_div = $('<div/>', {
       class: 'h_tick alt_tick volitile',
@@ -649,7 +651,7 @@ function generateTapes() {
   }
   // Add the text for each altitude
   $('#alt_tape_text').append('<div class="alt_tape_index volitile"></div>');
-  for (var i = 950; i > 0; i -= 50) {
+  for (i = 950; i > 0; i -= 50) {
     $('#alt_tape_text').append('<div class="alt_tape_index volitile">' + i + '0</div>');
   }
   $('#alt_tape_text').append('<div class="alt_tape_index volitile">0</div>');
@@ -912,7 +914,7 @@ function generateTapes() {
       $('#roll_readout span').html(pad(Math.round(Math.abs(roll)), 2) + '°' + (roll < 0 ? 'L' : 'R'));
     }
     checkIn(AHRS_TYPE.AHRS, override);
-  }
+  };
 
 
 
