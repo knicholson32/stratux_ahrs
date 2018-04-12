@@ -4,7 +4,7 @@ AHRS Display for the Raspberry pi powered Stratux software.
 ![alt text](https://raw.githubusercontent.com/knicholson32/stratux_ahrs/master/images/icons/icon.png "AHRS Logo")
 
 
-Extension to the [Stratux](https://github.com/cyoung/stratux) project that allows an iPhone to be used to display AHRS information.
+Extension to the [Stratux](https://github.com/cyoung/stratux) project that allows an iPhone to be used to display AHRS information. Modeled visually after the [Garmin G5](https://buy.garmin.com/en-US/US/p/570665)
 
 ### Example Screenshot
 This example image was created using simulated data, and shows all visual features of the device.
