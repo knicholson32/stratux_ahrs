@@ -31,7 +31,7 @@ mkdir ahrs
 ```
 - Clone this repository:
 ```unix
-git clone https://github.com/knicholson32/stratux_ahrs
+git clone https://github.com/knicholson32/stratux_ahrs.git
 ```
 - Move contents to correct folder and remove extras:
 ```unix
