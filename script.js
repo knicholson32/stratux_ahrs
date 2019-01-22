@@ -56,6 +56,7 @@ function systemInit() {
       speedTape.update(Math.sin(interval_val / 20 + 0.5) * 9 + 70);
       altTape.update(Math.cos(interval_val / 18 + 0.3) * 75 + 1423);
       vspeedTape.update(Math.sin(interval_val / 18 + 0.3) * 2 + 4);
+      slipSkid.update(Math.sin(interval_val / 27));
       satCount.update(7);
       // Toggle message flag to show updates
       $('#message_flag').toggleClass('bright');
@@ -202,8 +203,11 @@ function ahrsWSInit() {
         vspeedTape.update(data.BaroVerticalSpeed * conv.fps2mps);
       }
 
+      // data.AHRSSlipSkid
+
       if (data.AHRSStatus !== 1) {
         ahrsTape.update(data.AHRSPitch, data.AHRSRoll);
+        slipSkid.update(data.AHRSSlipSkid)
         gMeter.update(data.AHRSGLoad);
       }
 
@@ -916,6 +920,13 @@ function generateTapes() {
     checkIn(AHRS_TYPE.AHRS, override);
   };
 
+  // ------------------------------------------------------------------------ //
+  // Generate SLIP SKID                                                       //
+  // ------------------------------------------------------------------------ //
+
+  slipSkid.update = function(yaw, override) {
+    $('html').css('--slip_skid', (yaw * 50) + 'px')
+  }
 
 
   // ------------------------------------------------------------------------ //
@@ -1097,6 +1108,7 @@ function generateTapes() {
     var value = -(getDegreeDistance(headingTape.left_heading, currentHeading) * headingTape.pixels_per_tick - headingTape.pixels_per_tick * headingTape.padding);
     // Update the location
     $('#heading_tape_scroll').css('left', value);
+    $('#heading_tape_scroll').css('bottom', '0px');
   };
   // Redraw the heading tape initially
   headingTape.redrawHeadingTape(0, 0);
@@ -1200,6 +1212,7 @@ function checkValid() {
         case AHRS_TYPE.GMETER:
           ahrsTape.update(0, 0, true);
           gMeter.update(1, true);
+          slipSkid.update(0, true);
           break;
       }
       setInvalid(i, true);
@@ -1225,10 +1238,10 @@ function setInvalid(type, value) {
       name = ['heading_tape'];
       break;
     case AHRS_TYPE.AHRS:
-      name = ['ahrs_container', 'pitch_readout', 'roll_readout'];
+      name = ['ahrs_container', 'pitch_readout', 'roll_readout', 'slip_skid_holder'];
       break;
     case AHRS_TYPE.ALL:
-      name = ['ahrs_container', 'pitch_readout', 'roll_readout', 'heading_tape', 'alt_tape', 'speed_tape'];
+      name = ['ahrs_container', 'pitch_readout', 'roll_readout', 'heading_tape', 'alt_tape', 'speed_tape', 'slip_skid_holder'];
       break;
   }
   if (name === undefined)

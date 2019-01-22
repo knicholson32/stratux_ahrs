@@ -125,11 +125,12 @@ function orientationChange() {
   $('#heading_tape').css('left', $('#speed_tape').outerWidth());
   $('#readouts').css('width', system.ahrs.width - $('#speed_tape').outerWidth() - $('#alt_tape ').outerWidth() - 1);
   $('#readouts').css('left', $('#speed_tape').outerWidth());
-  $('#heading_tape').css('top', $('#speed_tape').outerHeight() - $('#heading_tape').outerHeight());
+  // $('#heading_tape').css('top', $('#speed_tape').outerHeight() - $('#heading_tape').outerHeight());
   $('#speed_counter').css('margin-right', $('#speed_tape_tick_holder').outerWidth() - 2);
   $('#g_meter').css('bottom', $('#heading_tape').outerHeight() + 10);
   $('#g_meter').css('right', $('#alt_tape ').outerWidth() + 10);
   $('#overheat_flag').css('display', 'none');
+  // $('#slip_skid_holder').css()
 
   // Generate the tapes
   generateTapes();
