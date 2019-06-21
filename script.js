@@ -8,12 +8,14 @@
 // 'index.html'
 // ============================================== //
 
+var html;
 
 // Run systemInit when the DOM is ready for modifications.
 $(document).ready(systemInit);
 
 // System Initialization function
 function systemInit() {
+  html = $('html');
   // Print init message
   console.log("JS INIT");
   // Prevent touch moves to ensure the user can't scroll off the screen
@@ -21,7 +23,8 @@ function systemInit() {
     e.preventDefault();
   });
   // Init Overlay
-  if (system.overlay_active === true) {
+  let bypass_warning = getCookie('bypass_warning');
+  if (system.overlay_active === true && bypass_warning !== "true") {
     $('#overlay').css('display', 'unset');
     $('#overlay').click(function() {
       console.warn("User acknowledged warning. View './README.md' for more information.");
@@ -54,8 +57,9 @@ function systemInit() {
       headingTape.update(+interval_val);
       ahrsTape.update(Math.sin(interval_val / 10) * 7, Math.cos(interval_val / 15 + 0.7) * 12);
       speedTape.update(Math.sin(interval_val / 20 + 0.5) * 9 + 70);
-      altTape.update(Math.cos(interval_val / 18 + 0.3) * 75 + 1423);
-      vspeedTape.update(Math.sin(interval_val / 18 + 0.3) * 2 + 4);
+      // altTape.update(Math.cos(interval_val / 18 + 0.3) * 75 + 1423);
+      altTape.update(273.71);
+      vspeedTape.update(Math.sin(interval_val / 18 + 0.3) * 200 + 4);
       slipSkid.update(Math.sin(interval_val / 27));
       satCount.update(7);
       // Toggle message flag to show updates
@@ -80,6 +84,27 @@ var headingAvg = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 var system_status = {};
 var presist = {
   overheat: false
+};
+
+system.sendNotification = function(msg, opentime){
+  let l;
+  let side = 'top';
+  if(system.orinetation === "landscape"){
+    l = $(`<div class="notification">${msg}</div>`);
+  }else{
+    l = $(`<div class="notification portrait">${msg}</div>`);
+    side = 'right';
+  }
+  $('body').append(l);
+  setTimeout(() => {
+    l.css(side, '0px');
+  }, 1)
+  setTimeout(() => {
+    l.css(side, '-40px');
+  }, opentime)
+  setTimeout(() => {
+    l.remove();
+  }, opentime+2000)
 };
 
 function initWS() {
@@ -112,8 +137,6 @@ function ahrsWSInit() {
   ahrsWS = new WebSocket(system.websocket_url);
   ahrsWS.closed = true;
   ahrsWS.lastMessage = new Date().getTime();
-
-
 
   ahrsWS.onopen = function(e) {
     console.log("Connection established!");
@@ -309,19 +332,52 @@ function fmuInit() {
 // NOTICE: ALL INPUTS TO UPDATE FUNCTIONS ARE TO BE IN SI UNITS
 
 function initButtons() {
+  $('#settings_icon').mouseup(() => {
+    $('#settings_menu').removeClass('hidden');
+    $('#settings_overlay').removeClass('hidden');
+  });
+
+  $(document).keyup(function(e) {
+    if (e.keyCode === 27){
+      $('#settings_menu').addClass('hidden');
+      $('#settings_overlay').addClass('hidden');
+    }
+  });
+
+  $('#settings_overlay').click(() => {
+    $('#settings_menu').addClass('hidden');
+    $('#settings_overlay').addClass('hidden');
+  });
+
   // Set Pitch On-Click
-  $('#pitch_readout').click(function() {
+  $('#align_ahrs').click(function() {
     var r = confirm("Center AHRS?");
     if (r == true) {
       post('cageAHRS');
     }
   });
 
-  $('#roll_readout').click(function() {
+  $('#calibrate_gyro').click(function() {
     var r = confirm("Calibrate GYRO?");
     if (r == true) {
       post('calibrateAHRS');
     }
+  });
+
+  function updateKollsmanSetting(kollsman){
+    altTape.kollsman = kollsman;
+    system.sendNotification(`Updated altimiter to ${altTape.kollsman}inHg`, 4000);
+    if(altTape.source == SOURCE.BARO) {
+        $('#alt_annun_text').html('Baro Altitude <span>' + altTape.kollsman + 'inHg, ' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
+    }
+  }
+
+  $('#update_baro').click(() => {
+    updateKollsmanSetting($('#kollsman_input').val());
+  });
+
+  $('#set_std_baro').click(() => {
+    updateKollsmanSetting(29.92);
   });
 
   $('#simulate_tag').click(function() {
@@ -349,7 +405,7 @@ function initButtons() {
     altTape.source = altTape.possibleSources[loc];
     switch (altTape.source) {
       case SOURCE.BARO:
-        $('#alt_annun_text').html('Baro Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
+        $('#alt_annun_text').html('Baro Altitude <span>' + altTape.kollsman + 'inHg, ' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
         break;
       case SOURCE.GPS:
         $('#alt_annun_text').html('GPS Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
@@ -374,13 +430,13 @@ function initButtons() {
     } else {
       system.smooth = !system.smooth;
       if (system.smooth) {
-        $('html').css('--ease_time', '0.2s');
-        $('html').css('--hdg_ease_time', '0.2s');
-        $('html').css('--aux_ease_time', '0.2s');
+        html.css('--ease_time', '0.2s');
+        html.css('--hdg_ease_time', '0.2s');
+        html.css('--aux_ease_time', '0.2s');
       } else {
-        $('html').css('--ease_time', '0s');
-        $('html').css('--hdg_ease_time', '0s');
-        $('html').css('--aux_ease_time', '0s');
+        html.css('--ease_time', '0s');
+        html.css('--hdg_ease_time', '0s');
+        html.css('--aux_ease_time', '0s');
       }
     }
 
@@ -510,7 +566,7 @@ function generateTapes() {
       console.error("Cannot use vspeed unit: " + vspeedTape.units);
   }
 
-  $('#alt_annun_text span').html(altTape.unitPrefix + ', ' + vspeedTape.unitPrefix);
+  $('#alt_annun_text span').html(altTape.kollsman + 'inHg, ' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix);
 
   // ------------------------------------------------------------------------ //
   // Generate speed tape                                                      //
@@ -662,6 +718,9 @@ function generateTapes() {
 
   // Define the altitude tape update method
   altTape.update = function(alt, override) {
+    // Alt in meters at this time. Need to apply Kollsman setting:
+    // altTape.kollsman (inHg)
+    alt = -44307.6 * (1 - 0.523779 * Math.pow(altTape.kollsman,0.190284)) + alt;
     // Unit conversion
     alt *= altTape.conv;
     // Position the scroll div
@@ -871,7 +930,7 @@ function generateTapes() {
   // Define the AHRS update method
   ahrsTape.update = function(pitch, roll, override) {
     // Set the pitch amount to the global CSS variable
-    $('html').css('--pitch_amount', pitch * (ahrsTape.pixels_per_tick * 4) / 10 - 3);
+    html.css('--pitch_amount', pitch * (ahrsTape.pixels_per_tick * 4) / 10 - 3);
     // Loop through each stored tick
     for (var i = 0; i < ahrsTape.ticks.length; i++) {
       var val = ahrsTape.ticks[i];
@@ -904,19 +963,19 @@ function generateTapes() {
       }
     }
     // Set the flight angle degree CSS value
-    $('html').css('--flight_angle', -roll + 'deg');
+    html.css('--flight_angle', -roll + 'deg');
     // Set the pitch text
-    if (Math.abs(pitch) < 0.5) {
-      $('#pitch_readout span').html(pad(Math.round(Math.abs(pitch)), 2) + '°-');
-    } else {
-      $('#pitch_readout span').html(pad(Math.round(Math.abs(pitch)), 2) + '°' + (pitch < 0 ? 'D' : 'U'));
-    }
-    // Set the roll text
-    if (Math.abs(roll) < 0.5) {
-      $('#roll_readout span').html(pad(Math.round(Math.abs(roll)), 2) + '°-');
-    } else {
-      $('#roll_readout span').html(pad(Math.round(Math.abs(roll)), 2) + '°' + (roll < 0 ? 'L' : 'R'));
-    }
+    // if (Math.abs(pitch) < 0.5) {
+    //   $('#pitch_readout span').html(pad(Math.round(Math.abs(pitch)), 2) + '°-');
+    // } else {
+    //   $('#pitch_readout span').html(pad(Math.round(Math.abs(pitch)), 2) + '°' + (pitch < 0 ? 'D' : 'U'));
+    // }
+    // // Set the roll text
+    // if (Math.abs(roll) < 0.5) {
+    //   $('#roll_readout span').html(pad(Math.round(Math.abs(roll)), 2) + '°-');
+    // } else {
+    //   $('#roll_readout span').html(pad(Math.round(Math.abs(roll)), 2) + '°' + (roll < 0 ? 'L' : 'R'));
+    // }
     checkIn(AHRS_TYPE.AHRS, override);
   };
 
@@ -925,7 +984,7 @@ function generateTapes() {
   // ------------------------------------------------------------------------ //
 
   slipSkid.update = function(yaw, override) {
-    $('html').css('--slip_skid', (yaw * 50) + 'px')
+    html.css('--slip_skid', (yaw * 50) + 'px')
   }
 
 
@@ -936,7 +995,7 @@ function generateTapes() {
   // Define some constants
   headingTape.safetyOffset = 30;
 
-  if ($('html').css('--hdg_ease_time').trim() === '0s') {
+  if (html.css('--hdg_ease_time').trim() === '0s') {
     headingTape.removeAnimation = true;
   } else {
     headingTape.removeAnimation = false;
@@ -1238,10 +1297,10 @@ function setInvalid(type, value) {
       name = ['heading_tape'];
       break;
     case AHRS_TYPE.AHRS:
-      name = ['ahrs_container', 'pitch_readout', 'roll_readout', 'slip_skid_holder'];
+      name = ['ahrs_container', /*'pitch_readout',*/ 'roll_readout', 'slip_skid_holder'];
       break;
     case AHRS_TYPE.ALL:
-      name = ['ahrs_container', 'pitch_readout', 'roll_readout', 'heading_tape', 'alt_tape', 'speed_tape', 'slip_skid_holder'];
+      name = ['ahrs_container', /*'pitch_readout',*/ 'roll_readout', 'heading_tape', 'alt_tape', 'speed_tape', 'slip_skid_holder'];
       break;
   }
   if (name === undefined)
@@ -1336,7 +1395,46 @@ var post = function(url) {
   http.send(params);
 }
 
+window.addEventListener("deviceorientation", handleOrientation, true);
+
+function handleOrientation(event) {
+  var absolute = event.absolute;
+  var alpha = event.alpha;
+  var beta = event.beta;
+  var gamma = event.gamma;
+
+  // console.log('Absolute: ' + absolute)
+  // console.log('Alpha: ' + alpha)
+  // console.log('Beta: ' + beta)
+  // console.log('Gamma: ' + gamma)
+
+  // Do stuff with the new orientation data
+}
+
 
 Math.toDegrees = function(rad) {
   return rad * 57.2958;
+}
+
+function setCookie(name,value,seconds) {
+  var expires = "";
+  if (seconds) {
+      var date = new Date();
+      date.setTime(date.getTime() + (seconds*1000));
+      expires = "; expires=" + date.toUTCString();
+  }
+  document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+function getCookie(name) {
+  var nameEQ = name + "=";
+  var ca = document.cookie.split(';');
+  for(var i=0;i < ca.length;i++) {
+      var c = ca[i];
+      while (c.charAt(0)==' ') c = c.substring(1,c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+  }
+  return null;
+}
+function eraseCookie(name) {   
+  document.cookie = name+'=; Max-Age=-99999999;';  
 }

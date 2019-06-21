@@ -88,6 +88,12 @@
       Speed FMU       id    speed_fmu
       Heading FMU     id    hdg_fmu
       Hdg Arrow       id    hdg_fmu_arrow
+  * Settings Menu     id    settings_menu
+      Exit Overlay    id    settings_overlay
+      Button          class settings_button
+      Input           class settings_input
+      Icon            id    settings_icon
+  * Notification      id    notification
  */
 html {
   --flight_angle: 0deg;
@@ -509,8 +515,8 @@ body {
 }
 
 #alt_annun_text span {
-  line-height: 20px;
-  font-size: 20px;
+  line-height: 15px;
+  font-size: 15px;
 }
 
 /* Heading Tape */
@@ -972,6 +978,124 @@ body {
   left: 0px;
   background-color: red;
   z-index: -1;
+}
+
+/* ---------------- Settings Menu ---------------- */
+
+#settings_menu{
+  width: 50%;
+  background-color: white;
+  border-radius: 5px;
+  z-index: 1000;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+#settings_overlay{
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  background-color: black;
+  opacity: 0.5;
+  z-index: 999;
+}
+
+#settings_menu.hidden, #settings_overlay.hidden{
+  display: none;
+}
+
+.settings_button{
+  width: 100%;
+  border-radius: 5px;
+  background-color: #1e79ca;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 35px;
+  line-height: 12vh;
+  color: white;
+  font-family: 'Monaco';
+  cursor: pointer;
+}
+
+.settings_button:active{
+  background-color: #003049;
+}
+
+.settings_button.last{
+  margin-bottom: 0px;
+}
+
+.settings_button.thin{
+  line-height: 6vh;
+  font-size: 25px;
+}
+
+.settings_input{
+  margin-bottom: 10px;
+}
+
+.settings_input input{
+  width: 90%;
+  transform: translateX(5%);
+  font-size: 25px;
+}
+
+.settings_spacer{
+  width: 100%;
+  height: 20px;
+  border-bottom: 2px solid black;
+  margin-bottom: 20px;
+}
+
+#settings_icon{
+  position: relative;
+  left: 20px;
+  width: 30px;
+  height: 20px;
+  bottom: 50px;
+  cursor: pointer;
+}
+
+.menu_bar{
+  height: 4px;
+  width: 100%;
+  border-radius: 2px;
+  background-color: white;
+  margin-bottom: 7px;
+}
+
+/* ---------------- Notification ---------------- */
+
+.notification{
+  background-color: #587E4B;
+  border-radius: 4px;
+  color: white;
+  font-family: 'Monaco';
+  font-size: 25px;
+  position: fixed;
+  padding: 0px 10px 0px 10px;
+  line-height: 40px;
+  height: 40px;
+  text-align: center;
+  top: -40px;
+  right: 20px;
+  transition: top 0.5s ease, right 0.5s ease;
+  z-index: 2000;
+}
+
+.notification.portrait{
+  bottom: 0px;
+  top: unset;
+  right: -40px;
+  transform: rotate(90deg);
+  transform-origin: right top;
 }
 
 /* ---------------- Other ---------------- */
