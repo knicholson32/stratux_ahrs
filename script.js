@@ -65,8 +65,7 @@ function systemInit() {
       headingTape.update(+interval_val);
       ahrsTape.update(Math.sin(interval_val / 10) * 7, Math.cos(interval_val / 15 + 0.7) * 12);
       speedTape.update(Math.sin(interval_val / 20 + 0.5) * 9 + 70);
-      // altTape.update(Math.cos(interval_val / 18 + 0.3) * 75 + 1423);
-      altTape.update(273.71);
+      altTape.update(Math.cos(interval_val / 18 + 0.3) * 75 + 1423);
       vspeedTape.update(Math.sin(interval_val / 18 + 0.3) * 200 + 4);
       slipSkid.update(Math.sin(interval_val / 27));
       satCount.update(7);

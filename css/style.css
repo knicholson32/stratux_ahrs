@@ -735,7 +735,7 @@ body {
   height: 55px;
   position: relative;
   bottom: 20px;
-  left: calc(50% - 35px);
+  left: calc(50% - 15px);
 }
 
 .slip_skid_bar {
