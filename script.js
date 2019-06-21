@@ -93,6 +93,7 @@ var system_status = {};
 var presist = {
   overheat: false
 };
+system.ahrs.inactiveCounter = 0;
 
 system.sendNotification = function(msg, opentime){
   let l;
@@ -161,9 +162,15 @@ function ahrsWSInit() {
       console.warn("Websocket \"" + name + "\" did not closed cleanly.");
     }
     console.log("Reconnecting after 0.5 seconds:");
-    setTimeout(function() {
-      ahrsWSInit();
-    }, 500);
+    system.ahrs.inactiveCounter++;
+    if(system.allowReload && system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount){
+      console.log('Reboot!');
+      doRefresh();
+    }else{
+      setTimeout(function() {
+        ahrsWSInit();
+      }, 500);
+    }
   };
 
   ahrsWS.checkActive = function() {
@@ -174,11 +181,16 @@ function ahrsWSInit() {
     // If it has been too long since a message, restart the connection
     if (d - system.ahrs.updateTimeout > ahrsWS.lastMessage) {
       ahrsWS.close();
-      console.log("Reconnecting after 0.5 seconds:");
-      setTimeout(function() {
-        ahrsWS = undefined;
-        ahrsWSInit();
-      }, 500);
+      if(system.allowReload && system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount){
+        console.log('Reboot!');
+        doRefresh();
+      }else{
+        console.log("Reconnecting after 0.5 seconds:");
+        setTimeout(function() {
+          ahrsWS = undefined;
+          ahrsWSInit();
+        }, 500);
+      }
     }
   };
 
@@ -186,6 +198,7 @@ function ahrsWSInit() {
     ahrsWS.lastMessage = new Date().getTime();
     $('#message_flag').toggleClass('bright');
     if (message.isTrusted) {
+      system.ahrs.inactiveCounter = 0;
       var data = JSON.parse(message.data);
       //console.log(data);
       var gpsValid = false;
@@ -1445,4 +1458,9 @@ function getCookie(name) {
 }
 function eraseCookie(name) {   
   document.cookie = name+'=; Max-Age=-99999999;';  
+}
+
+function doRefresh(){
+  setCookie('bypass_warning', 'true', 5);
+  location.reload();
 }

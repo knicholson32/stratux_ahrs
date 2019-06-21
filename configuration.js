@@ -7,10 +7,11 @@
 var system = { // Overall system settings
   overlay_active: true, // Enable warning overlay on startup
   ahrs: { // Settings for the overall AHRS
-    updateTimeout: 750 // Time required for a metric to be set as invalid
+    updateTimeout: 750, // Time (in ms) required for a metric to be set as invalid
+    reloadAfterTimeoutCount: 3 // Number of times the timeout has to be hit before a reboot
   },
   fmu: { // Settings for the overall AHRS
-    updateTimeout: 1500 // Time required for a metric to be set as invalid
+    updateTimeout: 1500 // Time (in ms) required for a metric to be set as invalid
   },
   checkActiveTime: 2250,
   websocket_url: // Websocket URL for situation
@@ -20,6 +21,7 @@ var system = { // Overall system settings
     "ws://192.168.10.1:8888",
   enable_fmu: false, // Enable FMU support - in development
   cpu_temp_warn: 70, // Temp at which the 'Temp' banner will be displayed (C)
+  allowReload: false, // Allows the app to automatically reload if it detects an issue
   status_url: "http://192.168.10.1/getStatus",
   simulate: true
 };
