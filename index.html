@@ -27,6 +27,17 @@
 </head>
 
 <body>
+  <div id="settings_menu", class="hidden">
+    <div class="settings_button noselect" id="align_ahrs">Align AHRS</div>
+    <div class="settings_button last noselect" id="calibrate_gyro">Calibrate Gyro</div>
+    <div class="settings_spacer"></div>
+    <div class="settings_input">
+      <input id="kollsman_input" type="number", value="29.92"/>
+    </div>
+    <div class="settings_button thin noselect" id="update_baro">Update Baro (inHg)</div>
+    <div class="settings_button thin last noselect" id="set_std_baro">Std. Baro (29.92inHg)</div>
+  </div>
+  <div id="settings_overlay" class="hidden"></div>
   <div id="overlay">
     <h1>Notice</h1>
     <p>
@@ -143,19 +154,16 @@
       </div>
 
       <div id="readouts" class="noselect">
-        <div id="pitch_readout" class="readout">
-          Pitch:<span>-03°</span>
-          <div class="invalid_holder"></div>
-        </div>
-        <div id="roll_readout" class="readout">
-          Roll:<span>+12°</span>
-          <div class="invalid_holder"></div>
-        </div>
         <div id="slip_skid_holder">
           <div class="slip_skid_bar"></div>
           <div class="slip_skid_bar slip_skid_bar_right"></div>
           <div id="slip_skid_ball"></div>
           <div class="invalid_holder"></div>
+        </div>
+        <div id="settings_icon">
+          <div class="menu_bar"></div>
+          <div class="menu_bar"></div>
+          <div class="menu_bar"></div>
         </div>
       </div>
       <div id="message_flag"></div>

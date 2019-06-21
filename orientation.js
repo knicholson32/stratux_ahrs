@@ -101,7 +101,7 @@ function orientationChange() {
       $('#overlay').css('top', 'unset');
       $('#overlay').css('transform', 'unset');
     }
-
+    $('#settings_menu').css('transform', 'translate(-50%, -50%)');
     // Set the system scale value ratio
     system.scale = system.screen_height / system.screen_width;
   } else {
@@ -132,6 +132,7 @@ function orientationChange() {
       $('#overlay').css('left', -(width / 2 - height / 2));
       $('#overlay').css('top', (width / 2 - height / 2) - 10);
     }
+    $('#settings_menu').css('transform', 'translate(-50%, -50%) rotate(90deg)');
   }
 
   // Record total sizes
