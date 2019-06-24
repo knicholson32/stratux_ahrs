@@ -70,14 +70,9 @@ jobs:
             casperjs --version
             # casperjs test mytest.js
             # casperjs test /opt/casperjs/samples/googletesting.js
-  # test:
-  #   docker:
-  #     - image: vitr/casperjs
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: Test
-  #         command: 'docker exec casperjs-daemon phantomjs /home/phantomjs/script.js'
+      - run:
+          name: Directory List
+          command: ls
 
 workflows:
   version: 2
@@ -87,9 +82,6 @@ workflows:
       - build:
           requires:
             - source_checkout
-      # - test:
-      #     requires:
-      #       - build
-      #     filters:
-      #       branches:
-      #         only: master
+    filters:
+      branches:
+        only: ci
