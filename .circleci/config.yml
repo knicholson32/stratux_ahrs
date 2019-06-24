@@ -50,11 +50,14 @@ jobs:
           name: Update npm
           command: 'echo "Would update NPM"'
       - run:
-          name: TestA
+          name: Check Phantom JS
           command: 'phantomjs /home/phantomjs/script.js'
       - run:
-          name: TestB
-          command: 'phantomjs casperjs.js /home/phantomjs/script.js'
+          name: Check CasperJs
+          command: |
+            casperjs --version
+            casperjs test mytest.js
+            casperjs test /opt/casperjs/samples/googletesting.js
   # test:
   #   docker:
   #     - image: vitr/casperjs
