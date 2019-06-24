@@ -5,6 +5,21 @@
   src: url('../fonts/monaco.ttf');
 }
 
+@font-face {
+  font-family: 'Aileron';
+  src: url('../fonts/Aileron-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Marcellus';
+  src: url('../fonts/Marcellus-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Mukta';
+  src: url('../fonts/Mukta-Regular.ttf');
+}
+
 /* AHRS CSS STYLESHEET */
 /* Components:
  *  Main Container    id    ahrs_container
@@ -1365,28 +1380,42 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: black;
+  color: #ccc;
   /* Black background with opacity */
   z-index: 20;
   /* Specify a stack order in case you're using a different order for other elements */
   cursor: pointer;
   /* Add a pointer on hover */
-  color: white;
-  font-size: 20px;
-  line-height: 20px;
-  font-family: 'Monaco';
+  font-size: 24px;
+  line-height: 24px;
+  /* font-family: 'Monaco'; */
   padding-top: 20px;
   text-align: center;
   transition: opacity 0.5s ease;
+  font-family: 'Mukta', sans-serif;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#overlay p {
+  text-align: justify;
+  /* font-family: 'Aileron'; */
+  font-family: 'Marcellus', sans-serif;
+}
+
+#overlay_text {
+  width: 100%;
 }
 
 #lock_orientation{
-  position: absolute;
-  right: 5%;
-  bottom: 5%;
-  width: 5em;
+  position: relative;
+  right: -50%;
+  width: 100%;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: row;
+  line-height: 14px;
+  transform: translateX(-11%)
 }
 
 #lock_orientation .logo{
@@ -1398,28 +1427,28 @@ body {
   color: black;
   background-image: url(../images/lock-01.png);
   background-size: cover;
-  margin-left: 3px;
 }
 
 #lock_orientation .text{
-  padding-top: 1.2em;
+  padding-top: 1.5em;
   /* width: 160px; */
   text-align: center;
-  margin-right: 12px;
-  font-size: 12px;
+  margin-right: 16px;
+  font-size: 20px;
+  line-height: 20px;
 }
 
 code {}
 
 #overlay h1 {
   font-size: 40px;
-  margin-bottom: 60px;
-  margin-top: 50px;
+  margin-bottom: 20px;
+  margin-top: 20px;
 }
 
 #overlay h2 {
   font-size: 25px;
-  margin-top: 100px;
+  margin-top: 20px;
 }
 
 #overlay a {
