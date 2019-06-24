@@ -167,7 +167,6 @@ function ahrsWSInit() {
 
   ahrsWS.onopen = function(e) {
     console.log("Connection established!");
-    console.log(e);
     ahrsWS.closed = false;
   };
 

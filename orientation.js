@@ -83,10 +83,12 @@ function orientationChange() {
   system.screen_width = $(window).width();
   system.screen_height = $(window).height();
 
+
   // Detect if in landscape or portrait based on the screen height and width
   if (system.screen_width > system.screen_height) {
     // Set to landscape
     system.orinetation = "landscape";
+    ar = system.screen_width / system.screen_height;
     // Reset ahrs_container css values to defaults
     $('#ahrs_container').css('height', system.screen_height);
     $('#ahrs_container').css('width', '100%');
@@ -109,6 +111,7 @@ function orientationChange() {
   } else {
     // Set to portrait
     system.orinetation = "portrait";
+    ar = system.screen_height / system.screen_width;
     // Detect if the user is using an ios device and correct for status bar
     // intrusion
     if (system.ios.correction === true) {
@@ -138,6 +141,12 @@ function orientationChange() {
     $('.settings_button').addClass('settings_button_rotated');
     $('#settings_popup').addClass('settings_popup_rotated');
   }
+
+  // Calculate scale factors for the ahrs virtual horizon bar
+  let top = -20.08655+39.72259*ar+21.09178*ar*ar
+  let zoom = 0.133225025*ar*ar*ar*ar - 1.226095815*ar*ar*ar + 4.400482563*ar*ar - 7.607275965*ar + 5.879861878;
+  $('#vhor_bar').css('top', `${top}px`);
+  $('#vhor_bar').css('zoom', zoom);
 
   // Record total sizes
   system.ahrs.width = $('#ahrs_container').outerWidth();
