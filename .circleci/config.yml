@@ -50,28 +50,28 @@ jobs:
           name: Update npm
           command: 'echo "Would update NPM"'
       - run:
-          name: Test1
+          name: TestA
           command: 'phantomjs /home/phantomjs/script.js'
-        - run:
-          name: Test2
-          command: 'phantomjs casperjs.js /home/phantomjs/script.js'
-  test:
-    docker:
-      - image: vitr/casperjs
-    steps:
-      - checkout
       - run:
-          name: Test
-          command: 'phantomjs /home/phantomjs/script.js'
+          name: TestB
+          command: 'phantomjs casperjs /home/phantomjs/script.js'
+  # test:
+  #   docker:
+  #     - image: vitr/casperjs
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Test
+  #         command: 'docker exec casperjs-daemon phantomjs /home/phantomjs/script.js'
 
 workflows:
   version: 2
   build_and_test:
     jobs:
       - build
-      - test:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
+      # - test:
+      #     requires:
+      #       - build
+      #     filters:
+      #       branches:
+      #         only: master
