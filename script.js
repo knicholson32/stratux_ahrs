@@ -263,6 +263,8 @@ function ahrsWSInit() {
 
       if (data.AHRSTurnRate != 3276.7){
         turnCoordinator.update(dataAHRSTurnRate);
+      }else{
+        turnCoordinator.update(0);
       }
 
       if (presist.overheat === false && system_status.CPUTemp > system.cpu_temp_warn) {
@@ -287,20 +289,20 @@ function ahrsWSInit() {
     console.error("Websocket \"" + name + "\" had an error.");
     ahrsWS.close();
   };
-
-  // Get status at interval
-  var getRequest = true;
-  setInterval(function() {
-    if (getRequest === true) {
-      getRequest = false;
-      $.getJSON(system.status_url, function(data) {
-        system_status = data;
-      }).always(function() {
-        getRequest = true;
-      });
-    }
-  }, 1000);
 }
+
+// Get status at interval
+var getRequest = true;
+setInterval(function() {
+  if (getRequest === true) {
+    getRequest = false;
+    $.getJSON(system.status_url, function(data) {
+      system_status = data;
+    }).always(function() {
+      getRequest = true;
+    });
+  }
+}, 1000);
 
 var fmuWS;
 
@@ -1572,7 +1574,7 @@ var post = function(url) {
       text_url = 'Unknown';
       break;
   }
-  var url = "http://raspberrypi.local/" + url;
+  var url = system.push_url + '/' + url;
   var params = "";
   http.open("POST", url, true);
 
