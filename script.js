@@ -1522,7 +1522,7 @@ var post = function(url) {
       text_url = 'Unknown';
       break;
   }
-  var url = "http://192.168.10.1/" + url;
+  var url = "http://raspberrypi.local/" + url;
   var params = "";
   http.open("POST", url, true);
 
