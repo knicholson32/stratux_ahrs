@@ -1,24 +1,38 @@
-# Use the latest 2.1 version of CircleCI pipeline processing engine, see https://circleci.com/docs/2.0/configuration-reference/
-version: 2.1
+# Run the welcome/run job in its own container
+jobs:
+  - build:
+      docker:
+        - image: vitr/casperjs
+      steps:
+        - checkout
+        - run: 
+            name: "Build Example"
+            command: |
+              echo "this is a build test!"
+        - run:
+            name: "Another Build Test"
+            command: node -v
+  - test:
+      docker:
+        - image: vitr/casperjs
+      steps:
+        - checkout
+        - run: 
+            name: "Test Example"
+            command: |
+              echo "this is a test!"
+        - run:
+            name: "Another Test"
+            command: node -v
 
-# Orchestrate or schedule a set of jobs, see https://circleci.com/docs/2.0/workflows/
 workflows:
-  # Name the workflow "Welcome"
-  Test:
-    # Run the welcome/run job in its own container
+  version: 2.1
+  build_and_test:
     jobs:
-      - test/build:
-          docker:
-            - image: vitr/casperjs
-          steps:
-            - checkout
-            - run: 
-                name: "Test Example"
-                command: |
-                  echo "this is a test!"
-            - run:
-                name: "Another Test"
-                command: node -v
+      - build
+      - test:
+          requires:
+            - build
           filters:
             branches:
               only: ci
