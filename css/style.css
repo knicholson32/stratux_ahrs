@@ -744,6 +744,7 @@ body {
 
 /* --------------- Slip Skid ---------------- */
 #slip_skid_holder {
+  z-index: -1;
   width: 70px;
   height: 55px;
   position: relative;
@@ -1058,7 +1059,7 @@ body {
   line-height: 4em;
 }
 
-.settings_button:active, .settings_button:hover{
+.settings_button:active{
   background: linear-gradient(to bottom, #111115, #151519, #191920);
 }
 
