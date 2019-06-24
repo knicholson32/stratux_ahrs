@@ -509,7 +509,7 @@ body {
   bottom: 0px;
   left: 0px;
   background-color: black;
-  z-index: 12;
+  z-index: 21;
   border-top: 2px solid white;
   border-bottom: 2px solid white;
   transform: translateZ(0);
