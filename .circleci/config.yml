@@ -16,7 +16,7 @@ workflows:
         filters:
           branches:
             only: ci
-      - build:
+      - welcome/build:
           docker:
             - image: vitr/casperjs
           steps:
