@@ -77,7 +77,7 @@ jobs:
             echo -e "\n"
             ls ../
             echo -e "\n"
-            ls
+            tree /
             echo -e "\n"
             ls ~/stratux_ahrs
 
