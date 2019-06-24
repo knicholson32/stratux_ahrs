@@ -56,7 +56,7 @@ jobs:
       - checkout
       - run:
           name: Test
-          command: 'echo "Test NPM"'
+          command: 'docker exec casperjs-daemon phantomjs /home/phantomjs/script.js'
 
 workflows:
   version: 2
