@@ -112,7 +112,7 @@ var speedTape = { // Speed tape on the left of the AHRS
 /** ******************************* ALTITUDE ******************************* **/
 var altTape = {
   units: UNITS.FEET, // Units for displaying altitude
-  kollsman: 29.92 // Default kollsman setting for the baro altimiter
+  kollsman: 29.92 // Default kollsman setting for the baro altimeter
 };
 /** ******************************* ******** ******************************* **/
 

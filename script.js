@@ -95,7 +95,7 @@ var presist = {
 };
 system.ahrs.inactiveCounter = 0;
 
-system.sendNotification = function(msg, opentime){
+system.sendNotification = function(msg, opentime, color='#587E4B'){
   let l;
   let side = 'top';
   if(system.orinetation === "landscape"){
@@ -104,6 +104,7 @@ system.sendNotification = function(msg, opentime){
     l = $(`<div class="notification portrait">${msg}</div>`);
     side = 'right';
   }
+  l.css('background-color', color);
   $('body').append(l);
   setTimeout(() => {
     l.css(side, '0px');
@@ -353,6 +354,14 @@ function fmuInit() {
 // NOTICE: ALL INPUTS TO UPDATE FUNCTIONS ARE TO BE IN SI UNITS
 
 function initButtons() {
+  let buttons = $('.number_button');
+  for(let i = 0; i < buttons.length; i++){
+    let button = $(buttons[i]);
+    $(buttons[i]).click((event) => {
+      reportButton($(event.currentTarget).html());
+    });
+  }
+
   $('#settings_icon').mouseup(() => {
     $('#settings_menu').removeClass('hidden');
     $('#settings_overlay').removeClass('hidden');
@@ -362,12 +371,14 @@ function initButtons() {
     if (e.keyCode === 27){
       $('#settings_menu').addClass('hidden');
       $('#settings_overlay').addClass('hidden');
+      hideBaroInput();
     }
   });
 
   $('#settings_overlay').click(() => {
     $('#settings_menu').addClass('hidden');
     $('#settings_overlay').addClass('hidden');
+    hideBaroInput();
   });
 
   // Set Pitch On-Click
@@ -385,16 +396,116 @@ function initButtons() {
     }
   });
 
+  var baro_input_value = ['2','9','9','2'];
+  var pre_input = true;
+  var index = 0;
+  function updateBaroPressure(push = false){
+    if(push && (baro_input_value[0] === '' || baro_input_value[1] == '' || baro_input_value[2] == '' || baro_input_value[3] == '')){
+      system.sendNotification(`Please enter a valid altimeter setting`, 2000, color='red');
+      return false;
+    }
+    let press_str = '' + baro_input_value[0] + baro_input_value[1] + '.' + baro_input_value[2] + baro_input_value[3];
+    let val = parseFloat(press_str);
+    if(push || index == 4){
+      if(val < 26){
+        system.sendNotification(`Altimeter setting too low`, 2000, color='red');
+        val = 26;
+        baro_input_value = ['2','6','0','0'];
+        press_str = '' + baro_input_value[0] + baro_input_value[1] + '.' + baro_input_value[2] + baro_input_value[3];
+        $('#altimeter_display').html(press_str);
+        return false;
+      }else if(val > 32){
+        system.sendNotification(`Altimeter setting too high`, 2000, color='red');
+        val = 32;
+        baro_input_value = ['3','2','0','0'];
+        press_str = '' + baro_input_value[0] + baro_input_value[1] + '.' + baro_input_value[2] + baro_input_value[3];
+        $('#altimeter_display').html(press_str);
+        return false;
+      }
+    }
+    $('#altimeter_display').html(press_str);
+    if(push){
+      updateKollsmanSetting(val);
+    }
+    return true;
+  }
+
   function updateKollsmanSetting(kollsman){
     altTape.kollsman = kollsman;
-    system.sendNotification(`Updated altimiter to ${altTape.kollsman}inHg`, 4000);
+    system.sendNotification(`Updated altimeter to ${altTape.kollsman}inHg`, 4000);
     if(altTape.source == SOURCE.BARO) {
         $('#alt_annun_text').html('Baro Altitude <span>' + altTape.kollsman + 'inHg, ' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
     }
   }
 
+  function resetBaroInput(fromCurrent=false){
+    if(fromCurrent){
+      let tmp = altTape.kollsman;
+      baro_input_value = [Math.floor(tmp/10 % 10), Math.floor(tmp % 10), Math.floor(tmp*10 % 10), Math.floor(tmp*100 % 10)];
+    }else{
+      baro_input_value = ['2','9','9','2'];
+    }
+    
+    updateBaroPressure();
+    pre_input = true;
+    index = 0;
+  }
+
+  function showBaroInput(){
+    $('#settings_popup').removeClass('hidden');
+    resetBaroInput(fromCurrent=true)
+  }
+
+  function hideBaroInput(){
+    $('#settings_popup').addClass('hidden');
+    resetBaroInput(fromCurrent=true)
+  }
+
+  function addValue(val){
+    if(pre_input){
+      baro_input_value = ['','','',''];
+      pre_input = false;
+    }
+    baro_input_value[index] = val;
+    index += 1;
+    if(index === 4){
+      pre_input = true;
+      index = 0;
+    }
+    console.log(baro_input_value);
+    updateBaroPressure();
+  }
+
+  function reportButton(button) {
+    switch(button){
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+      case '0':
+        addValue(button);
+        break;
+      case 'Clr':
+          pre_redix = false;
+          baro_input_value = ['','','',''];
+          index = 0;
+          updateBaroPressure();
+          break;
+      case 'Ent':
+          if(updateBaroPressure(push=true)){
+            hideBaroInput();
+          }
+          break;
+    }
+  }
+
   $('#update_baro').click(() => {
-    updateKollsmanSetting($('#kollsman_input').val());
+    showBaroInput();
   });
 
   $('#set_std_baro').click(() => {
@@ -434,7 +545,7 @@ function initButtons() {
       case SOURCE.INPUT:
         return;
         /*$('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');*/
-        // TODO: Implement user defined altimiter setting
+        // TODO: Implement user defined altimeter setting
         //break;
     }
     vspeedTape.source = altTape.source;
@@ -1399,6 +1510,18 @@ function requestFullScreen(element) {
 
 var post = function(url) {
   var http = new XMLHttpRequest();
+  var text_url = '';
+  switch(url){
+    case "cageAHRS":
+      text_url = "Cage AHRS";
+      break;
+    case "calibrateAHRS":
+      text_url = "Cage AHRS";
+      break;
+    default:
+      text_url = 'Unknown';
+      break;
+  }
   var url = "http://192.168.10.1/" + url;
   var params = "";
   http.open("POST", url, true);
@@ -1411,6 +1534,11 @@ var post = function(url) {
   http.onreadystatechange = function() { //Call a function when the state changes.
     if (http.readyState == 4 && http.status == 200) {
       console.log("Done: " + http.responseText);
+      system.sendNotification(`Sent the '${text_url}' command to Stratux`, 4000);
+    }else if(http.readyState == 4 && http.status == 0){
+      system.sendNotification(`Failed to send the '${text_url}' command to Stratux`, 6000, color='red');
+    }else{
+      console.log(http);
     }
   }
   http.send(params);
@@ -1464,3 +1592,20 @@ function doRefresh(){
   setCookie('bypass_warning', 'true', 5);
   location.reload();
 }
+
+const times = [];
+let fps;
+
+function refreshLoop() {
+  window.requestAnimationFrame(() => {
+    const now = performance.now();
+    while (times.length > 0 && times[0] <= now - 1000) {
+      times.shift();
+    }
+    times.push(now);
+    fps = times.length;
+    refreshLoop();
+  });
+}
+
+// refreshLoop();

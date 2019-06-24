@@ -101,7 +101,9 @@ function orientationChange() {
       $('#overlay').css('top', 'unset');
       $('#overlay').css('transform', 'unset');
     }
-    $('#settings_menu').css('transform', 'translate(-50%, -50%)');
+    $('#settings_menu').removeClass('settings_menu_rotated');
+    $('.settings_button').removeClass('settings_button_rotated');
+    $('#settings_popup').removeClass('settings_popup_rotated');
     // Set the system scale value ratio
     system.scale = system.screen_height / system.screen_width;
   } else {
@@ -132,7 +134,9 @@ function orientationChange() {
       $('#overlay').css('left', -(width / 2 - height / 2));
       $('#overlay').css('top', (width / 2 - height / 2) - 10);
     }
-    $('#settings_menu').css('transform', 'translate(-50%, -50%) rotate(90deg)');
+    $('#settings_menu').addClass('settings_menu_rotated');
+    $('.settings_button').addClass('settings_button_rotated');
+    $('#settings_popup').addClass('settings_popup_rotated');
   }
 
   // Record total sizes

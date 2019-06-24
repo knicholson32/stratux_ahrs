@@ -1,10 +1,13 @@
 <!doctype html>
-
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="viewport" content="viewport-fit=cover">
+  <!-- <meta name="viewport" content="viewport-fit=cover"> -->
+  <!-- <meta name="viewport" content= "width=device-width, user-scalable=no"> -->
+  <!-- <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/> -->
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
 
   <meta name="apple-mobile-web-app-title" content="AHRS">
 
@@ -24,18 +27,39 @@
   <script type="text/javascript" src="orientation.js"></script>
   <script type="text/javascript" src="script.js"></script>
   <title>AHRS</title>
+  <!-- <script>
+      document.addEventListener('touchmove',
+          function(e) {
+              e.preventDefault();
+          }, {passive:false});
+  </script> -->
 </head>
 
 <body>
+  <div id="settings_popup" class="hidden">
+    <div class="title">- Baro Setting -</div>
+    <div class="relative"><span id="altimeter_display">29.92</span><span class="small">inHg</span></div>
+    <div class="altimeter_input">
+        <div class="number_button">1</div>
+        <div class="number_button">2</div>
+        <div class="number_button">3</div>
+        <div class="number_button">4</div>
+        <div class="number_button">5</div>
+        <div class="number_button">6</div>
+        <div class="number_button">7</div>
+        <div class="number_button">8</div>
+        <div class="number_button">9</div>
+        <div class="number_button">Clr</div>
+        <div class="number_button">0</div>
+        <div class="number_button">Ent</div>
+    </div>
+  </div>
   <div id="settings_menu", class="hidden">
     <div class="settings_button noselect" id="align_ahrs">Align AHRS</div>
-    <div class="settings_button last noselect" id="calibrate_gyro">Calibrate Gyro</div>
+    <div class="settings_button noselect" id="calibrate_gyro">Calibrate Gyro</div>
     <div class="settings_spacer"></div>
-    <div class="settings_input">
-      <input id="kollsman_input" type="number", value="29.92"/>
-    </div>
-    <div class="settings_button thin noselect" id="update_baro">Update Baro (inHg)</div>
-    <div class="settings_button thin last noselect" id="set_std_baro">Std. Baro (29.92inHg)</div>
+    <div class="settings_button noselect" id="update_baro">Set Baro</div>
+    <div class="settings_button noselect" id="set_std_baro">Std. Baro</div>
   </div>
   <div id="settings_overlay" class="hidden"></div>
   <div id="overlay">
@@ -170,3 +194,4 @@
     </div>
   </div>
 </body>
+</html>
