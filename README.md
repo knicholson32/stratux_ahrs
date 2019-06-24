@@ -33,14 +33,21 @@ mkdir ahrs
 ```
 - Clone this repository:
 ```unix
-git clone https://github.com/knicholson32/stratux_ahrs.git
+git clone https://github.com/knicholson32/stratux_ahrs.git ahrs
 ```
-- Move contents to correct folder and remove extras:
+_If you get a warning about server verification failure, check the time setting:_
 ```unix
-mv stratux_ahrs/* ahrs
-rm -rf stratux_ahrs
+date -R
 ```
-- Ensure files have been moved:
+_If it is incorrect, set using the following and try to clone again:_
+```unix
+sudo date -s "Jun 24 2018 13:20:12" # <Replace with the new date/time (to the second)>
+```
+_Alternatively, if setting the time does not work, clone using this command to disable SSL verification (**as a last resort!**):_
+```unix
+git -c http.sslVerify=false clone https://github.com/knicholson32/stratux_ahrs.git ahrs
+```
+- Check that the files have been added to the ahrs folder:
 ```unix
 ls ahrs
 ```
