@@ -49,6 +49,9 @@ jobs:
       - run:
           name: Update npm
           command: 'echo "Would update NPM"'
+      - run:
+          name: Test
+          command: 'docker exec casperjs-daemon phantomjs /home/phantomjs/script.js'
   test:
     docker:
       - image: vitr/casperjs
