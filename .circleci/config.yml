@@ -42,12 +42,16 @@
 version: 2
 jobs:
   build:
+    docker:
+      - image: vitr/casperjs
     steps:
       - checkout
       - run:
           name: Update npm
           command: 'echo "Would update NPM"'
   test:
+    docker:
+      - image: vitr/casperjs
     steps:
       - checkout
       - run:
