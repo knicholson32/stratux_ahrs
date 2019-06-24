@@ -48,9 +48,9 @@ jobs:
     steps:
       - checkout
       - save_cache:
-        key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
-        paths:
-          - ~/stratux_ahrs
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/stratux_ahrs
   build:
     docker:
       - image: vitr/casperjs
@@ -69,7 +69,7 @@ jobs:
           command: |
             casperjs --version
             # casperjs test mytest.js
-            casperjs test /opt/casperjs/samples/googletesting.js
+            # casperjs test /opt/casperjs/samples/googletesting.js
   # test:
   #   docker:
   #     - image: vitr/casperjs
@@ -84,7 +84,9 @@ workflows:
   build_and_test:
     jobs:
       - source_checkout
-      - build
+      - build:
+          requires:
+            - source_checkout
       # - test:
       #     requires:
       #       - build
