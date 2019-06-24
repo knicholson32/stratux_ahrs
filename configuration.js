@@ -136,7 +136,7 @@ var ahrsTape = { // AHRS in the center of the AHRS
 
 /** ****************************** SLIP SKID ******************************* **/
 var slipSkid = {
-  multiplier: 5
+  multiplier: 2
 }
 /** ****************************** SLIP SKID ******************************* **/
 
