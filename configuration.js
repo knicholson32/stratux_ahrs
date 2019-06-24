@@ -15,14 +15,14 @@ var system = { // Overall system settings
   },
   checkActiveTime: 2250,
   websocket_url: // Websocket URL for situation
-    "ws://http://raspberrypi.local/situation",
+    "ws://raspberrypi.local/situation",
   enable_ahrs_ws: true,
   fmu_url: // Websocket URL for FMU Update
-    "ws://http://raspberrypi.local:8888",
+    "ws://raspberrypi.local:8888",
   enable_fmu: false, // Enable FMU support - in development
   cpu_temp_warn: 70, // Temp at which the 'Temp' banner will be displayed (C)
   allowReload: false, // Allows the app to automatically reload if it detects an issue
-  status_url: "http://http://raspberrypi.local/getStatus",
+  status_url: "http://raspberrypi.local/getStatus",
   simulate: true
 };
 /** ******************************** ****** ******************************** **/
