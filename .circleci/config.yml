@@ -9,14 +9,10 @@ orbs:
 # Orchestrate or schedule a set of jobs, see https://circleci.com/docs/2.0/workflows/
 workflows:
   # Name the workflow "Welcome"
-  Welcome:
+  Test:
     # Run the welcome/run job in its own container
     jobs:
-      - welcome/run:
-        filters:
-          branches:
-            only: ci
-      - welcome/build:
+      - test/build:
           docker:
             - image: vitr/casperjs
           steps:
