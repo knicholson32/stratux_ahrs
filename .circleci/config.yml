@@ -73,7 +73,12 @@ jobs:
       - run:
           name: Directory List
           command: |
+            pwd
+            echo -e "\n"
+            ls ../
+            echo -e "\n"
             ls
+            echo -e "\n"
             ls ~/stratux_ahrs
 
 workflows:
