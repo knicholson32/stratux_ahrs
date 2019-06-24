@@ -41,11 +41,23 @@
 
 version: 2
 jobs:
+  source_checkout:
+    docker:
+      - image: vitr/casperjs
+    working_directory: ~/stratux_ahrs
+    steps:
+      - checkout
+      - save_cache:
+        key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+        paths:
+          - ~/stratux_ahrs
   build:
     docker:
       - image: vitr/casperjs
+    working_directory: ~/stratux_ahrs
     steps:
-      - checkout
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Update npm
           command: 'echo "Would update NPM"'
