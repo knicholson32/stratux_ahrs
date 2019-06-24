@@ -16,3 +16,18 @@ workflows:
         filters:
           branches:
             only: ci
+      - build:
+          docker:
+            - image: vitr/casperjs
+          steps:
+            - checkout
+            - run: 
+                name: "Test Example"
+                command: |
+                  echo "this is a test!"
+            - run:
+                name: "Another Test"
+                command: node -v
+          filters:
+            branches:
+              only: ci
