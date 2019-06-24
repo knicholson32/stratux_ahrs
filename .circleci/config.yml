@@ -69,16 +69,10 @@ jobs:
           command: |
             casperjs --version
             # casperjs test mytest.js
-            # casperjs test /opt/casperjs/samples/googletesting.js
+            casperjs test /opt/casperjs/samples/googletesting.js
       - run:
           name: Directory List
           command: |
-            pwd
-            echo -e "\n"
-            ls ../
-            echo -e "\n"
-            tree /
-            echo -e "\n"
             ls ~/stratux_ahrs
 
 workflows:
