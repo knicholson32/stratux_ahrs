@@ -72,8 +72,9 @@ jobs:
             # casperjs test /opt/casperjs/samples/googletesting.js
       - run:
           name: Directory List
-          command: ls
-          command: ls ~/stratux_ahrs
+          command: |
+            ls
+            ls ~/stratux_ahrs
 
 workflows:
   version: 2
