@@ -1116,7 +1116,7 @@ function generateTapes() {
   // ------------------------------------------------------------------------ //
 
   slipSkid.update = function(yaw, override) {
-    html.css('--slip_skid', (yaw * 50) + 'px')
+    html.css('--slip_skid', (yaw * slipSkid.multiplier) + 'px')
   }
 
 
