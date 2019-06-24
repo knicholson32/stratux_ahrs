@@ -83,10 +83,10 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - source_checkout
+      # - source_checkout
       - build:
-          requires:
-            - source_checkout
+          # requires:
+          #   - source_checkout
       # - test:
       #     requires:
       #       - build
