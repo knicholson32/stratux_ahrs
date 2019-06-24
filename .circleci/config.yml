@@ -41,11 +41,24 @@
 
 version: 2
 jobs:
+  checkout:
+    docker:
+      - imageL vitr/casperjs
+    working_directory: ~/tests
+    steps:
+      - checkout
+      - save_cache:
+        key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+        paths:
+          - ~/tests
+
   build:
     docker:
       - image: vitr/casperjs
+    working_directory: ~/tests
     steps:
-      - checkout
+      - restore_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
       - run:
           name: Update npm
           command: 'echo "Would update NPM"'
