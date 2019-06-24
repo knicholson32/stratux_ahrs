@@ -68,6 +68,10 @@
       Slip Skid Bar   class slip_skid_bar
       Slip Bar Right  class slip_skid_bar_right
       Slip Skid Ball  id    slip_skid_ball
+ *  Turn Coord Holder id    turn_coordinator_holder
+      TC Top Bar      class top_bar
+      TC Middle Bar   class middle_bar
+      TC Indicator    id    turn_coordinator_indicator
  *  Readouts          id    readouts
       Readout         class readout
       Pitch Readout   id    pitch_readout
@@ -98,6 +102,7 @@
 html {
   --flight_angle: 0deg;
   --slip_skid: 0px;
+  --turn_rate: 52px;
   --speed_counter_speed: 1s;
   --ease_time: 0.2s;
   /* AHRS EASING */
@@ -105,6 +110,7 @@ html {
   /* HEADING EASING */
   --aux_ease_time: 0.2s;
   /* OTHER EASING */
+  --tc_ease_time: 0.5s;
   --pitch_amount: 0px;
   background-color: #000;
   touch-action:manipulation;
@@ -752,6 +758,10 @@ body {
   left: calc(50% - 15px);
 }
 
+#slip_skid_holder.shifted{
+  bottom: 0px;
+}
+
 .slip_skid_bar {
   background-color: white;
   width: 4px;
@@ -784,11 +794,108 @@ body {
   box-shadow: inset 0 0 10px #000000;
 }
 
+/* --------------- Turn Coordinator ---------------- */
+
+#turn_coordinator_holder{
+  z-index: -100;
+  width: 270px;
+  height: 14px;
+  position: relative;
+  bottom: 5px;
+  left: calc(50% - 112px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  visibility: hidden;
+}
+
+#turn_coordinator_holder.show{
+  visibility: visible;
+}
+
+
+#turn_coordinator_holder .top_bar{
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, rgba(0,0,0,.0) 0%, black 10%, black 90%, rgba(0,0,0,.0) 100%);
+}
+
+#turn_coordinator_holder .middle_bar{
+  height: 100%;
+  border-right: 2px solid black;
+}
+
+#turn_coordinator_holder .middle_bar.middle{
+  position: absolute;
+  top: 3px;
+}
+
+#turn_coordinator_holder .middle_bar.right_bar{
+  position: absolute;
+  right: 35px;
+  border-color: white;
+  bottom: -4px;
+}
+
+#turn_coordinator_holder .middle_bar.left_bar{
+  position: absolute;
+  left: 35px;
+  border-color: white;
+  bottom: -3px;
+}
+
+#turn_coordinator_indicator{
+  height: 15px;
+  width: 100%;
+  top: 3px;
+  position: absolute;
+  z-index: -100;
+}
+
+#turn_coordinator_indicator .bar{
+  background-color: magenta;
+  width: var(--turn_rate);
+  height: 100%;
+  position: absolute;
+  right: 50%;
+  transition: width var(--tc_ease_time);
+}
+
+#turn_coordinator_indicator .bar.right{
+  right: unset;
+  left: 50%;
+}
+
+#turn_coordinator_indicator .arrow{
+  width: 0; 
+  height: 0; 
+  position: absolute;
+  transition: left var(--tc_ease_time), right var(--tc_ease_time);
+}
+
+#turn_coordinator_indicator .arrow.hide{
+  display: none;
+}
+
+#turn_coordinator_indicator .arrow.right{
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 7px solid magenta;
+  left: calc(50% + var(--turn_rate) - 1px);
+}
+
+#turn_coordinator_indicator .arrow.left{
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-right: 7px solid magenta;
+  right: calc(50% + var(--turn_rate) - 1px);
+}
+
 /* ---------------- Readouts ---------------- */
 #readouts {
   position: absolute;
   /* top: 0px; */
-  bottom: 24px;
+  bottom: 44px;
   height: 24px;
   transform: translateZ(0);
 }
@@ -1085,8 +1192,12 @@ body {
   left: 20px;
   width: 30px;
   height: 20px;
-  bottom: 50px;
+  bottom: 30px;
   cursor: pointer;
+}
+
+#settings_icon.shifted{
+  bottom: 45px;
 }
 
 .menu_bar{

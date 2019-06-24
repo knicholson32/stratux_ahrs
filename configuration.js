@@ -5,7 +5,7 @@
 
 /** ******************************** SYSTEM ******************************** **/
 var system = { // Overall system settings
-  overlay_active: true, // Enable warning overlay on startup
+  overlay_active: false, // Enable warning overlay on startup
   ahrs: { // Settings for the overall AHRS
     updateTimeout: 750, // Time (in ms) required for a metric to be set as invalid
     reloadAfterTimeoutCount: 3 // Number of times the timeout has to be hit before a reboot
@@ -16,7 +16,7 @@ var system = { // Overall system settings
   checkActiveTime: 2250,
   websocket_url: // Websocket URL for situation
     "ws://raspberrypi.local/situation",
-  enable_ahrs_ws: true,
+  enable_ahrs_ws: false,
   fmu_url: // Websocket URL for FMU Update
     "ws://raspberrypi.local:8888",
   enable_fmu: false, // Enable FMU support - in development
@@ -139,6 +139,12 @@ var slipSkid = {
   multiplier: 3
 }
 /** ****************************** SLIP SKID ******************************* **/
+
+/** *************************** TURN COORDINATOR *************************** **/
+var turnCoordinator = {
+  display: true
+}
+/** *************************** TURN COORDINATOR *************************** **/
 
 /** ******************************** G-Meter ******************************* **/
 var gMeter = {

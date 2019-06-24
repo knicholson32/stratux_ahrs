@@ -67,7 +67,8 @@ function systemInit() {
       speedTape.update(Math.sin(interval_val / 20 + 0.5) * 9 + 70);
       altTape.update(Math.cos(interval_val / 18 + 0.3) * 75 + 1423);
       vspeedTape.update(Math.sin(interval_val / 18 + 0.3) * 50 + 4);
-      slipSkid.update(Math.sin(interval_val / 27));
+      slipSkid.update(Math.sin(interval_val / 27)*20);
+      turnCoordinator.update(Math.sin(interval_val / 17)*3.5);
       satCount.update(7);
       gMeter.update(Math.cos(interval_val / 30) + 1);
       // Toggle message flag to show updates
@@ -244,6 +245,10 @@ function ahrsWSInit() {
           break;
       }
 
+      if (data.AHRSTurnRate != 3276.7){
+        console.log(data.AHRSTurnRate);
+      }
+
       if (data.BaroVerticalSpeed !== 99999 && data.BaroPressureAltitude !== 99999) {
         vspeedTape.update(data.BaroVerticalSpeed * conv.fps2mps);
       }
@@ -254,6 +259,10 @@ function ahrsWSInit() {
         ahrsTape.update(data.AHRSPitch, data.AHRSRoll);
         slipSkid.update(data.AHRSSlipSkid)
         gMeter.update(data.AHRSGLoad);
+      }
+
+      if (data.AHRSTurnRate != 3276.7){
+        turnCoordinator.update(dataAHRSTurnRate);
       }
 
       if (presist.overheat === false && system_status.CPUTemp > system.cpu_temp_warn) {
@@ -1119,6 +1128,46 @@ function generateTapes() {
     html.css('--slip_skid', (yaw * slipSkid.multiplier) + 'px')
   }
 
+  // ------------------------------------------------------------------------ //
+  // Generate Turn Coordinator                                                //
+  // ------------------------------------------------------------------------ //
+
+  var turnCoordinatorArrow = $('#tcarrow');
+  var turnCoordinatorBar= $('#tcbar');
+  if(turnCoordinator.display === false){
+    turnCoordinator.update = function(rate, override){}
+  }else{
+    $('#turn_coordinator_holder').addClass('show');
+    // $('#settings_icon').removeClass('shifted');
+    $('#slip_skid_holder').removeClass('shifted');
+    turnCoordinator.update = function(rate, override) {
+      if(rate > 3.25){
+        rate = 3.25;
+      }else if(rate < -3.25){
+        rate = -3.25;
+      }
+      if(Math.abs(rate) < 0.2){
+        html.css('--turn_rate', `0px`);
+        turnCoordinatorArrow.addClass('hide');
+      }else{
+        if(rate < 0){
+          turnCoordinatorBar.addClass('right');
+          turnCoordinatorArrow.addClass('right');
+          turnCoordinatorBar.removeClass('left');
+          turnCoordinatorArrow.removeClass('left');
+        }else{
+          turnCoordinatorBar.addClass('left');
+          turnCoordinatorArrow.addClass('left');
+          turnCoordinatorBar.removeClass('right');
+          turnCoordinatorArrow.removeClass('right');
+        }
+        let px = (Math.abs(rate) * 100 / 3);
+        turnCoordinatorArrow.removeClass('hide');
+        html.css('--turn_rate', `${px}px`);
+      }
+    }
+  }
+
 
   // ------------------------------------------------------------------------ //
   // Generate Heading Tape                                                    //
@@ -1404,6 +1453,7 @@ function checkValid() {
           ahrsTape.update(0, 0, true);
           gMeter.update(1, true);
           slipSkid.update(0, true);
+          turnCoordinator.update(0, true);
           break;
       }
       setInvalid(i, true);
