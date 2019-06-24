@@ -1,3 +1,5 @@
+[![GitHub license](https://img.shields.io/github/license/knicholson32/stratux_ahrs.svg)](https://github.com/knicholson32/stratux_ahrs/blob/master/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/knicholson32/stratux_ahrs.svg)](https://github.com/knicholson32/stratux_ahrs/issues)
+
 # stratux_ahrs
 AHRS Display for the Raspberry pi powered Stratux software.
 
