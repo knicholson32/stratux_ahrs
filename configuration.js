@@ -8,7 +8,7 @@ var system = { // Overall system settings
   overlay_active: true, // Enable warning overlay on startup
   ahrs: { // Settings for the overall AHRS
     updateTimeout: 750, // Time (in ms) required for a metric to be set as invalid
-    reloadAfterTimeoutCount: 3 // Number of times the timeout has to be hit before a reboot
+    reloadAfterTimeoutCount: 4 // Number of times the timeout has to be hit before a reboot
   },
   fmu: { // Settings for the overall AHRS
     updateTimeout: 1500 // Time (in ms) required for a metric to be set as invalid
@@ -21,7 +21,7 @@ var system = { // Overall system settings
     "ws://raspberrypi.local:8888",
   enable_fmu: false, // Enable FMU support - in development
   cpu_temp_warn: 70, // Temp at which the 'Temp' banner will be displayed (C)
-  allowReload: false, // Allows the app to automatically reload if it detects an issue
+  allowReload: true, // Allows the app to automatically reload if it detects an issue
   status_url: "http://raspberrypi.local/getStatus",
   push_url: "http://raspberrypi.local",
   simulate: false

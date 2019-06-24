@@ -118,11 +118,12 @@ system.sendNotification = function(msg, opentime, color='#587E4B'){
   }, opentime+2000)
 };
 
+var sockets = [];
 function initWS() {
   //Init AHRS
   if (system.enable_ahrs_ws === true) {
     ahrsWSInit();
-    setInterval(ahrsWS.checkActive, 250);
+    setInterval(ahrsWS.checkActive, 500);
   }
 
   //Init FMU - BETA
@@ -140,12 +141,27 @@ function avg(arr) {
   return sum / arr.length;
 }
 
+function removeAllClients(){
+  for(s in sockets)
+    sockets[s].close();
+  sockets = [];
+}
+
 function ahrsWSInit() {
   console.log("Attempting to connect to " + system.websocket_url);
   try {
-    ahrsWS.close();
-  } catch (error) {}
+    try{
+      ahrsWS.onmessage = function () {};
+      ahrsWS.checkActive = function () {};
+      ahrsWS.onerror = function () {};
+    }catch (error) {}
+    removeAllClients();
+    // ahrsWS.close();
+  } catch (error) {
+    console.error(error);
+  }
   ahrsWS = new WebSocket(system.websocket_url);
+  sockets.push(ahrsWS);
   ahrsWS.closed = true;
   ahrsWS.lastMessage = new Date().getTime();
 
@@ -174,6 +190,12 @@ function ahrsWSInit() {
       }, 500);
     }
   };
+
+  ahrsWS.kill = function() {
+    system.checkWS = false;
+    ahrsWS.closed = true;
+    ahrsWS.close();
+  }
 
   ahrsWS.checkActive = function() {
     if (system.checkWS === false || ahrsWS.closed === true)
@@ -862,7 +884,6 @@ function generateTapes() {
   // Define the altitude tape update method
   altTape.update = function(alt, override) {
     // Alt in meters at this time. Need to apply Kollsman setting:
-    // altTape.kollsman (inHg)
     alt = -44307.6 * (1 - 0.523779 * Math.pow(altTape.kollsman,0.190284)) + alt;
     // Unit conversion
     alt *= altTape.conv;
