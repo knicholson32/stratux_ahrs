@@ -1,4 +1,5 @@
-# Run the welcome/run job in its own container
+version: 2.1
+
 jobs:
   - build:
       docker:
