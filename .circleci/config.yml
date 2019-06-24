@@ -73,6 +73,7 @@ jobs:
       - run:
           name: Directory List
           command: ls
+          command: ls ~/stratux_ahrs
 
 workflows:
   version: 2
