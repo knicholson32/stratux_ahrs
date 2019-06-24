@@ -54,7 +54,7 @@ jobs:
           command: 'phantomjs /home/phantomjs/script.js'
       - run:
           name: TestB
-          command: 'phantomjs casperjs /home/phantomjs/script.js'
+          command: 'phantomjs casperjs.js /home/phantomjs/script.js'
   # test:
   #   docker:
   #     - image: vitr/casperjs
