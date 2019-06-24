@@ -1380,6 +1380,35 @@ body {
   transition: opacity 0.5s ease;
 }
 
+#lock_orientation{
+  position: absolute;
+  right: 5%;
+  bottom: 5%;
+  width: 5em;
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+#lock_orientation .logo{
+  width: 4em;
+  height: 4em;
+  background-color: #FFF;
+  opacity: 0.8;
+  border-radius: 1em;
+  color: black;
+  background-image: url(../images/lock-01.png);
+  background-size: cover;
+  margin-left: 3px;
+}
+
+#lock_orientation .text{
+  padding-top: 1.2em;
+  /* width: 160px; */
+  text-align: center;
+  margin-right: 12px;
+  font-size: 12px;
+}
+
 code {}
 
 #overlay h1 {
