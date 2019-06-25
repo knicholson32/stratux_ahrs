@@ -544,7 +544,9 @@ function initButtons() {
   $('#set_std_baro').click(() => {
     updateKollsmanSetting(29.92);
   });
-
+  $('#force_update').click(() => {
+    window.location.reload(true)
+  });
   $('#simulate_tag').click(function() {
     if (system.simulate === true) {
       system.simulate = false;

@@ -108,6 +108,7 @@
       Heading FMU     id    hdg_fmu
       Hdg Arrow       id    hdg_fmu_arrow
   * Settings Menu     id    settings_menu
+      Menu Rotated    id    settings_menu_rotated
       Exit Overlay    id    settings_overlay
       Button          class settings_button
       Input           class settings_input
@@ -1133,17 +1134,11 @@ body {
   display: flex;
   flex-direction: row;
   padding: 0.5em 0.25em 0.5em 0.25em;
+
+  overflow-x: scroll;
+  overflow-y: hidden;
 }
 
-.settings_menu_rotated{
-  height: 18vw !important;
-  width: 95vh !important;
-  transform: translate(-50%, -100%) rotate(90deg) !important;
-  transform-origin: bottom !important;
-  left: 3% !important;
-  top: 50% !important;
-  font-size: 2.5em !important;
-}
 
 #settings_overlay{
   width: 100%;
@@ -1162,6 +1157,7 @@ body {
 
 .settings_button{
   width: 100%;
+  min-width: calc(25% - 14px);
   height: 100px;
   border-radius: 3px;
   border: 1px solid #BBBBCC;
@@ -1175,10 +1171,42 @@ body {
   margin: 0px 5px 0px 5px;
 }
 
+.settings_last {
+  padding: 0.15em;
+}
+
+.settings_last_rotated {
+  padding: 0em !important;
+}
+
+.settings_menu_rotated{
+  height: 95vh !important;
+  width: 18vw !important;
+  transform: translate(-50%, -100%) rotate(0deg) !important;
+  transform-origin: bottom !important;
+  left: 13% !important;
+  top: 99% !important;
+  font-size: 2.5em !important;
+  overflow-x: scroll !important;
+  overflow-y: scroll !important;
+  flex-direction: column !important;
+
+  padding: 0px 0px 0px 0px !important;
+  border-radius: 0.3em !important;
+}
+
 .settings_button_rotated{
-  height: 100%;
+  height: 18vw;
+  margin: 0px 0px 0px 0px;
+  
+  margin-bottom: 250px;
+  width: 393px;
+
   font-size: 1em;
   line-height: 4em;
+  transform-origin: left !important;
+  transform: translate(22%, -44%) rotate(90deg) !important;
+  
 }
 
 .settings_button:active{
@@ -1197,9 +1225,14 @@ body {
 
 .settings_spacer{
   width: 0.5em;
-  /* height: 100%; */
   border-right: 2px solid white;
   margin: 0px 0.25em 0px 0.25em;
+}
+
+.settings_spacer_rotated{
+  width: 90% !important;
+  border-top: 2px solid white !important;
+  margin: 0.2em 0.25em 0.2em 0.2em !important;
 }
 
 #settings_icon{
