@@ -1413,7 +1413,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: black;
+  background-color: rgba(0,0,0,0.9);
   color: #ccc;
   /* Black background with opacity */
   z-index: 20;
@@ -1476,7 +1476,7 @@ code {}
 #overlay h1 {
   font-size: 40px;
   margin-bottom: 20px;
-  margin-top: 20px;
+  margin-top: 50px;
 }
 
 #overlay h2 {

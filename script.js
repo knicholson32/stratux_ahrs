@@ -167,7 +167,6 @@ function ahrsWSInit() {
 
   ahrsWS.onopen = function(e) {
     console.log("Connection established!");
-    console.log(e);
     ahrsWS.closed = false;
   };
 
@@ -396,8 +395,13 @@ function initButtons() {
   }
 
   $('#settings_icon').mouseup(() => {
+    // Make the menu visible
     $('#settings_menu').removeClass('hidden');
     $('#settings_overlay').removeClass('hidden');
+
+    // Now that it is visible, set its scroll back to 0 so that
+    // the default icons are visible first
+    $('#settings_menu')[0].scrollLeft=0;
   });
 
   $(document).keyup(function(e) {
@@ -505,7 +509,7 @@ function initButtons() {
       pre_input = true;
       index = 0;
     }
-    console.log(baro_input_value);
+    // console.log(baro_input_value);
     updateBaroPressure();
   }
 
@@ -859,8 +863,8 @@ function generateTapes() {
     altTape.fmu_alt = alt;
   };
   $('#alt_tape_scroll').append('<div id="alt_fmu" class="fmu_h volitile"></div>');
-  // Loop through altitudes (0 - 10,000 ft)
-  for (i = 1000; i >= 0; i -= 10) {
+  // Loop through altitudes (0 - 20,000 ft)
+  for (i = 2000; i >= 0; i -= 10) {
     // Generate a tick
     var tick_div = $('<div/>', {
       class: 'h_tick alt_tick volitile',
@@ -878,7 +882,7 @@ function generateTapes() {
   }
   // Add the text for each altitude
   $('#alt_tape_text').append('<div class="alt_tape_index volitile"></div>');
-  for (i = 950; i > 0; i -= 50) {
+  for (i = 1950; i > 0; i -= 50) {
     $('#alt_tape_text').append('<div class="alt_tape_index volitile">' + i + '0</div>');
   }
   $('#alt_tape_text').append('<div class="alt_tape_index volitile">0</div>');
@@ -894,14 +898,24 @@ function generateTapes() {
     // Round the altitude for text display
     alt = Math.round(alt);
     // Pad and display the altitude in the altitude box
-    if (alt < 10) {
+    if(alt <= -1000){
+      $('#alt_counter_text').html(Math.abs(alt));
+    } else if(alt <= -100){
+      $('#alt_counter_text').html('-' + Math.abs(alt));
+    } else if(alt <= -10){
+      $('#alt_counter_text').html('-0' + Math.abs(alt));
+    } else if(alt < 0){
+      $('#alt_counter_text').html('-00' + Math.abs(alt));
+    } else if (alt < 10) {
       $('#alt_counter_text').html('000' + alt);
     } else if (alt < 100) {
       $('#alt_counter_text').html('00' + alt);
     } else if (alt < 1000) {
       $('#alt_counter_text').html('0' + alt);
-    } else {
+    } else if (alt < 10000){
       $('#alt_counter_text').html(alt);
+    } else {
+      $('#alt_counter_text').html(Math.floor(alt/100) + 'X');
     }
     if (!isNaN(altTape.fmu_alt) && altTape.fmu_alt != null) {
       $('#alt_fmu').css('bottom', (-(10000 - altTape.fmu_alt) * altTape.pixels_per_number / 10 - 30) + 'px');
