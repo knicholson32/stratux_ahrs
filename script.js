@@ -402,6 +402,7 @@ function initButtons() {
     // Now that it is visible, set its scroll back to 0 so that
     // the default icons are visible first
     $('#settings_menu')[0].scrollLeft=0;
+    $('#settings_menu')[0].scrollTop=0;
   });
 
   $(document).keyup(function(e) {
