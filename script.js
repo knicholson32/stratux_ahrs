@@ -504,7 +504,7 @@ function initButtons() {
       pre_input = true;
       index = 0;
     }
-    console.log(baro_input_value);
+    // console.log(baro_input_value);
     updateBaroPressure();
   }
 
