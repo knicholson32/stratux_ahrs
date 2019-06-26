@@ -16,7 +16,7 @@ var system = { // Overall system settings
   checkActiveTime: 2250,
   websocket_url: // Websocket URL for situation
     "ws://raspberrypi.local/situation",
-  enable_ahrs_ws: true,
+  enable_ahrs_ws: false,
   fmu_url: // Websocket URL for FMU Update
     "ws://raspberrypi.local:8888",
   enable_fmu: false, // Enable FMU support - in development
@@ -137,7 +137,7 @@ var ahrsTape = { // AHRS in the center of the AHRS
 
 /** ****************************** SLIP SKID ******************************* **/
 var slipSkid = {
-  multiplier: 3
+  multiplier: 6
 }
 /** ****************************** SLIP SKID ******************************* **/
 

@@ -266,15 +266,9 @@ function ahrsWSInit() {
           break;
       }
 
-      if (data.AHRSTurnRate != 3276.7){
-        console.log(data.AHRSTurnRate);
-      }
-
       if (data.BaroVerticalSpeed !== 99999 && data.BaroPressureAltitude !== 99999) {
         vspeedTape.update(data.BaroVerticalSpeed * conv.fps2mps);
       }
-
-      // data.AHRSSlipSkid
 
       if (data.AHRSStatus !== 1) {
         ahrsTape.update(data.AHRSPitch, data.AHRSRoll);
@@ -283,7 +277,7 @@ function ahrsWSInit() {
       }
 
       if (data.AHRSTurnRate != 3276.7){
-        turnCoordinator.update(dataAHRSTurnRate);
+        turnCoordinator.update(data.AHRSTurnRate);
       }else{
         turnCoordinator.update(0);
       }
@@ -1173,6 +1167,7 @@ function generateTapes() {
     // $('#settings_icon').removeClass('shifted');
     $('#slip_skid_holder').removeClass('shifted');
     turnCoordinator.update = function(rate, override) {
+      rate = -rate;
       if(rate > 3.25){
         rate = 3.25;
       }else if(rate < -3.25){
