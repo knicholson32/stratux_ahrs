@@ -106,6 +106,9 @@ function orientationChange() {
     $('#settings_menu').removeClass('settings_menu_rotated');
     $('.settings_button').removeClass('settings_button_rotated');
     $('#settings_popup').removeClass('settings_popup_rotated');
+    $('.settings_last').removeClass('settings_last_rotated');
+    $('.settings_spacer').removeClass('settings_spacer_rotated');
+
     // Set the system scale value ratio
     system.scale = system.screen_height / system.screen_width;
   } else {
@@ -140,6 +143,9 @@ function orientationChange() {
     $('#settings_menu').addClass('settings_menu_rotated');
     $('.settings_button').addClass('settings_button_rotated');
     $('#settings_popup').addClass('settings_popup_rotated');
+    $('.settings_last').addClass('settings_last_rotated');
+    $('.settings_spacer').addClass('settings_spacer_rotated');
+
   }
 
   // Calculate scale factors for the ahrs virtual horizon bar

@@ -389,8 +389,14 @@ function initButtons() {
   }
 
   $('#settings_icon').mouseup(() => {
+    // Make the menu visible
     $('#settings_menu').removeClass('hidden');
     $('#settings_overlay').removeClass('hidden');
+
+    // Now that it is visible, set its scroll back to 0 so that
+    // the default icons are visible first
+    $('#settings_menu')[0].scrollLeft=0;
+    $('#settings_menu')[0].scrollTop=0;
   });
 
   $(document).keyup(function(e) {
@@ -537,7 +543,9 @@ function initButtons() {
   $('#set_std_baro').click(() => {
     updateKollsmanSetting(29.92);
   });
-
+  $('#force_update').click(() => {
+    window.location.reload(true)
+  });
   $('#simulate_tag').click(function() {
     if (system.simulate === true) {
       system.simulate = false;
