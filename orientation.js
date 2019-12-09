@@ -1,3 +1,21 @@
+// ============================================== //
+// orientation.js :: Stratux AHRS
+//
+// View the repo at
+// https://github.com/knicholson32/stratux_ahrs
+//
+// Run with via webserver. Entry point is
+// 'index.html'
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// ============================================== //
+
 // Initialize orientation system
 function orientationInit() {
   // Bind orientationChange to the window resize event
@@ -21,16 +39,20 @@ function orientationInit() {
 
   // Get the user agent and determine the type of device
   var ua = navigator.userAgent;
-  if (ua.indexOf('iPad') !== -1) {
-    system.device = 'iPad';
-  } else if (ua.indexOf('iPhone') !== -1 || ua.indexOf('iPod') !== -1) {
-    system.device = 'iPhone';
-  } else if (ua.indexOf('Android') !== -1) {
-    system.device = 'Android';
+  if (ua.indexOf("iPad") !== -1) {
+    system.device = "iPad";
+  } else if (ua.indexOf("iPhone") !== -1 || ua.indexOf("iPod") !== -1) {
+    system.device = "iPhone";
+  } else if (ua.indexOf("Android") !== -1) {
+    system.device = "Android";
   }
 
   // Check if the system started in portrait mode and is a webapp
-  if (system.fullscreen && system.orinetation === "portrait" && system.device === 'iPhone') {
+  if (
+    system.fullscreen &&
+    system.orinetation === "portrait" &&
+    system.device === "iPhone"
+  ) {
     system.ios.correction = true;
     system.ios.orgnial_height = $(window).height();
   }
@@ -53,8 +75,8 @@ function confirmOrientationChange() {
     orientationChange();
   } else {
     // Zoom the container based on the orientation
-    if (system.orientation == 'portrait') {
-      $('#ahrs_container').css('zoom', (system.scale * 100) + '%');
+    if (system.orientation == "portrait") {
+      $("#ahrs_container").css("zoom", system.scale * 100 + "%");
     }
   }
 }
@@ -69,72 +91,110 @@ function orientationChange() {
   if (system.screen_width > system.screen_height) {
     // Set to landscape
     system.orinetation = "landscape";
+    ar = system.screen_width / system.screen_height;
     // Reset ahrs_container css values to defaults
-    $('#ahrs_container').css('height', system.screen_height);
-    $('#ahrs_container').css('width', '100%');
-    $('#ahrs_container').css('zoom', '100%');
-    $('#ahrs_container').css('left', 'unset');
+    $("#ahrs_container").css("height", system.screen_height);
+    $("#ahrs_container").css("width", "100%");
+    $("#ahrs_container").css("zoom", "100%");
+    $("#ahrs_container").css("left", "unset");
 
     if (system.overlay_active === true) {
-      $('#overlay').css('height', system.screen_height);
-      $('#overlay').css('width', '100%');
-      $('#overlay').css('zoom', '100%');
-      $('#overlay').css('left', 'unset');
-      $('#overlay').css('top', 'unset');
-      $('#overlay').css('transform', 'unset');
+      $("#overlay").css("height", system.screen_height);
+      $("#overlay").css("width", "100%");
+      $("#overlay").css("zoom", "100%");
+      $("#overlay").css("left", "unset");
+      $("#overlay").css("top", "unset");
+      $("#overlay").css("transform", "unset");
     }
+    $("#settings_menu").removeClass("settings_menu_rotated");
+    $(".settings_button").removeClass("settings_button_rotated");
+    $("#settings_popup").removeClass("settings_popup_rotated");
+    $(".settings_last").removeClass("settings_last_rotated");
+    $(".settings_spacer").removeClass("settings_spacer_rotated");
 
     // Set the system scale value ratio
     system.scale = system.screen_height / system.screen_width;
   } else {
     // Set to portrait
     system.orinetation = "portrait";
+    ar = system.screen_height / system.screen_width;
     // Detect if the user is using an ios device and correct for status bar
     // intrusion
     if (system.ios.correction === true) {
       system.screen_height = system.ios.orgnial_height;
-      $('#ahrs_container').css('left', '31px');
+      $("#ahrs_container").css("left", "31px");
     }
     // Set the system scale value ratio
     system.scale = system.screen_height / system.screen_width;
     // Update the width to fit the portrait mode
     let width = system.screen_height / system.scale;
     let height = system.screen_width / system.scale;
-    $('#ahrs_container').css('width', width);
-    $('#ahrs_container').css('height', height);
+    $("#ahrs_container").css("width", width);
+    $("#ahrs_container").css("height", height);
     // Set the scale to fit the portrait mode
-    $('#ahrs_container').css('zoom', (system.scale * 100 + 1) + '%');
+    $("#ahrs_container").css("zoom", system.scale * 100 + 1 + "%");
 
     if (system.overlay_active === true) {
-      $('#overlay').css('width', width + 20);
-      $('#overlay').css('height', height);
+      $("#overlay").css("width", width + 20);
+      $("#overlay").css("height", height);
       // Set the scale to fit the portrait mode
-      $('#overlay').css('zoom', (system.scale * 100 + 1) + '%');
-      $('#overlay').css('transform', 'rotate(90deg)');
-      $('#overlay').css('left', -(width / 2 - height / 2));
-      $('#overlay').css('top', (width / 2 - height / 2) - 10);
+      $("#overlay").css("zoom", system.scale * 100 + 1 + "%");
+      $("#overlay").css("transform", "rotate(90deg)");
+      $("#overlay").css("left", -(width / 2 - height / 2));
+      $("#overlay").css("top", width / 2 - height / 2 - 10);
     }
+    $("#settings_menu").addClass("settings_menu_rotated");
+    $(".settings_button").addClass("settings_button_rotated");
+    $("#settings_popup").addClass("settings_popup_rotated");
+    $(".settings_last").addClass("settings_last_rotated");
+    $(".settings_spacer").addClass("settings_spacer_rotated");
   }
 
+  // Calculate scale factors for the ahrs virtual horizon bar
+  let top = -20.08655 + 39.72259 * ar + 21.09178 * ar * ar;
+  let zoom =
+    0.133225025 * ar * ar * ar * ar -
+    1.226095815 * ar * ar * ar +
+    4.400482563 * ar * ar -
+    7.607275965 * ar +
+    5.879861878;
+  $("#vhor_bar").css("top", `${top}px`);
+  $("#vhor_bar").css("zoom", zoom);
+
   // Record total sizes
-  system.ahrs.width = $('#ahrs_container').outerWidth();
-  system.ahrs.height = $('#ahrs_container').outerHeight();
+  system.ahrs.width = $("#ahrs_container").outerWidth();
+  system.ahrs.height = $("#ahrs_container").outerHeight();
 
   // Configure specific div sizes based on the current window size
-  $('#heading_tape').css('width', system.ahrs.width - $('#speed_tape').outerWidth() - $('#alt_tape ').outerWidth() - 1);
-  $('#heading_tape').css('left', $('#speed_tape').outerWidth());
-  $('#readouts').css('width', system.ahrs.width - $('#speed_tape').outerWidth() - $('#alt_tape ').outerWidth() - 1);
-  $('#readouts').css('left', $('#speed_tape').outerWidth());
-  $('#heading_tape').css('top', $('#speed_tape').outerHeight() - $('#heading_tape').outerHeight());
-  $('#speed_counter').css('margin-right', $('#speed_tape_tick_holder').outerWidth() - 2);
-  $('#g_meter').css('bottom', $('#heading_tape').outerHeight() + 10);
-  $('#g_meter').css('right', $('#alt_tape ').outerWidth() + 10);
-  $('#overheat_flag').css('display', 'none');
+  $("#heading_tape").css(
+    "width",
+    system.ahrs.width -
+      $("#speed_tape").outerWidth() -
+      $("#alt_tape ").outerWidth() -
+      1
+  );
+  $("#heading_tape").css("left", $("#speed_tape").outerWidth());
+  $("#readouts").css(
+    "width",
+    system.ahrs.width -
+      $("#speed_tape").outerWidth() -
+      $("#alt_tape ").outerWidth() -
+      1
+  );
+  $("#readouts").css("left", $("#speed_tape").outerWidth());
+  // $('#heading_tape').css('top', $('#speed_tape').outerHeight() - $('#heading_tape').outerHeight());
+  $("#speed_counter").css(
+    "margin-right",
+    $("#speed_tape_tick_holder").outerWidth() - 2
+  );
+  $("#g_meter").css("bottom", $("#heading_tape").outerHeight() + 10);
+  $("#g_meter").css("right", $("#alt_tape ").outerWidth() + 10);
+  $("#overheat_flag").css("display", "none");
+  // $('#slip_skid_holder').css()
 
   // Generate the tapes
   generateTapes();
 
   // Check the orientation change after 1/2 second
   setTimeout(confirmOrientationChange, 500);
-
 }

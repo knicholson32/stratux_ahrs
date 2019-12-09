@@ -1,14 +1,29 @@
 @charset "UTF-8";
+
 @font-face {
   font-family: 'Monaco';
   src: url('../fonts/monaco.ttf');
 }
 
-/* AHRS CSS STYLESHEET */
+@font-face {
+  font-family: 'Aileron';
+  src: url('../fonts/Aileron-Regular.ttf');
+}
 
+@font-face {
+  font-family: 'Marcellus';
+  src: url('../fonts/Marcellus-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Mukta';
+  src: url('../fonts/Mukta-Regular.ttf');
+}
+
+/* AHRS CSS STYLESHEET */
 /* Components:
  *  Main Container    id    ahrs_container
- *  Scroll Precvent   id    scroll_prevent
+ *  Scroll Prevent    id    scroll_prevent
  *  Sky Container     id    sky_container
  *  Sky Mask          id    sky_mask
  *
@@ -64,6 +79,14 @@
       Pitch Tick      class ahrs_tick
       Pitch Text      class ahrs_text
       Chevron         class ahrs_chevron
+ *  Slip Skid Holder  id    slip_skid_holder
+      Slip Skid Bar   class slip_skid_bar
+      Slip Bar Right  class slip_skid_bar_right
+      Slip Skid Ball  id    slip_skid_ball
+ *  Turn Coord Holder id    turn_coordinator_holder
+      TC Top Bar      class top_bar
+      TC Middle Bar   class middle_bar
+      TC Indicator    id    turn_coordinator_indicator
  *  Readouts          id    readouts
       Readout         class readout
       Pitch Readout   id    pitch_readout
@@ -84,10 +107,18 @@
       Speed FMU       id    speed_fmu
       Heading FMU     id    hdg_fmu
       Hdg Arrow       id    hdg_fmu_arrow
+  * Settings Menu     id    settings_menu
+      Menu Rotated    id    settings_menu_rotated
+      Exit Overlay    id    settings_overlay
+      Button          class settings_button
+      Input           class settings_input
+      Icon            id    settings_icon
+  * Notification      id    notification
  */
-
 html {
   --flight_angle: 0deg;
+  --slip_skid: 0px;
+  --turn_rate: 0px;
   --speed_counter_speed: 1s;
   --ease_time: 0.2s;
   /* AHRS EASING */
@@ -95,13 +126,27 @@ html {
   /* HEADING EASING */
   --aux_ease_time: 0.2s;
   /* OTHER EASING */
+  --tc_ease_time: 0.5s;
   --pitch_amount: 0px;
   background-color: #000;
+  touch-action:manipulation;
 }
+
+/* input[type='text'],
+input[type='number'],
+textarea {
+  font-size: 16px;
+} */
 
 body {
   margin: 0px;
   overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40000;
+  width: 100vw;
+  height: 100vh;
 }
 
 #ahrs_container {
@@ -150,7 +195,6 @@ body {
 }
 
 /* ---------------- Tapes ---------------- */
-
 .tape {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.4);
@@ -174,7 +218,8 @@ body {
   width: 4px;
   background-color: #FFF;
   position: absolute;
-  top: 0px;
+  /* top: 0px; */
+  bottom: 0px;
   transition: unset;
   z-index: -2;
 }
@@ -189,7 +234,6 @@ body {
 }
 
 /* --------- Speed Tape --------- */
-
 #speed_tape {
   width: 180px;
   left: 0px;
@@ -306,7 +350,6 @@ body {
 }
 
 /* --------- Alt Tape --------- */
-
 #alt_tape {
   width: 220px;
   right: 0px;
@@ -488,7 +531,7 @@ body {
   bottom: 0px;
   left: 0px;
   background-color: black;
-  z-index: 12;
+  z-index: 21;
   border-top: 2px solid white;
   border-bottom: 2px solid white;
   transform: translateZ(0);
@@ -507,14 +550,14 @@ body {
 }
 
 #alt_annun_text span {
-  line-height: 20px;
-  font-size: 20px;
+  line-height: 15px;
+  font-size: 15px;
 }
 
 /* Heading Tape */
-
 #heading_tape {
-  height: 110px;
+  /* height: 110px; */
+  height: 60px;
   margin: 0 auto;
   z-index: 5;
   /* Some CSS details are calculated in "script.js" */
@@ -530,7 +573,8 @@ body {
   line-height: 20px;
   position: absolute;
   font-family: 'Monaco';
-  top: 38px;
+  /* top: 38px; */
+  top: -42px;
 }
 
 .card_text {
@@ -561,7 +605,8 @@ body {
   font-size: 26px;
   font-family: 'Monaco';
   position: absolute;
-  top: 20px;
+  /* top: 20px; */
+  bottom: 20px;
   left: 50%;
   transform: translateX(-36%);
   padding-bottom: 3px;
@@ -586,14 +631,15 @@ body {
   height: 0;
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-bottom: 10px solid white;
+  /* border-bottom: 10px solid white; */
+  border-top: 10px solid white;
   position: absolute;
-  top: -12px;
+  /* top: -12px; */
+  bottom: -12px;
   left: 76px;
 }
 
 /* ---------------- VHorizon ---------------- */
-
 #vhorizon {
   position: absolute;
   width: 550px;
@@ -718,11 +764,154 @@ body {
   transform: translateX(-50%);
 }
 
-/* ---------------- Readouts ---------------- */
+/* --------------- Slip Skid ---------------- */
+#slip_skid_holder {
+  z-index: -1;
+  width: 70px;
+  height: 55px;
+  position: relative;
+  bottom: 20px;
+  left: calc(50% - 15px);
+}
 
+#slip_skid_holder.shifted{
+  bottom: 0px;
+}
+
+.slip_skid_bar {
+  background-color: white;
+  width: 4px;
+  height: 100%;
+  border-radius: 5px;
+  position: absolute;
+  left: 0px;
+  z-index: 1;
+  border: 2px solid black;
+}
+
+.slip_skid_bar_right {
+  right: 0px;
+  left: unset;
+}
+
+#slip_skid_ball {
+  width: 40px;
+  height: 40px;
+  border-radius: 25px;
+  background-color: ghostwhite;
+  border: 5px solid black;
+  z-index: 0;
+  position: relative;
+  left: calc(50% - 25px - var(--slip_skid));
+  /* transition: 0.2s; */
+  top: 2.5px;
+  -moz-box-shadow: inset 0 0 10px #000000;
+  -webkit-box-shadow: inset 0 0 10px #000000;
+  box-shadow: inset 0 0 10px #000000;
+}
+
+/* --------------- Turn Coordinator ---------------- */
+
+#turn_coordinator_holder{
+  z-index: -100;
+  width: 270px;
+  height: 14px;
+  position: relative;
+  bottom: 5px;
+  left: calc(50% - 112px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  visibility: hidden;
+}
+
+#turn_coordinator_holder.show{
+  visibility: visible;
+}
+
+
+#turn_coordinator_holder .top_bar{
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, rgba(0,0,0,.0) 0%, black 10%, black 90%, rgba(0,0,0,.0) 100%);
+}
+
+#turn_coordinator_holder .middle_bar{
+  height: 100%;
+  border-right: 2px solid black;
+}
+
+#turn_coordinator_holder .middle_bar.middle{
+  position: absolute;
+  top: 3px;
+}
+
+#turn_coordinator_holder .middle_bar.right_bar{
+  position: absolute;
+  right: 35px;
+  border-color: white;
+  bottom: -4px;
+}
+
+#turn_coordinator_holder .middle_bar.left_bar{
+  position: absolute;
+  left: 35px;
+  border-color: white;
+  bottom: -3px;
+}
+
+#turn_coordinator_indicator{
+  height: 15px;
+  width: 100%;
+  top: 3px;
+  position: absolute;
+  z-index: -100;
+}
+
+#turn_coordinator_indicator .bar{
+  background-color: magenta;
+  width: var(--turn_rate);
+  height: 100%;
+  position: absolute;
+  right: 50%;
+  transition: width var(--tc_ease_time);
+}
+
+#turn_coordinator_indicator .bar.right{
+  right: unset;
+  left: 50%;
+}
+
+#turn_coordinator_indicator .arrow{
+  width: 0; 
+  height: 0; 
+  position: absolute;
+  transition: left var(--tc_ease_time), right var(--tc_ease_time);
+}
+
+#turn_coordinator_indicator .arrow.hide{
+  display: none;
+}
+
+#turn_coordinator_indicator .arrow.right{
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 7px solid magenta;
+  left: calc(50% + var(--turn_rate) - 1px);
+}
+
+#turn_coordinator_indicator .arrow.left{
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-right: 7px solid magenta;
+  right: calc(50% + var(--turn_rate) - 1px);
+}
+
+/* ---------------- Readouts ---------------- */
 #readouts {
   position: absolute;
-  top: 0px;
+  /* top: 0px; */
+  bottom: 44px;
   height: 24px;
   transform: translateZ(0);
 }
@@ -758,7 +947,6 @@ body {
 }
 
 /* ---------------- Invalid ---------------- */
-
 .invalid_holder {
   position: absolute;
   z-index: 20;
@@ -795,7 +983,6 @@ body {
 }
 
 /* ---------------- Message Flag ---------------- */
-
 #message_flag {
   position: absolute;
   left: 10px;
@@ -868,7 +1055,6 @@ body {
 }
 
 /* ---------------- Sat Count ---------------- */
-
 #sat_count {
   position: absolute;
   left: 6px;
@@ -892,7 +1078,6 @@ body {
 }
 
 /* ----------------- FMU ----------------- */
-
 #alt_fmu {
   width: 160px;
 }
@@ -932,8 +1117,259 @@ body {
   z-index: -1;
 }
 
-/* ---------------- Other ---------------- */
+/* ---------------- Settings Menu ---------------- */
 
+#settings_menu{
+  width: 95%;
+  /* height: 18vh; */
+  align-content: space-between;
+  background-color: #111;
+  border: 2px solid #BBBBCC;
+  border-radius: 0.75em;
+  z-index: 1000;
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, -15%);
+  display: flex;
+  flex-direction: row;
+  padding: 0.5em 0.25em 0.5em 0.25em;
+
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+
+#settings_overlay{
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  background-color: black;
+  opacity: 0.0;
+  z-index: 999;
+}
+
+#settings_menu.hidden, #settings_overlay.hidden{
+  display: none;
+}
+
+.settings_button{
+  width: 100%;
+  min-width: calc(25% - 14px);
+  height: 100px;
+  border-radius: 3px;
+  border: 1px solid #BBBBCC;
+  background: linear-gradient(to bottom, #333335, #222225, #111115);
+  text-align: center;
+  line-height: 100px;
+  font-size: 1.5em;
+  color: white;
+  font-family: 'Monaco';
+  cursor: pointer;
+  margin: 0px 5px 0px 5px;
+}
+
+.settings_last {
+  padding: 0.15em;
+}
+
+.settings_last_rotated {
+  padding: 0em !important;
+}
+
+.settings_menu_rotated{
+  height: 95vh !important;
+  width: 18vw !important;
+  transform: translate(-50%, -100%) rotate(0deg) !important;
+  transform-origin: bottom !important;
+  left: 13% !important;
+  top: 99% !important;
+  font-size: 2.5em !important;
+  overflow-x: scroll !important;
+  overflow-y: scroll !important;
+  flex-direction: column !important;
+
+  padding: 0px 0px 0px 0px !important;
+  border-radius: 0.3em !important;
+}
+
+.settings_button_rotated{
+  height: 18vw;
+  margin: 0px 0px 0px 0px;
+  
+  margin-bottom: 250px;
+  width: 393px;
+
+  font-size: 1em;
+  line-height: 4em;
+  transform-origin: left !important;
+  transform: translate(22%, -44%) rotate(90deg) !important;
+  
+}
+
+.settings_button:active{
+  background: linear-gradient(to bottom, #111115, #151519, #191920);
+}
+
+.settings_input{
+  margin-bottom: 10px;
+}
+
+.settings_input input{
+  width: 90%;
+  transform: translateX(5%);
+  font-size: 25px;
+}
+
+.settings_spacer{
+  width: 0.5em;
+  border-right: 2px solid white;
+  margin: 0px 0.25em 0px 0.25em;
+}
+
+.settings_spacer_rotated{
+  width: 90% !important;
+  border-top: 2px solid white !important;
+  margin: 0.2em 0.25em 0.2em 0.2em !important;
+}
+
+#settings_icon{
+  position: relative;
+  left: 20px;
+  width: 30px;
+  height: 20px;
+  bottom: 30px;
+  cursor: pointer;
+}
+
+#settings_icon.shifted{
+  bottom: 45px;
+}
+
+.menu_bar{
+  height: 4px;
+  width: 100%;
+  border-radius: 2px;
+  background-color: white;
+  margin-bottom: 7px;
+}
+
+#settings_popup{
+  background-color: #151519;
+  border-radius: 0.5em;
+  border: 2px solid #BBBBCC;
+  color: white;
+  font-family: 'Monaco';
+  text-align: center;
+  position: fixed;
+  width: 60vh;
+  height: 60vh;
+  z-index: 3000;
+  font-size: 2em !important;
+  flex-direction: column;
+  display: flex;
+  margin-left: 50%;
+  transform: translate(-50%, 20%);
+}
+
+#settings_popup.hidden{
+  display: none;
+}
+
+#settings_popup .title{
+  margin-top: 10px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#settings_popup .small{
+  color: #AAA;
+  font-size: 0.5em !important;
+  padding-left: 10px;
+  position: absolute;
+  bottom: 0.35em;
+}
+
+.settings_popup_rotated{
+  width: 60vw !important;
+  height: 60vw !important;
+  margin-left: 60vw !important;
+  margin-top: 50vh !important;
+  transform: translate(-50%, -50%) rotate(90deg) !important;
+  font-size: 3em !important;
+}
+
+.altimeter_input{
+  display: flex;
+  flex-wrap: wrap;
+  flex-grow: 1;
+}
+
+.relative{
+  position: relative;
+}
+
+.altimeter_display{
+
+}
+
+.number_button{
+  flex: 1 0 30%; /* explanation below */
+  margin: 5px;
+  /* height: 100px; */
+  background-color: white;
+  color: black;
+  font-size: 1em;
+  background-color: white;
+  border-radius: 0.3em;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer;
+}
+
+.number_button:active{
+  background-color: #333;
+  color: white;
+}
+
+/* ---------------- Notification ---------------- */
+
+.notification{
+  background-color: #587E4B;
+  border-radius: 4px;
+  color: white;
+  font-family: 'Monaco';
+  font-size: 25px;
+  position: fixed;
+  padding: 0px 10px 0px 10px;
+  line-height: 40px;
+  height: 40px;
+  text-align: center;
+  top: -40px;
+  right: 20px;
+  transition: top 0.5s ease, right 0.5s ease;
+  z-index: 2000;
+}
+
+.notification.portrait{
+  bottom: 0px;
+  top: unset;
+  right: -40px;
+  transform: rotate(90deg);
+  transform-origin: right top;
+}
+
+/* ---------------- Other ---------------- */
 .shadow {
   -moz-box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
   -webkit-box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
@@ -977,32 +1413,75 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0,0,0,0.9);
+  color: #ccc;
   /* Black background with opacity */
   z-index: 20;
   /* Specify a stack order in case you're using a different order for other elements */
   cursor: pointer;
   /* Add a pointer on hover */
-  color: white;
-  font-size: 20px;
-  line-height: 20px;
-  font-family: 'Monaco';
+  font-size: 24px;
+  line-height: 24px;
+  /* font-family: 'Monaco'; */
   padding-top: 20px;
   text-align: center;
   transition: opacity 0.5s ease;
+  font-family: 'Mukta', sans-serif;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+#overlay p {
+  text-align: justify;
+  /* font-family: 'Aileron'; */
+  font-family: 'Marcellus', sans-serif;
+}
+
+#overlay_text {
+  width: 100%;
+}
+
+#lock_orientation{
+  position: relative;
+  right: -50%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  line-height: 14px;
+  transform: translateX(-11%)
+}
+
+#lock_orientation .logo{
+  width: 4em;
+  height: 4em;
+  background-color: #FFF;
+  opacity: 0.8;
+  border-radius: 1em;
+  color: black;
+  background-image: url(../images/lock-01.png);
+  background-size: cover;
+}
+
+#lock_orientation .text{
+  padding-top: 1.5em;
+  /* width: 160px; */
+  text-align: center;
+  margin-right: 16px;
+  font-size: 20px;
+  line-height: 20px;
 }
 
 code {}
 
 #overlay h1 {
   font-size: 40px;
-  margin-bottom: 60px;
+  margin-bottom: 20px;
   margin-top: 50px;
 }
 
 #overlay h2 {
   font-size: 25px;
-  margin-top: 100px;
+  margin-top: 20px;
 }
 
 #overlay a {
@@ -1019,9 +1498,7 @@ code {}
 }
 
 /* TODO: Review this and correct it so it actually works. */
-
 /* if portrait mode is detected, rotate the entire site -90 degrees to hint rotating to landscape */
-
 @media (orientation: portrait) {
   #scroll_prevent {
     -webkit-transform: rotate(90deg);
@@ -1030,6 +1507,7 @@ code {}
     -ms-transform: rotate(90deg);
     transform: rotate(90deg);
   }
+
   /*#ahrs_container{
     height: 514px;
     width: 919px;

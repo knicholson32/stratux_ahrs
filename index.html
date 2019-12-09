@@ -1,10 +1,13 @@
 <!doctype html>
-
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="viewport" content="viewport-fit=cover">
+  <!-- <meta name="viewport" content="viewport-fit=cover"> -->
+  <!-- <meta name="viewport" content= "width=device-width, user-scalable=no"> -->
+  <!-- <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'/> -->
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
 
   <meta name="apple-mobile-web-app-title" content="AHRS">
 
@@ -24,26 +27,65 @@
   <script type="text/javascript" src="orientation.js"></script>
   <script type="text/javascript" src="script.js"></script>
   <title>AHRS</title>
+  <!-- <script>
+      document.addEventListener('touchmove',
+          function(e) {
+              e.preventDefault();
+          }, {passive:false});
+  </script> -->
 </head>
 
 <body>
+  <div id="settings_popup" class="hidden">
+    <div class="title">- Baro Setting -</div>
+    <div class="relative"><span id="altimeter_display">29.92</span><span class="small">inHg</span></div>
+    <div class="altimeter_input">
+        <div class="number_button">1</div>
+        <div class="number_button">2</div>
+        <div class="number_button">3</div>
+        <div class="number_button">4</div>
+        <div class="number_button">5</div>
+        <div class="number_button">6</div>
+        <div class="number_button">7</div>
+        <div class="number_button">8</div>
+        <div class="number_button">9</div>
+        <div class="number_button">Clr</div>
+        <div class="number_button">0</div>
+        <div class="number_button">Ent</div>
+    </div>
+  </div>
+  <div id="settings_menu", class="hidden">
+    <div class="settings_button noselect" id="align_ahrs">Align AHRS</div>
+    <div class="settings_button noselect" id="calibrate_gyro">Calibrate Gyro</div>
+    <div class="settings_spacer"></div>
+    <div class="settings_button noselect" id="update_baro">Set Baro</div>
+    <div class="settings_button noselect" id="set_std_baro">Std. Baro</div>
+    <div class="settings_spacer"></div>
+    <div class="settings_button noselect" id="force_update">Force Update</div>
+    <div class="settings_last noselect"></div>
+  </div>
+  <div id="settings_overlay" class="hidden"></div>
   <div id="overlay">
-    <h1>Notice</h1>
+    <h1>NOTICE</h1>
     <p>
-      This AHRS is neither certified nor recomended for use in life-threatening situations.
+      This display is neither certified nor recomended for use in life-threatening situations. Use only as an aid to situiational awareness. 
     </p>
     <p>
-      Data for this display comes from the IMU attached to the STRATUX unit, and is not built for aviation applications. Please use good personal judgment, and use this display for situational awareness only.
+      Data for this display comes from the IMU attached to the STRATUX unit, and is not built for aviation applications. Please use good personal judgment when using this display, and always fly with a certified attitude indicator.
     </p>
     <p>
-      For more information, view '<code><a href="/README.md">README.md</a></code>'.
+      For best results, lock the screen orientation prior to use. More information available in the '<code><a href="/README.md">readme.md</a></code>' file. Software license available at '<code><a href="/LICENSE">license</a></code>'.
     </p>
-    <p>
-      To acknowledge this message permanently, edit '<code>configuration.js</code>'.
-    </p>
+    <p><i>
+      To acknowledge this message permanently, edit please '<code>configuration.js</code>' on the Raspberry Pi.
+    </i></p>
+    <div id="lock_orientation">
+      <div class="text">Please Lock<br>Orientation!</div>
+      <div class="logo"></div>
+    </div>
     <h2>
-      Tap this message to continue.
-    </h2>
+        Tap to continue.
+      </h2>
   </div>
   <div id="scroll_prevent">
     <div id="ahrs_container">
@@ -143,16 +185,30 @@
       </div>
 
       <div id="readouts" class="noselect">
-        <div id="pitch_readout" class="readout">
-          Pitch:<span>-03°</span>
+        <div id="slip_skid_holder" class="shifted">
+          <div class="slip_skid_bar"></div>
+          <div class="slip_skid_bar slip_skid_bar_right"></div>
+          <div id="slip_skid_ball"></div>
           <div class="invalid_holder"></div>
         </div>
-        <div id="roll_readout" class="readout">
-          Roll:<span>+12°</span>
-          <div class="invalid_holder"></div>
+        <div id="turn_coordinator_holder">
+          <div class="top_bar"></div>
+          <div class="middle_bar middle"></div>
+          <div class="middle_bar left_bar"></div>
+          <div class="middle_bar right_bar"></div>
+          <div id="turn_coordinator_indicator">
+            <div id="tcbar" class="bar"></div>
+            <div id="tcarrow" class="arrow left hide"></div>
+          </div>
+        </div>
+        <div id="settings_icon" class="shifted">
+          <div class="menu_bar"></div>
+          <div class="menu_bar"></div>
+          <div class="menu_bar"></div>
         </div>
       </div>
       <div id="message_flag"></div>
     </div>
   </div>
 </body>
+</html>
