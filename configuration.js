@@ -4,21 +4,24 @@
 /** ************************** ****************** ************************** **/
 
 /** ******************************** SYSTEM ******************************** **/
-var system = { // Overall system settings
+var system = {
+  // Overall system settings
   overlay_active: true, // Enable warning overlay on startup
-  ahrs: { // Settings for the overall AHRS
+  ahrs: {
+    // Settings for the overall AHRS
     updateTimeout: 750, // Time (in ms) required for a metric to be set as invalid
     reloadAfterTimeoutCount: 4 // Number of times the timeout has to be hit before a reboot
   },
-  fmu: { // Settings for the overall AHRS
+  fmu: {
+    // Settings for the overall AHRS
     updateTimeout: 1500 // Time (in ms) required for a metric to be set as invalid
   },
   checkActiveTime: 2250,
-  websocket_url: // Websocket URL for situation
-    "ws://raspberrypi.local/situation",
-  enable_ahrs_ws: false,
-  fmu_url: // Websocket URL for FMU Update
-    "ws://raspberrypi.local:8888",
+  // Websocket URL for situation
+  websocket_url: "ws://raspberrypi.local/situation",
+  enable_ahrs_ws: true,
+  // Websocket URL for FMU Update
+  fmu_url: "ws://raspberrypi.local:8888",
   enable_fmu: false, // Enable FMU support - in development
   cpu_temp_warn: 70, // Temp at which the 'Temp' banner will be displayed (C)
   allowReload: true, // Allows the app to automatically reload if it detects an issue
@@ -46,7 +49,6 @@ var AHRS_TYPE = {
 };
 var UNITS = {
   KTS: 0,
-  KNOTS: 0,
   MPH: 1,
   MPS: 2,
   FPS: 3,
@@ -70,7 +72,8 @@ var SOURCE = {
 /** ******************************* ********* ****************************** **/
 
 /** ******************************* HEADING ******************************** **/
-var headingTape = { // Compass / track tape at the bottom of the AHRS
+var headingTape = {
+  // Compass / track tape at the bottom of the AHRS
   range: 30, // Visual range of degrees present at one time. IE: a
   // value of '30' allows 30 degrees visiable at all times.
   ticks_per_number: 10 // Specifies how often numbers are written on the tape.
@@ -78,12 +81,13 @@ var headingTape = { // Compass / track tape at the bottom of the AHRS
 };
 /** ******************************* ******* ******************************** **/
 
-
 /** ******************************** SPEED ********************************* **/
-var speedTape = { // Speed tape on the left of the AHRS
+var speedTape = {
+  // Speed tape on the left of the AHRS
   lowerSpeed: 0, // Lower displayed speed given in MPH
   upperSpeed: 200, // Upper displayed speed given in MPH
-  speeds: [ // Speed color band configurations given in MPH
+  speeds: [
+    // Speed color band configurations given in MPH
     {
       color: COLORS.WHITE,
       start: 55,
@@ -109,7 +113,6 @@ var speedTape = { // Speed tape on the left of the AHRS
 };
 /** ******************************** ***** ********************************* **/
 
-
 /** ******************************* ALTITUDE ******************************* **/
 var altTape = {
   units: UNITS.FEET, // Units for displaying altitude
@@ -117,34 +120,33 @@ var altTape = {
 };
 /** ******************************* ******** ******************************* **/
 
-
 /** ******************************** VSPEED ******************************** **/
 var vspeedTape = {
-  units: UNITS.FPM // Units for displaying verticle speed
+  units: UNITS.FPM // Units for displaying vertical speed
 };
 /** ******************************** ****** ******************************** **/
 
-
 /** ********************************* AHRS ********************************* **/
-var ahrsTape = { // AHRS in the center of the AHRS
+var ahrsTape = {
+  // AHRS in the center of the AHRS
   limits: [30, -30], // Limits for the degrees that are displayed. Values
   // outside this range show chevrons
   degrees_in_view: 25, // Degrees in constant view (range)
-  chevrons: 4, // Number of chevrons shown pased the limits
+  chevrons: 4, // Number of chevrons shown passed the limits
   chevron_space: 140 // Space given to each chevron (sizing)
 };
 /** ********************************* AHRS ********************************* **/
 
 /** ****************************** SLIP SKID ******************************* **/
 var slipSkid = {
-  multiplier: 6
-}
+  multiplier: 6 // Arbitrary scale for tuning slip-skid movement
+};
 /** ****************************** SLIP SKID ******************************* **/
 
 /** *************************** TURN COORDINATOR *************************** **/
 var turnCoordinator = {
   display: true
-}
+};
 /** *************************** TURN COORDINATOR *************************** **/
 
 /** ******************************** G-Meter ******************************* **/
@@ -153,13 +155,11 @@ var gMeter = {
 };
 /** ******************************** ******* ******************************* **/
 
-
 /** ****************************** Sat Count ******************************* **/
 var satCount = {
   display: true
 };
 /** ****************************** ********* ******************************* **/
-
 
 /** ********************************* ADS-b ******************************** **/
 /** ********************************* ***** ******************************** **/

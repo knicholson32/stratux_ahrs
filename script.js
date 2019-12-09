@@ -23,23 +23,25 @@ $(document).ready(systemInit);
 
 // System Initialization function
 function systemInit() {
-  html = $('html');
+  html = $("html");
   // Print init message
   console.log("JS INIT");
   // Prevent touch moves to ensure the user can't scroll off the screen
-  $('body').bind('touchmove', function(e) {
+  $("body").bind("touchmove", function(e) {
     e.preventDefault();
   });
   // Init Overlay
-  let bypass_warning = getCookie('bypass_warning');
+  let bypass_warning = getCookie("bypass_warning");
   if (system.overlay_active === true && bypass_warning !== "true") {
-    $('#overlay').css('display', 'unset');
-    $('#overlay').click(function() {
-      console.warn("User acknowledged warning. View './README.md' for more information.");
-      $('#overlay').css('opacity', '0');
+    $("#overlay").css("display", "unset");
+    $("#overlay").click(function() {
+      console.warn(
+        "User acknowledged warning. View './README.md' for more information."
+      );
+      $("#overlay").css("opacity", "0");
       setTimeout(function() {
         system.overlay_active = false;
-        $('#overlay').remove();
+        $("#overlay").remove();
       }, 500);
     });
   }
@@ -53,26 +55,28 @@ function systemInit() {
     var interval_val = 0;
     // Don't init ahrs_ws if we are simulating
     system.enable_ahrs_ws = false;
-    $('#simulate_tag').css('display', 'unset');
+    $("#simulate_tag").css("display", "unset");
     // Repeating function every 1/4 second
     setInterval(function() {
       // Exit simulation if it has been canceled
-      if (!system.simulate)
-        return;
+      if (!system.simulate) return;
       // Increment interval
       interval_val++;
       // Send artificial updates for simulation
       headingTape.update(+interval_val);
-      ahrsTape.update(Math.sin(interval_val / 10) * 7, Math.cos(interval_val / 15 + 0.7) * 12);
+      ahrsTape.update(
+        Math.sin(interval_val / 10) * 7,
+        Math.cos(interval_val / 15 + 0.7) * 12
+      );
       speedTape.update(Math.sin(interval_val / 20 + 0.5) * 9 + 70);
       altTape.update(Math.cos(interval_val / 18 + 0.3) * 75 + 1423);
       vspeedTape.update(Math.sin(interval_val / 18 + 0.3) * 50 + 4);
-      slipSkid.update(Math.sin(interval_val / 27)*20);
-      turnCoordinator.update(Math.sin(interval_val / 17)*3.5);
+      slipSkid.update(Math.sin(interval_val / 27) * 20);
+      turnCoordinator.update(Math.sin(interval_val / 17) * 3.5);
       satCount.update(7);
       gMeter.update(Math.cos(interval_val / 30) + 1);
       // Toggle message flag to show updates
-      $('#message_flag').toggleClass('bright');
+      $("#message_flag").toggleClass("bright");
     }, 250);
   }
 
@@ -96,26 +100,26 @@ var presist = {
 };
 system.ahrs.inactiveCounter = 0;
 
-system.sendNotification = function(msg, opentime, color='#587E4B'){
+system.sendNotification = function(msg, opentime, color = "#587E4B") {
   let l;
-  let side = 'top';
-  if(system.orinetation === "landscape"){
+  let side = "top";
+  if (system.orinetation === "landscape") {
     l = $(`<div class="notification">${msg}</div>`);
-  }else{
+  } else {
     l = $(`<div class="notification portrait">${msg}</div>`);
-    side = 'right';
+    side = "right";
   }
-  l.css('background-color', color);
-  $('body').append(l);
+  l.css("background-color", color);
+  $("body").append(l);
   setTimeout(() => {
-    l.css(side, '0px');
-  }, 1)
+    l.css(side, "0px");
+  }, 1);
   setTimeout(() => {
-    l.css(side, '-40px');
-  }, opentime)
+    l.css(side, "-40px");
+  }, opentime);
   setTimeout(() => {
     l.remove();
-  }, opentime+2000)
+  }, opentime + 2000);
 };
 
 var sockets = [];
@@ -141,20 +145,19 @@ function avg(arr) {
   return sum / arr.length;
 }
 
-function removeAllClients(){
-  for(s in sockets)
-    sockets[s].close();
+function removeAllClients() {
+  for (s in sockets) sockets[s].close();
   sockets = [];
 }
 
 function ahrsWSInit() {
   console.log("Attempting to connect to " + system.websocket_url);
   try {
-    try{
-      ahrsWS.onmessage = function () {};
-      ahrsWS.checkActive = function () {};
-      ahrsWS.onerror = function () {};
-    }catch (error) {}
+    try {
+      ahrsWS.onmessage = function() {};
+      ahrsWS.checkActive = function() {};
+      ahrsWS.onerror = function() {};
+    } catch (error) {}
     removeAllClients();
     // ahrsWS.close();
   } catch (error) {
@@ -172,18 +175,21 @@ function ahrsWSInit() {
 
   ahrsWS.onclose = function(e) {
     ahrsWS.closed = true;
-    var name = e.target.url.substr(e.target.url.lastIndexOf('/') + 1);
+    var name = e.target.url.substr(e.target.url.lastIndexOf("/") + 1);
     if (e.wasClean) {
-      console.log("Websocket \"" + name + "\" closed cleanly.");
+      console.log('Websocket "' + name + '" closed cleanly.');
     } else {
-      console.warn("Websocket \"" + name + "\" did not closed cleanly.");
+      console.warn('Websocket "' + name + '" did not closed cleanly.');
     }
     console.log("Reconnecting after 0.5 seconds:");
     system.ahrs.inactiveCounter++;
-    if(system.allowReload && system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount){
-      console.log('Reboot!');
+    if (
+      system.allowReload &&
+      system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount
+    ) {
+      console.log("Reboot!");
       doRefresh();
-    }else{
+    } else {
       setTimeout(function() {
         ahrsWSInit();
       }, 500);
@@ -194,20 +200,22 @@ function ahrsWSInit() {
     system.checkWS = false;
     ahrsWS.closed = true;
     ahrsWS.close();
-  }
+  };
 
   ahrsWS.checkActive = function() {
-    if (system.checkWS === false || ahrsWS.closed === true)
-      return;
+    if (system.checkWS === false || ahrsWS.closed === true) return;
     // Get the current time
     var d = new Date().getTime();
     // If it has been too long since a message, restart the connection
     if (d - system.ahrs.updateTimeout > ahrsWS.lastMessage) {
       ahrsWS.close();
-      if(system.allowReload && system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount){
-        console.log('Reboot!');
+      if (
+        system.allowReload &&
+        system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount
+      ) {
+        console.log("Reboot!");
         doRefresh();
-      }else{
+      } else {
         console.log("Reconnecting after 0.5 seconds:");
         setTimeout(function() {
           ahrsWS = undefined;
@@ -219,7 +227,7 @@ function ahrsWSInit() {
 
   ahrsWS.onmessage = function(message) {
     ahrsWS.lastMessage = new Date().getTime();
-    $('#message_flag').toggleClass('bright');
+    $("#message_flag").toggleClass("bright");
     if (message.isTrusted) {
       system.ahrs.inactiveCounter = 0;
       var data = JSON.parse(message.data);
@@ -229,7 +237,15 @@ function ahrsWSInit() {
       switch (data.GPSFixQuality) {
         case 2: // WAAS
         case 1: // 2D / 3D
-          if (data.GPSSatellitesSeen < 7 || data.GPSLatitude == 0.0 || data.GPSLongitude == 0.0 || data.GPSNACp < 7 || data.GPSHorizontalAccuracy > 100 || data.GPSVerticalAccuracy > 500 /*|| data.GPSPositionSampleRate === 0*/ ) {
+          if (
+            data.GPSSatellitesSeen < 7 ||
+            data.GPSLatitude == 0.0 ||
+            data.GPSLongitude == 0.0 ||
+            data.GPSNACp < 7 ||
+            data.GPSHorizontalAccuracy > 100 ||
+            data.GPSVerticalAccuracy >
+              500 /*|| data.GPSPositionSampleRate === 0*/
+          ) {
             // Data is invalid for some reason
             break;
           }
@@ -259,49 +275,60 @@ function ahrsWSInit() {
           }
           break;
         case SOURCE.BARO:
-          if (data.BaroVerticalSpeed !== 99999 && data.BaroPressureAltitude !== 99999) {
+          if (
+            data.BaroVerticalSpeed !== 99999 &&
+            data.BaroPressureAltitude !== 99999
+          ) {
             //vspeedTape.update(data.BaroVerticalSpeed * conv.fps2mps);   // Given in f/s -> 100ft/min  BaroVerticalSpeed GPSVerticalSpeed
             altTape.update(data.BaroPressureAltitude * conv.ft2m); // BaroPressureAltitude BaroPressureAltitude GPSAltitudeMSL
           }
           break;
       }
 
-      if (data.BaroVerticalSpeed !== 99999 && data.BaroPressureAltitude !== 99999) {
+      if (
+        data.BaroVerticalSpeed !== 99999 &&
+        data.BaroPressureAltitude !== 99999
+      ) {
         vspeedTape.update(data.BaroVerticalSpeed * conv.fps2mps);
       }
 
       if (data.AHRSStatus !== 1) {
         ahrsTape.update(data.AHRSPitch, data.AHRSRoll);
-        slipSkid.update(data.AHRSSlipSkid)
+        slipSkid.update(data.AHRSSlipSkid);
         gMeter.update(data.AHRSGLoad);
       }
 
-      if (data.AHRSTurnRate != 3276.7){
+      if (data.AHRSTurnRate != 3276.7) {
         turnCoordinator.update(data.AHRSTurnRate);
-      }else{
+      } else {
         turnCoordinator.update(0);
       }
 
-      if (presist.overheat === false && system_status.CPUTemp > system.cpu_temp_warn) {
+      if (
+        presist.overheat === false &&
+        system_status.CPUTemp > system.cpu_temp_warn
+      ) {
         presist.overheat = true;
-        $('#overheat_flag').css('display', 'block');
-      } else if (presist.overheat === true && system_status.CPUTemp < system.cpu_temp_warn) {
+        $("#overheat_flag").css("display", "block");
+      } else if (
+        presist.overheat === true &&
+        system_status.CPUTemp < system.cpu_temp_warn
+      ) {
         presist.overheat = false;
-        $('#overheat_flag').css('display', 'none');
+        $("#overheat_flag").css("display", "none");
       }
 
-
       //console.log(data);
-
     } else {
       console.log("Invalid data");
     }
-
   };
 
   ahrsWS.onerror = function(message) {
-    var name = message.target.url.substr(message.target.url.lastIndexOf('/') + 1);
-    console.error("Websocket \"" + name + "\" had an error.");
+    var name = message.target.url.substr(
+      message.target.url.lastIndexOf("/") + 1
+    );
+    console.error('Websocket "' + name + '" had an error.');
     ahrsWS.close();
   };
 }
@@ -337,11 +364,11 @@ function fmuInit() {
 
   fmuWS.onclose = function(e) {
     fmuWS.closed = true;
-    var name = e.target.url.substr(e.target.url.lastIndexOf('/') + 1);
+    var name = e.target.url.substr(e.target.url.lastIndexOf("/") + 1);
     if (e.wasClean) {
-      console.log("Websocket \"" + name + "\" closed cleanly.");
+      console.log('Websocket "' + name + '" closed cleanly.');
     } else {
-      console.warn("Websocket \"" + name + "\" did not closed cleanly.");
+      console.warn('Websocket "' + name + '" did not closed cleanly.');
     }
     console.log("Reconnecting after 0.5 seconds:");
     setTimeout(function() {
@@ -350,8 +377,7 @@ function fmuInit() {
   };
 
   fmuWS.checkActive = function() {
-    if (system.checkWS === false || fmuWS.closed === true)
-      return;
+    if (system.checkWS === false || fmuWS.closed === true) return;
     // If it has been too long since a message, restart the connection
     if (new Date().getTime() - system.fmu.updateTimeout > fmuWS.lastMessage) {
       fmuWS.close();
@@ -360,7 +386,7 @@ function fmuInit() {
 
   fmuWS.onmessage = function(message) {
     fmuWS.lastMessage = new Date().getTime();
-    $('#message_flag').toggleClass('bright');
+    $("#message_flag").toggleClass("bright");
     if (message.isTrusted) {
       var data = JSON.parse(message.data);
       headingTape.updateFMU(data.hdg);
@@ -370,137 +396,190 @@ function fmuInit() {
   };
 
   fmuWS.onerror = function(message) {
-    var name = message.target.url.substr(message.target.url.lastIndexOf('/') + 1);
-    console.error("Websocket \"" + name + "\" had an error.");
+    var name = message.target.url.substr(
+      message.target.url.lastIndexOf("/") + 1
+    );
+    console.error('Websocket "' + name + '" had an error.');
     fmuWS.close();
   };
-
 }
 
 // NOTICE: ALL INPUTS TO UPDATE FUNCTIONS ARE TO BE IN SI UNITS
 
 function initButtons() {
-  let buttons = $('.number_button');
-  for(let i = 0; i < buttons.length; i++){
+  let buttons = $(".number_button");
+  for (let i = 0; i < buttons.length; i++) {
     let button = $(buttons[i]);
-    $(buttons[i]).click((event) => {
+    $(buttons[i]).click(event => {
       reportButton($(event.currentTarget).html());
     });
   }
 
-  $('#settings_icon').mouseup(() => {
+  $("#settings_icon").mouseup(() => {
     // Make the menu visible
-    $('#settings_menu').removeClass('hidden');
-    $('#settings_overlay').removeClass('hidden');
+    $("#settings_menu").removeClass("hidden");
+    $("#settings_overlay").removeClass("hidden");
 
     // Now that it is visible, set its scroll back to 0 so that
     // the default icons are visible first
-    $('#settings_menu')[0].scrollLeft=0;
-    $('#settings_menu')[0].scrollTop=0;
+    $("#settings_menu")[0].scrollLeft = 0;
+    $("#settings_menu")[0].scrollTop = 0;
   });
 
   $(document).keyup(function(e) {
-    if (e.keyCode === 27){
-      $('#settings_menu').addClass('hidden');
-      $('#settings_overlay').addClass('hidden');
+    if (e.keyCode === 27) {
+      $("#settings_menu").addClass("hidden");
+      $("#settings_overlay").addClass("hidden");
       hideBaroInput();
     }
   });
 
-  $('#settings_overlay').click(() => {
-    $('#settings_menu').addClass('hidden');
-    $('#settings_overlay').addClass('hidden');
+  $("#settings_overlay").click(() => {
+    $("#settings_menu").addClass("hidden");
+    $("#settings_overlay").addClass("hidden");
     hideBaroInput();
   });
 
   // Set Pitch On-Click
-  $('#align_ahrs').click(function() {
+  $("#align_ahrs").click(function() {
     var r = confirm("Center AHRS?");
     if (r == true) {
-      post('cageAHRS');
+      post("cageAHRS");
     }
   });
 
-  $('#calibrate_gyro').click(function() {
+  $("#calibrate_gyro").click(function() {
     var r = confirm("Calibrate GYRO?");
     if (r == true) {
-      post('calibrateAHRS');
+      post("calibrateAHRS");
     }
   });
 
-  var baro_input_value = ['2','9','9','2'];
+  var baro_input_value = ["2", "9", "9", "2"];
   var pre_input = true;
   var index = 0;
-  function updateBaroPressure(push = false){
-    if(push && (baro_input_value[0] === '' || baro_input_value[1] == '' || baro_input_value[2] == '' || baro_input_value[3] == '')){
-      system.sendNotification(`Please enter a valid altimeter setting`, 2000, color='red');
+  function updateBaroPressure(push = false) {
+    if (
+      push &&
+      (baro_input_value[0] === "" ||
+        baro_input_value[1] == "" ||
+        baro_input_value[2] == "" ||
+        baro_input_value[3] == "")
+    ) {
+      system.sendNotification(
+        `Please enter a valid altimeter setting`,
+        2000,
+        (color = "red")
+      );
       return false;
     }
-    let press_str = '' + baro_input_value[0] + baro_input_value[1] + '.' + baro_input_value[2] + baro_input_value[3];
+    let press_str =
+      "" +
+      baro_input_value[0] +
+      baro_input_value[1] +
+      "." +
+      baro_input_value[2] +
+      baro_input_value[3];
     let val = parseFloat(press_str);
-    if(push || index == 4){
-      if(val < 26){
-        system.sendNotification(`Altimeter setting too low`, 2000, color='red');
+    if (push || index == 4) {
+      if (val < 26) {
+        system.sendNotification(
+          `Altimeter setting too low`,
+          2000,
+          (color = "red")
+        );
         val = 26;
-        baro_input_value = ['2','6','0','0'];
-        press_str = '' + baro_input_value[0] + baro_input_value[1] + '.' + baro_input_value[2] + baro_input_value[3];
-        $('#altimeter_display').html(press_str);
+        baro_input_value = ["2", "6", "0", "0"];
+        press_str =
+          "" +
+          baro_input_value[0] +
+          baro_input_value[1] +
+          "." +
+          baro_input_value[2] +
+          baro_input_value[3];
+        $("#altimeter_display").html(press_str);
         return false;
-      }else if(val > 32){
-        system.sendNotification(`Altimeter setting too high`, 2000, color='red');
+      } else if (val > 32) {
+        system.sendNotification(
+          `Altimeter setting too high`,
+          2000,
+          (color = "red")
+        );
         val = 32;
-        baro_input_value = ['3','2','0','0'];
-        press_str = '' + baro_input_value[0] + baro_input_value[1] + '.' + baro_input_value[2] + baro_input_value[3];
-        $('#altimeter_display').html(press_str);
+        baro_input_value = ["3", "2", "0", "0"];
+        press_str =
+          "" +
+          baro_input_value[0] +
+          baro_input_value[1] +
+          "." +
+          baro_input_value[2] +
+          baro_input_value[3];
+        $("#altimeter_display").html(press_str);
         return false;
       }
     }
-    $('#altimeter_display').html(press_str);
-    if(push){
+    $("#altimeter_display").html(press_str);
+    if (push) {
       updateKollsmanSetting(val);
     }
     return true;
   }
 
-  function updateKollsmanSetting(kollsman){
+  function updateKollsmanSetting(kollsman) {
     altTape.kollsman = kollsman;
-    system.sendNotification(`Updated altimeter to ${altTape.kollsman}inHg`, 4000);
-    if(altTape.source == SOURCE.BARO) {
-        $('#alt_annun_text').html('Baro Altitude <span>' + altTape.kollsman + 'inHg, ' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
+    system.sendNotification(
+      `Updated altimeter to ${altTape.kollsman}inHg`,
+      4000
+    );
+    if (altTape.source == SOURCE.BARO) {
+      $("#alt_annun_text").html(
+        "Baro Altitude <span>" +
+          altTape.kollsman +
+          "inHg, " +
+          altTape.unitPrefix +
+          ", " +
+          vspeedTape.unitPrefix +
+          "</span>"
+      );
     }
   }
 
-  function resetBaroInput(fromCurrent=false){
-    if(fromCurrent){
+  function resetBaroInput(fromCurrent = false) {
+    if (fromCurrent) {
       let tmp = altTape.kollsman;
-      baro_input_value = [Math.floor(tmp/10 % 10), Math.floor(tmp % 10), Math.floor(tmp*10 % 10), Math.floor(tmp*100 % 10)];
-    }else{
-      baro_input_value = ['2','9','9','2'];
+      baro_input_value = [
+        Math.floor((tmp / 10) % 10),
+        Math.floor(tmp % 10),
+        Math.floor((tmp * 10) % 10),
+        Math.floor((tmp * 100) % 10)
+      ];
+    } else {
+      baro_input_value = ["2", "9", "9", "2"];
     }
-    
+
     updateBaroPressure();
     pre_input = true;
     index = 0;
   }
 
-  function showBaroInput(){
-    $('#settings_popup').removeClass('hidden');
-    resetBaroInput(fromCurrent=true)
+  function showBaroInput() {
+    $("#settings_popup").removeClass("hidden");
+    resetBaroInput((fromCurrent = true));
   }
 
-  function hideBaroInput(){
-    $('#settings_popup').addClass('hidden');
-    resetBaroInput(fromCurrent=true)
+  function hideBaroInput() {
+    $("#settings_popup").addClass("hidden");
+    resetBaroInput((fromCurrent = true));
   }
 
-  function addValue(val){
-    if(pre_input){
-      baro_input_value = ['','','',''];
+  function addValue(val) {
+    if (pre_input) {
+      baro_input_value = ["", "", "", ""];
       pre_input = false;
     }
     baro_input_value[index] = val;
     index += 1;
-    if(index === 4){
+    if (index === 4) {
       pre_input = true;
       index = 0;
     }
@@ -509,54 +588,54 @@ function initButtons() {
   }
 
   function reportButton(button) {
-    switch(button){
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
-      case '0':
+    switch (button) {
+      case "1":
+      case "2":
+      case "3":
+      case "4":
+      case "5":
+      case "6":
+      case "7":
+      case "8":
+      case "9":
+      case "0":
         addValue(button);
         break;
-      case 'Clr':
-          pre_redix = false;
-          baro_input_value = ['','','',''];
-          index = 0;
-          updateBaroPressure();
-          break;
-      case 'Ent':
-          if(updateBaroPressure(push=true)){
-            hideBaroInput();
-          }
-          break;
+      case "Clr":
+        pre_redix = false;
+        baro_input_value = ["", "", "", ""];
+        index = 0;
+        updateBaroPressure();
+        break;
+      case "Ent":
+        if (updateBaroPressure((push = true))) {
+          hideBaroInput();
+        }
+        break;
     }
   }
 
-  $('#update_baro').click(() => {
+  $("#update_baro").click(() => {
     showBaroInput();
   });
 
-  $('#set_std_baro').click(() => {
+  $("#set_std_baro").click(() => {
     updateKollsmanSetting(29.92);
   });
-  $('#force_update').click(() => {
-    window.location.reload(true)
+  $("#force_update").click(() => {
+    window.location.reload(true);
   });
-  $('#simulate_tag').click(function() {
+  $("#simulate_tag").click(function() {
     if (system.simulate === true) {
       system.simulate = false;
       system.enable_ahrs_ws = true;
       initWS();
-      $('#simulate_tag').css('display', 'none');
+      $("#simulate_tag").css("display", "none");
     }
   });
 
   // Set altitude button up
-  $('#alt_annun').click(function() {
+  $("#alt_annun").click(function() {
     var loc = 0;
     for (var i = 0; i < altTape.possibleSources.length; i++) {
       if (altTape.possibleSources[i] === altTape.source) {
@@ -571,41 +650,53 @@ function initButtons() {
     altTape.source = altTape.possibleSources[loc];
     switch (altTape.source) {
       case SOURCE.BARO:
-        $('#alt_annun_text').html('Baro Altitude <span>' + altTape.kollsman + 'inHg, ' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
+        $("#alt_annun_text").html(
+          "Baro Altitude <span>" +
+            altTape.kollsman +
+            "inHg, " +
+            altTape.unitPrefix +
+            ", " +
+            vspeedTape.unitPrefix +
+            "</span>"
+        );
         break;
       case SOURCE.GPS:
-        $('#alt_annun_text').html('GPS Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
+        $("#alt_annun_text").html(
+          "GPS Altitude <span>" +
+            altTape.unitPrefix +
+            ", " +
+            vspeedTape.unitPrefix +
+            "</span>"
+        );
         break;
       case SOURCE.INPUT:
         return;
-        /*$('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');*/
-        // TODO: Implement user defined altimeter setting
-        //break;
+      /*$('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');*/
+      // TODO: Implement user defined altimeter setting
+      //break;
     }
     vspeedTape.source = altTape.source;
   });
 
   system.checkWS = true;
   system.smooth = true;
-  $('#sat_count').click(function() {
+  $("#sat_count").click(function() {
     var r = confirm((system.smooth ? "Disable" : "Enable") + " Smoothing?");
     if (r == false) {
       r = confirm((system.checkWS ? "Disable" : "Enable") + " Check WS?");
-      if (r == true)
-        system.checkWS = !system.checkWS;
+      if (r == true) system.checkWS = !system.checkWS;
     } else {
       system.smooth = !system.smooth;
       if (system.smooth) {
-        html.css('--ease_time', '0.2s');
-        html.css('--hdg_ease_time', '0.2s');
-        html.css('--aux_ease_time', '0.2s');
+        html.css("--ease_time", "0.2s");
+        html.css("--hdg_ease_time", "0.2s");
+        html.css("--aux_ease_time", "0.2s");
       } else {
-        html.css('--ease_time', '0s');
-        html.css('--hdg_ease_time', '0s');
-        html.css('--aux_ease_time', '0s');
+        html.css("--ease_time", "0s");
+        html.css("--hdg_ease_time", "0s");
+        html.css("--aux_ease_time", "0s");
       }
     }
-
   });
 }
 
@@ -613,22 +704,21 @@ var currentHeading = 0;
 var updateHeading = 0;
 
 function generateTapes() {
-
   $("div.volitile").remove();
 
   // Define height and width characteristics
-  speedTape.width = $('#speed_tape').outerWidth();
-  speedTape.height = $('#speed_tape').outerHeight();
-  altTape.width = $('#alt_tape').outerWidth();
-  altTape.height = $('#alt_tape').outerHeight();
-  vspeedTape.width = $('#alt_vspeed').outerWidth();
-  vspeedTape.height = $('#alt_vspeed').outerHeight();
-  ahrsTape.width = $('#pitch_indicator').outerWidth();
-  ahrsTape.height = $('#pitch_indicator').outerHeight();
-  headingTape.height = $('#heading_tape').outerHeight();
-  headingTape.width = $('#heading_tape').outerWidth();
-  gMeter.height = $('#speed_tape').outerHeight();
-  gMeter.width = $('#speed_tape').outerWidth();
+  speedTape.width = $("#speed_tape").outerWidth();
+  speedTape.height = $("#speed_tape").outerHeight();
+  altTape.width = $("#alt_tape").outerWidth();
+  altTape.height = $("#alt_tape").outerHeight();
+  vspeedTape.width = $("#alt_vspeed").outerWidth();
+  vspeedTape.height = $("#alt_vspeed").outerHeight();
+  ahrsTape.width = $("#pitch_indicator").outerWidth();
+  ahrsTape.height = $("#pitch_indicator").outerHeight();
+  headingTape.height = $("#heading_tape").outerHeight();
+  headingTape.width = $("#heading_tape").outerWidth();
+  gMeter.height = $("#speed_tape").outerHeight();
+  gMeter.width = $("#speed_tape").outerWidth();
 
   // ------------------------------------------------------------------------ //
   // Init conversions                                                         //
@@ -637,102 +727,115 @@ function generateTapes() {
   // Speed tape
   switch (speedTape.units) {
     case UNITS.KTS:
-      speedTape.unitPrefix = 'KTS';
+      speedTape.unitPrefix = "KTS";
       speedTape.conv = conv.mps2kts;
       break;
     case UNITS.MPH:
-      speedTape.unitPrefix = 'MPH';
+      speedTape.unitPrefix = "MPH";
       speedTape.conv = conv.mps2mph;
       break;
     case UNITS.MPS:
-      speedTape.unitPrefix = 'M/S';
+      speedTape.unitPrefix = "M/S";
       speedTape.conv = 1;
       break;
     case UNITS.FPS:
-      speedTape.unitPrefix = 'Ft/S';
+      speedTape.unitPrefix = "Ft/S";
       speedTape.conv = conv.mps2fps;
       break;
     case UNITS.FPM:
-      speedTape.unitPrefix = 'Ft/M';
+      speedTape.unitPrefix = "Ft/M";
       speedTape.conv = conv.mps2fpm;
       break;
     case UNITS.KPH:
-      speedTape.unitPrefix = 'KPH';
+      speedTape.unitPrefix = "KPH";
       speedTape.conv = conv.mps2kph;
       break;
     case UNITS.MPM:
-      speedTape.unitPrefix = 'M/Min';
+      speedTape.unitPrefix = "M/Min";
       speedTape.conv = conv.mps2mpm;
       break;
     default:
       console.error("Cannot use speed unit: " + speedTape.units);
   }
-  speedTape.lowerSpeed = Math.round(speedTape.conv * speedTape.lowerSpeed * conv.mph2mps);
-  speedTape.upperSpeed = Math.round(speedTape.conv * speedTape.upperSpeed * conv.mph2mps);
+  speedTape.lowerSpeed = Math.round(
+    speedTape.conv * speedTape.lowerSpeed * conv.mph2mps
+  );
+  speedTape.upperSpeed = Math.round(
+    speedTape.conv * speedTape.upperSpeed * conv.mph2mps
+  );
   for (var i = 0; i < speedTape.speeds.length; i++) {
-    speedTape.speeds[i].start = Math.round(speedTape.speeds[i].start * conv.mph2mps * speedTape.conv);
-    speedTape.speeds[i].end = Math.round(speedTape.speeds[i].end * conv.mph2mps * speedTape.conv);
+    speedTape.speeds[i].start = Math.round(
+      speedTape.speeds[i].start * conv.mph2mps * speedTape.conv
+    );
+    speedTape.speeds[i].end = Math.round(
+      speedTape.speeds[i].end * conv.mph2mps * speedTape.conv
+    );
   }
-  $('#speed_annun_text').html('GPS GS ' + speedTape.unitPrefix);
+  $("#speed_annun_text").html("GPS GS " + speedTape.unitPrefix);
 
   // Alt tape
   switch (altTape.units) {
     case UNITS.FEET:
-      altTape.unitPrefix = 'Feet';
+      altTape.unitPrefix = "Feet";
       altTape.conv = conv.m2ft;
       break;
     case UNITS.METERS:
-      altTape.unitPrefix = 'Meters';
+      altTape.unitPrefix = "Meters";
       altTape.conv = 1;
       break;
     case UNITS.MILES:
-      altTape.unitPrefix = 'Mils';
+      altTape.unitPrefix = "Mils";
       altTape.conv = conv.m2mi;
       break;
     case UNITS.NAUTICLE_MILES:
-      altTape.unitPrefix = 'N Miles';
+      altTape.unitPrefix = "N Miles";
       altTape.conv = conv.m2nmi;
       break;
     default:
       console.error("Cannot use altitude unit: " + altTape.units);
   }
 
-
   // VSpeed tape
   switch (vspeedTape.units) {
     case UNITS.KTS:
-      vspeedTape.unitPrefix = 'KTS';
+      vspeedTape.unitPrefix = "KTS";
       vspeedTape.conv = conv.mps2kts;
       break;
     case UNITS.MPH:
-      vspeedTape.unitPrefix = 'MPH';
+      vspeedTape.unitPrefix = "MPH";
       vspeedTape.conv = conv.mps2mph;
       break;
     case UNITS.MPS:
-      vspeedTape.unitPrefix = 'M/S';
+      vspeedTape.unitPrefix = "M/S";
       vspeedTape.conv = 1;
       break;
     case UNITS.FPS:
-      vspeedTape.unitPrefix = 'FPS';
+      vspeedTape.unitPrefix = "FPS";
       vspeedTape.conv = conv.mps2fps;
       break;
     case UNITS.FPM:
-      vspeedTape.unitPrefix = 'FPM';
+      vspeedTape.unitPrefix = "FPM";
       vspeedTape.conv = conv.mps2fpm;
       break;
     case UNITS.KPH:
-      vspeedTape.unitPrefix = 'KPH';
+      vspeedTape.unitPrefix = "KPH";
       vspeedTape.conv = conv.mps2kph;
       break;
     case UNITS.MPM:
-      vspeedTape.unitPrefix = 'M/Min';
+      vspeedTape.unitPrefix = "M/Min";
       vspeedTape.conv = conv.mps2mpm;
       break;
     default:
       console.error("Cannot use vspeed unit: " + vspeedTape.units);
   }
 
-  $('#alt_annun_text span').html(altTape.kollsman + 'inHg, ' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix);
+  $("#alt_annun_text span").html(
+    altTape.kollsman +
+      "inHg, " +
+      altTape.unitPrefix +
+      ", " +
+      vspeedTape.unitPrefix
+  );
 
   // ------------------------------------------------------------------------ //
   // Generate speed tape                                                      //
@@ -750,93 +853,148 @@ function generateTapes() {
   };
   // Add all speeds as text
   for (i = speedTape.upperSpeed; i >= speedTape.lowerSpeed; i -= space) {
-    var val = $('#speed_tape_text').append('<div class="speed_tape_index volitile">' + i + '</div>');
+    var val = $("#speed_tape_text").append(
+      '<div class="speed_tape_index volitile">' + i + "</div>"
+    );
   }
   // Calculate speed tape total height
-  speedTape.total_height = number_height * (speedTape.upperSpeed - speedTape.lowerSpeed) / space;
+  speedTape.total_height =
+    (number_height * (speedTape.upperSpeed - speedTape.lowerSpeed)) / space;
   // Calculate tick offset based on text size
-  speedTape.offset = parseInt($('#speed_tape_text').css('margin-top').replace('px', '')) + parseInt($('#speed_tape_text').css('line-height').replace('px', '')) / 2 + 4;
+  speedTape.offset =
+    parseInt(
+      $("#speed_tape_text")
+        .css("margin-top")
+        .replace("px", "")
+    ) +
+    parseInt(
+      $("#speed_tape_text")
+        .css("line-height")
+        .replace("px", "")
+    ) /
+      2 +
+    4;
 
   // Loop through each speed and add color bars
   for (i = 0; i < speedTape.speeds.length; i++) {
     // Grab the current color bar from config
     var bar = speedTape.speeds[i];
     // Generate the color bar
-    var color_bar = $('<div/>', {
-      class: 'speed_tape_color_bar volitile',
+    var color_bar = $("<div/>", {
+      class: "speed_tape_color_bar volitile"
     });
     // Change some settings based on where the color bar is located
     if (bar.start === speedTape.lowerSpeed) {
-      color_bar.css('height', (bar.end - bar.start) * speedTape.pixels_per_number + speedTape.offset);
-      color_bar.css('top', (speedTape.upperSpeed - bar.end) * speedTape.pixels_per_number + speedTape.offset);
+      color_bar.css(
+        "height",
+        (bar.end - bar.start) * speedTape.pixels_per_number + speedTape.offset
+      );
+      color_bar.css(
+        "top",
+        (speedTape.upperSpeed - bar.end) * speedTape.pixels_per_number +
+          speedTape.offset
+      );
     } else if (bar.end === speedTape.upperSpeed) {
-      color_bar.css('height', (bar.end - bar.start) * speedTape.pixels_per_number + speedTape.offset);
-      color_bar.css('top', (speedTape.upperSpeed - bar.end) * speedTape.pixels_per_number);
+      color_bar.css(
+        "height",
+        (bar.end - bar.start) * speedTape.pixels_per_number + speedTape.offset
+      );
+      color_bar.css(
+        "top",
+        (speedTape.upperSpeed - bar.end) * speedTape.pixels_per_number
+      );
     } else {
-      color_bar.css('height', (bar.end - bar.start) * speedTape.pixels_per_number);
-      color_bar.css('top', (speedTape.upperSpeed - bar.end) * speedTape.pixels_per_number + speedTape.offset);
+      color_bar.css(
+        "height",
+        (bar.end - bar.start) * speedTape.pixels_per_number
+      );
+      color_bar.css(
+        "top",
+        (speedTape.upperSpeed - bar.end) * speedTape.pixels_per_number +
+          speedTape.offset
+      );
     }
     // Set the color bar colors and parameters
     switch (bar.color) {
       case COLORS.GREEN:
-        color_bar.css('background-color', '#0F0');
+        color_bar.css("background-color", "#0F0");
         break;
       case COLORS.YELLOW:
-        color_bar.css('background-color', '#FF0');
+        color_bar.css("background-color", "#FF0");
         break;
       case COLORS.RED:
-        color_bar.css('background-color', '#F00');
+        color_bar.css("background-color", "#F00");
         break;
       case COLORS.WHITE:
-        color_bar.css('background-color', '#FFF');
-        color_bar.css('width', '10px');
-        color_bar.css('z-index', '-1');
+        color_bar.css("background-color", "#FFF");
+        color_bar.css("width", "10px");
+        color_bar.css("z-index", "-1");
         break;
     }
     // Append the color bar to the tick holder
-    $('#speed_tape_tick_holder').append(color_bar);
+    $("#speed_tape_tick_holder").append(color_bar);
   }
   // Generte the ticks for the speed tape
   var tick_offset = 4;
   for (i = speedTape.upperSpeed; i >= speedTape.lowerSpeed; i -= tick) {
     // Generate a tick
-    var tick_div = $('<div/>', {
-      class: 'h_tick volitile',
+    var tick_div = $("<div/>", {
+      class: "h_tick volitile"
     });
     // Set the tick's location
-    tick_div.css('top', i * speedTape.pixels_per_number + speedTape.offset - tick_offset);
+    tick_div.css(
+      "top",
+      i * speedTape.pixels_per_number + speedTape.offset - tick_offset
+    );
     // If the current tick has a number, make it wider
     if (i % space === 0) {
-      tick_div.css('width', '150%');
+      tick_div.css("width", "150%");
     }
     // Append the tick to the tick holder
-    $('#speed_tape_tick_holder').append(tick_div);
+    $("#speed_tape_tick_holder").append(tick_div);
     // Update the total height
-    speedTape.total_height = Math.max(speedTape.total_height, i * speedTape.pixels_per_number + speedTape.offset - tick_offset);
+    speedTape.total_height = Math.max(
+      speedTape.total_height,
+      i * speedTape.pixels_per_number + speedTape.offset - tick_offset
+    );
   }
-  $('#speed_tape_scroll').append('<div id="speed_fmu" class="fmu_h volitile"></div>');
+  $("#speed_tape_scroll").append(
+    '<div id="speed_fmu" class="fmu_h volitile"></div>'
+  );
 
   // Define the speed tape update method
   speedTape.update = function(s, override) {
     // Unit conversion
     s *= speedTape.conv;
     // Position the scroll div
-    $('#speed_tape_scroll').css('top', s * speedTape.pixels_per_number - speedTape.total_height + system.ahrs.height / 2 - 2);
+    $("#speed_tape_scroll").css(
+      "top",
+      s * speedTape.pixels_per_number -
+        speedTape.total_height +
+        system.ahrs.height / 2 -
+        2
+    );
     // Round speed for text display
     s = Math.round(s);
     // Pad and display speed in the speed box
     if (s < 10) {
-      $('#speed_counter_text').html('00' + s);
+      $("#speed_counter_text").html("00" + s);
     } else if (s < 100) {
-      $('#speed_counter_text').html('0' + s);
+      $("#speed_counter_text").html("0" + s);
     } else {
-      $('#speed_counter_text').html(s);
+      $("#speed_counter_text").html(s);
     }
     if (!isNaN(speedTape.fmu_speed) && speedTape.fmu_speed != null) {
-      $('#speed_fmu').css('display', 'block');
-      $('#speed_fmu').css('bottom', (-(speedTape.upperSpeed - speedTape.fmu_speed) * speedTape.pixels_per_number - 30) + 'px');
+      $("#speed_fmu").css("display", "block");
+      $("#speed_fmu").css(
+        "bottom",
+        -(speedTape.upperSpeed - speedTape.fmu_speed) *
+          speedTape.pixels_per_number -
+          30 +
+          "px"
+      );
     } else {
-      $('#speed_fmu').css('display', 'none');
+      $("#speed_fmu").css("display", "none");
     }
 
     checkIn(AHRS_TYPE.SPEED, override);
@@ -857,66 +1015,88 @@ function generateTapes() {
   altTape.updateFMU = function(alt) {
     altTape.fmu_alt = alt;
   };
-  $('#alt_tape_scroll').append('<div id="alt_fmu" class="fmu_h volitile"></div>');
+  $("#alt_tape_scroll").append(
+    '<div id="alt_fmu" class="fmu_h volitile"></div>'
+  );
   // Loop through altitudes (0 - 20,000 ft)
   for (i = 2000; i >= 0; i -= 10) {
     // Generate a tick
-    var tick_div = $('<div/>', {
-      class: 'h_tick alt_tick volitile',
+    var tick_div = $("<div/>", {
+      class: "h_tick alt_tick volitile"
     });
     // Set the tick location
-    tick_div.css('top', i * altTape.pixels_per_number + altTape.offset - tick_offset);
+    tick_div.css(
+      "top",
+      i * altTape.pixels_per_number + altTape.offset - tick_offset
+    );
     // If the tick is an increment of 50, make it wider
     if (i % 50 === 0) {
-      tick_div.css('width', '175%');
+      tick_div.css("width", "175%");
     }
     // Add the tick to the tick holder
-    $('#alt_tape_tick_holder').append(tick_div);
+    $("#alt_tape_tick_holder").append(tick_div);
     // Update the total height
-    altTape.total_height = Math.max(altTape.total_height, i * altTape.pixels_per_number + altTape.offset - tick_offset);
+    altTape.total_height = Math.max(
+      altTape.total_height,
+      i * altTape.pixels_per_number + altTape.offset - tick_offset
+    );
   }
   // Add the text for each altitude
-  $('#alt_tape_text').append('<div class="alt_tape_index volitile"></div>');
+  $("#alt_tape_text").append('<div class="alt_tape_index volitile"></div>');
   for (i = 1950; i > 0; i -= 50) {
-    $('#alt_tape_text').append('<div class="alt_tape_index volitile">' + i + '0</div>');
+    $("#alt_tape_text").append(
+      '<div class="alt_tape_index volitile">' + i + "0</div>"
+    );
   }
-  $('#alt_tape_text').append('<div class="alt_tape_index volitile">0</div>');
+  $("#alt_tape_text").append('<div class="alt_tape_index volitile">0</div>');
 
   // Define the altitude tape update method
   altTape.update = function(alt, override) {
     // Alt in meters at this time. Need to apply Kollsman setting:
-    alt = -44307.6 * (1 - 0.523779 * Math.pow(altTape.kollsman,0.190284)) + alt;
+    alt =
+      -44307.6 * (1 - 0.523779 * Math.pow(altTape.kollsman, 0.190284)) + alt;
     // Unit conversion
     alt *= altTape.conv;
     // Position the scroll div
-    $('#alt_tape_scroll').css('top', alt / 10 * altTape.pixels_per_number - altTape.total_height + system.ahrs.height / 2 - 2);
+    $("#alt_tape_scroll").css(
+      "top",
+      (alt / 10) * altTape.pixels_per_number -
+        altTape.total_height +
+        system.ahrs.height / 2 -
+        2
+    );
     // Round the altitude for text display
     alt = Math.round(alt);
     // Pad and display the altitude in the altitude box
-    if(alt <= -1000){
-      $('#alt_counter_text').html(Math.abs(alt));
-    } else if(alt <= -100){
-      $('#alt_counter_text').html('-' + Math.abs(alt));
-    } else if(alt <= -10){
-      $('#alt_counter_text').html('-0' + Math.abs(alt));
-    } else if(alt < 0){
-      $('#alt_counter_text').html('-00' + Math.abs(alt));
+    if (alt <= -1000) {
+      $("#alt_counter_text").html(Math.abs(alt));
+    } else if (alt <= -100) {
+      $("#alt_counter_text").html("-" + Math.abs(alt));
+    } else if (alt <= -10) {
+      $("#alt_counter_text").html("-0" + Math.abs(alt));
+    } else if (alt < 0) {
+      $("#alt_counter_text").html("-00" + Math.abs(alt));
     } else if (alt < 10) {
-      $('#alt_counter_text').html('000' + alt);
+      $("#alt_counter_text").html("000" + alt);
     } else if (alt < 100) {
-      $('#alt_counter_text').html('00' + alt);
+      $("#alt_counter_text").html("00" + alt);
     } else if (alt < 1000) {
-      $('#alt_counter_text').html('0' + alt);
-    } else if (alt < 10000){
-      $('#alt_counter_text').html(alt);
+      $("#alt_counter_text").html("0" + alt);
+    } else if (alt < 10000) {
+      $("#alt_counter_text").html(alt);
     } else {
-      $('#alt_counter_text').html(Math.floor(alt/100) + 'X');
+      $("#alt_counter_text").html(Math.floor(alt / 100) + "X");
     }
     if (!isNaN(altTape.fmu_alt) && altTape.fmu_alt != null) {
-      $('#alt_fmu').css('bottom', (-(10000 - altTape.fmu_alt) * altTape.pixels_per_number / 10 - 30) + 'px');
-      $('#alt_fmu').css('display', 'block');
+      $("#alt_fmu").css(
+        "bottom",
+        (-(10000 - altTape.fmu_alt) * altTape.pixels_per_number) / 10 -
+          30 +
+          "px"
+      );
+      $("#alt_fmu").css("display", "block");
     } else {
-      $('#alt_fmu').css('display', 'none');
+      $("#alt_fmu").css("display", "none");
     }
 
     checkIn(AHRS_TYPE.ALT, override);
@@ -934,47 +1114,58 @@ function generateTapes() {
 
   // Define some constants
   vspeedTape.total_offset = 7;
-  vspeedTape.offset = $('#alt_vspeed').outerHeight() / 2 + vspeedTape.total_offset;
+  vspeedTape.offset =
+    $("#alt_vspeed").outerHeight() / 2 + vspeedTape.total_offset;
   vspeedTape.pixels_per_number = 22;
   tick_offset = 4;
   // VSpeed tick generation
   for (var i = 15; i >= -15; i -= 1) {
     // Generate a tick
-    var tick_div = $('<div/>', {
-      class: 'h_tick vspeed_tick volitile',
+    var tick_div = $("<div/>", {
+      class: "h_tick vspeed_tick volitile"
     });
     // Set the tick location
-    tick_div.css('top', i * vspeedTape.pixels_per_number + vspeedTape.offset - tick_offset);
+    tick_div.css(
+      "top",
+      i * vspeedTape.pixels_per_number + vspeedTape.offset - tick_offset
+    );
     // If the tick is a 5th tick, make it larger
     if (i % 5 === 0) {
-      tick_div.css('width', '20px');
-      tick_div.css('height', '4px');
+      tick_div.css("width", "20px");
+      tick_div.css("height", "4px");
     }
     // Append the tick to the tick holder
-    $('#vspeed_tape_tick_holder').append(tick_div);
+    $("#vspeed_tape_tick_holder").append(tick_div);
     // Update the total height
-    altTape.total_height = Math.max(altTape.total_height, i * vspeedTape.pixels_per_number + vspeedTape.offset - tick_offset);
+    altTape.total_height = Math.max(
+      altTape.total_height,
+      i * vspeedTape.pixels_per_number + vspeedTape.offset - tick_offset
+    );
   }
 
   // Set the text position based on the size
-  var text_pos = $('#alt_vspeed').outerHeight() / 2 - vspeedTape.pixels_per_number * 16 + 8 + vspeedTape.total_offset;
+  var text_pos =
+    $("#alt_vspeed").outerHeight() / 2 -
+    vspeedTape.pixels_per_number * 16 +
+    8 +
+    vspeedTape.total_offset;
   // Loop through each number and add it
   for (var i = 15; i >= 0; i -= 5) {
-    var val = $('<div/>', {
-      class: 'vspeed_tape_index volitile',
+    var val = $("<div/>", {
+      class: "vspeed_tape_index volitile",
       html: i
     });
-    val.css('top', text_pos);
-    $('#vspeed_tape_text').append(val);
+    val.css("top", text_pos);
+    $("#vspeed_tape_text").append(val);
     text_pos += vspeedTape.pixels_per_number * 5;
   }
   for (var i = 5; i <= 15; i += 5) {
-    var val = $('<div/>', {
-      class: 'vspeed_tape_index volitile',
-      html: i,
+    var val = $("<div/>", {
+      class: "vspeed_tape_index volitile",
+      html: i
     });
-    val.css('top', text_pos);
-    $('#vspeed_tape_text').append(val);
+    val.css("top", text_pos);
+    $("#vspeed_tape_text").append(val);
     text_pos += vspeedTape.pixels_per_number * 5;
   }
 
@@ -984,17 +1175,33 @@ function generateTapes() {
     vspeed *= vspeedTape.conv;
     vspeed /= 10000;
     // Position the vspeed pointer
-    $('#vspeed_pointer').css('top', vspeedTape.height / 2 - vspeed * vspeedTape.pixels_per_number - $('#vspeed_pointer').outerHeight() / 2 - 14 + vspeedTape.total_offset);
+    $("#vspeed_pointer").css(
+      "top",
+      vspeedTape.height / 2 -
+        vspeed * vspeedTape.pixels_per_number -
+        $("#vspeed_pointer").outerHeight() / 2 -
+        14 +
+        vspeedTape.total_offset
+    );
     // Set the vspeed tail position and height
     if (vspeed > 0) {
-      $('#vspeed_trail').css('top', vspeedTape.height / 2 - vspeed * vspeedTape.pixels_per_number - 3 + vspeedTape.total_offset);
-      $('#vspeed_trail').css('height', vspeed * vspeedTape.pixels_per_number);
+      $("#vspeed_trail").css(
+        "top",
+        vspeedTape.height / 2 -
+          vspeed * vspeedTape.pixels_per_number -
+          3 +
+          vspeedTape.total_offset
+      );
+      $("#vspeed_trail").css("height", vspeed * vspeedTape.pixels_per_number);
     } else {
-      $('#vspeed_trail').css('height', -vspeed * vspeedTape.pixels_per_number);
-      $('#vspeed_trail').css('top', vspeedTape.height / 2 - 3 + vspeedTape.total_offset);
+      $("#vspeed_trail").css("height", -vspeed * vspeedTape.pixels_per_number);
+      $("#vspeed_trail").css(
+        "top",
+        vspeedTape.height / 2 - 3 + vspeedTape.total_offset
+      );
     }
     checkIn(AHRS_TYPE.VSPEED, override);
-  }
+  };
 
   // ------------------------------------------------------------------------ //
   // Generate AHRS                                                            //
@@ -1008,137 +1215,147 @@ function generateTapes() {
   // Loop through initial chevrons
   for (var c = 0; c < ahrsTape.chevrons; c++) {
     // Generate chevron from svg
-    var chevron = $('<img/>', {
-      class: 'ahrs_chevron volitile',
-      src: 'images/chevron.svg'
+    var chevron = $("<img/>", {
+      class: "ahrs_chevron volitile",
+      src: "images/chevron.svg"
     });
     // Set chevron position
-    chevron.css('top', -c * ahrsTape.chevron_space - 150);
+    chevron.css("top", -c * ahrsTape.chevron_space - 150);
     // Add the chevron to the tick array
     ahrsTape.ticks.push({
       angle: i,
       val: chevron,
-      type: 'chevron'
+      type: "chevron"
     });
     // Append the chevron to the scroll div
-    $('#pitch_tape_scroll').append(chevron);
+    $("#pitch_tape_scroll").append(chevron);
   }
   // Loop through the ticks based on the limits
   for (var i = ahrsTape.limits[0]; i >= ahrsTape.limits[1]; i -= 2.5) {
     // Generate a tick
-    var tick_div = $('<div/>', {
-      class: 'h_tick ahrs_tick volitile'
+    var tick_div = $("<div/>", {
+      class: "h_tick ahrs_tick volitile"
     });
     // Position the tick
-    tick_div.css('top', pos_index * ahrsTape.pixels_per_tick);
+    tick_div.css("top", pos_index * ahrsTape.pixels_per_tick);
     // Skip the tick at the 0 degree location
     if (i !== 0) {
       // If the degree is a factor of 5, make it med size
       if (i % 5 === 0) {
-        tick_div.css('width', '80px');
-        tick_div.css('height', '4px');
+        tick_div.css("width", "80px");
+        tick_div.css("height", "4px");
       }
       // If the degree is a factor of 10, make it large
       if (i % 10 === 0) {
-        tick_div.css('width', '120px');
-        tick_div.css('height', '4px');
+        tick_div.css("width", "120px");
+        tick_div.css("height", "4px");
         // Add text
         for (var j = 0; j < 2; j++) {
           // Generate text
-          var text = $('<div/>', {
-            class: 'ahrs_text volitile noselect'
+          var text = $("<div/>", {
+            class: "ahrs_text volitile noselect"
           });
           // Set the html as the degree in question
-          text.html((i < 0 ? -i : i));
+          text.html(i < 0 ? -i : i);
           // Position the text
-          text.css('top', pos_index * ahrsTape.pixels_per_tick - 8);
+          text.css("top", pos_index * ahrsTape.pixels_per_tick - 8);
           // Adjust the position
-          if (j === 0)
-            text.css('left', '0px');
-          else
-            text.css('right', '0px');
+          if (j === 0) text.css("left", "0px");
+          else text.css("right", "0px");
           // Add the text to the tick array
           ahrsTape.ticks.push({
             angle: i,
             val: text,
-            type: 'text'
+            type: "text"
           });
           // Append the text to the scroll div
-          $('#pitch_tape_scroll').append(text);
+          $("#pitch_tape_scroll").append(text);
         }
       }
       // Add the tick to the tick array
       ahrsTape.ticks.push({
         angle: i,
         val: tick_div,
-        type: 'tick'
+        type: "tick"
       });
       // Append the tick to the scroll div
-      $('#pitch_tape_scroll').append(tick_div);
+      $("#pitch_tape_scroll").append(tick_div);
     }
     // Update the total height
-    ahrsTape.total_height = Math.max(ahrsTape.total_height, pos_index * ahrsTape.pixels_per_tick);
+    ahrsTape.total_height = Math.max(
+      ahrsTape.total_height,
+      pos_index * ahrsTape.pixels_per_tick
+    );
     // Adjust the position of the scroll div
-    $('#pitch_tape_scroll').css('top', -ahrsTape.total_height / 2 + ahrsTape.height / 2 - 2);
+    $("#pitch_tape_scroll").css(
+      "top",
+      -ahrsTape.total_height / 2 + ahrsTape.height / 2 - 2
+    );
     // Increment the total position
     pos_index++;
   }
   // Loop through ending chevrons
   for (var c = 0; c < ahrsTape.chevrons; c++) {
     // Generate chevron from svg
-    var chevron = $('<img/>', {
-      class: 'ahrs_chevron volitile',
-      src: 'images/chevron_flip.svg'
+    var chevron = $("<img/>", {
+      class: "ahrs_chevron volitile",
+      src: "images/chevron_flip.svg"
     });
     // Set chevron position
-    chevron.css('top', ahrsTape.total_height + c * ahrsTape.chevron_space + 50);
+    chevron.css("top", ahrsTape.total_height + c * ahrsTape.chevron_space + 50);
     // Add the chevron to the tick array
     ahrsTape.ticks.push({
       angle: i,
       val: chevron,
-      type: 'chevron'
+      type: "chevron"
     });
     // Append the chevron to the scroll div
-    $('#pitch_tape_scroll').append(chevron);
+    $("#pitch_tape_scroll").append(chevron);
   }
 
   // Define the AHRS update method
   ahrsTape.update = function(pitch, roll, override) {
     // Set the pitch amount to the global CSS variable
-    html.css('--pitch_amount', pitch * (ahrsTape.pixels_per_tick * 4) / 10 - 3);
+    html.css(
+      "--pitch_amount",
+      (pitch * (ahrsTape.pixels_per_tick * 4)) / 10 - 3
+    );
     // Loop through each stored tick
     for (var i = 0; i < ahrsTape.ticks.length; i++) {
       var val = ahrsTape.ticks[i];
       var dist = Math.abs(pitch - val.angle);
       // If the current tick is a third from the center, set it to full white
       if (dist <= ahrsTape.degrees_in_view / 3) {
-        if (val.type === 'text') {
-          val.val.css('color', 'white');
-        } else if (val.type === 'tick') {
-          val.val.css('background-color', 'white');
+        if (val.type === "text") {
+          val.val.css("color", "white");
+        } else if (val.type === "tick") {
+          val.val.css("background-color", "white");
         }
       } else if (dist <= ahrsTape.degrees_in_view / 2) {
         // Otherwise if it is within a half, set it to some transparancy value
         // Generate a transparancy level
-        var level = Math.abs((dist - ahrsTape.degrees_in_view / 2) / (ahrsTape.degrees_in_view / 2 - ahrsTape.degrees_in_view / 3));
+        var level = Math.abs(
+          (dist - ahrsTape.degrees_in_view / 2) /
+            (ahrsTape.degrees_in_view / 2 - ahrsTape.degrees_in_view / 3)
+        );
         // Set the color to that value
-        var color = 'rgba(255,255,255,' + level + ')';
-        if (val.type === 'text') {
-          val.val.css('color', color);
-        } else if (val.type === 'tick') {
-          val.val.css('background-color', color);
+        var color = "rgba(255,255,255," + level + ")";
+        if (val.type === "text") {
+          val.val.css("color", color);
+        } else if (val.type === "tick") {
+          val.val.css("background-color", color);
         }
       } else {
         // Otherwise make it fully transparent
-        if (val.type === 'text') {
-          val.val.css('color', 'transparent');
-        } else if (val.type === 'tick') {
-          val.val.css('background-color', 'transparent');
+        if (val.type === "text") {
+          val.val.css("color", "transparent");
+        } else if (val.type === "tick") {
+          val.val.css("background-color", "transparent");
         }
       }
     }
     // Set the flight angle degree CSS value
-    html.css('--flight_angle', -roll + 'deg');
+    html.css("--flight_angle", -roll + "deg");
     // Set the pitch text
     // if (Math.abs(pitch) < 0.5) {
     //   $('#pitch_readout span').html(pad(Math.round(Math.abs(pitch)), 2) + '°-');
@@ -1159,50 +1376,49 @@ function generateTapes() {
   // ------------------------------------------------------------------------ //
 
   slipSkid.update = function(yaw, override) {
-    html.css('--slip_skid', (yaw * slipSkid.multiplier) + 'px')
-  }
+    html.css("--slip_skid", yaw * slipSkid.multiplier + "px");
+  };
 
   // ------------------------------------------------------------------------ //
   // Generate Turn Coordinator                                                //
   // ------------------------------------------------------------------------ //
 
-  var turnCoordinatorArrow = $('#tcarrow');
-  var turnCoordinatorBar= $('#tcbar');
-  if(turnCoordinator.display === false){
-    turnCoordinator.update = function(rate, override){}
-  }else{
-    $('#turn_coordinator_holder').addClass('show');
+  var turnCoordinatorArrow = $("#tcarrow");
+  var turnCoordinatorBar = $("#tcbar");
+  if (turnCoordinator.display === false) {
+    turnCoordinator.update = function(rate, override) {};
+  } else {
+    $("#turn_coordinator_holder").addClass("show");
     // $('#settings_icon').removeClass('shifted');
-    $('#slip_skid_holder').removeClass('shifted');
+    $("#slip_skid_holder").removeClass("shifted");
     turnCoordinator.update = function(rate, override) {
       rate = -rate;
-      if(rate > 3.25){
+      if (rate > 3.25) {
         rate = 3.25;
-      }else if(rate < -3.25){
+      } else if (rate < -3.25) {
         rate = -3.25;
       }
-      if(Math.abs(rate) < 0.2){
-        html.css('--turn_rate', `0px`);
-        turnCoordinatorArrow.addClass('hide');
-      }else{
-        if(rate < 0){
-          turnCoordinatorBar.addClass('right');
-          turnCoordinatorArrow.addClass('right');
-          turnCoordinatorBar.removeClass('left');
-          turnCoordinatorArrow.removeClass('left');
-        }else{
-          turnCoordinatorBar.addClass('left');
-          turnCoordinatorArrow.addClass('left');
-          turnCoordinatorBar.removeClass('right');
-          turnCoordinatorArrow.removeClass('right');
+      if (Math.abs(rate) < 0.2) {
+        html.css("--turn_rate", `0px`);
+        turnCoordinatorArrow.addClass("hide");
+      } else {
+        if (rate < 0) {
+          turnCoordinatorBar.addClass("right");
+          turnCoordinatorArrow.addClass("right");
+          turnCoordinatorBar.removeClass("left");
+          turnCoordinatorArrow.removeClass("left");
+        } else {
+          turnCoordinatorBar.addClass("left");
+          turnCoordinatorArrow.addClass("left");
+          turnCoordinatorBar.removeClass("right");
+          turnCoordinatorArrow.removeClass("right");
         }
-        let px = (Math.abs(rate) * 100 / 3);
-        turnCoordinatorArrow.removeClass('hide');
-        html.css('--turn_rate', `${px}px`);
+        let px = (Math.abs(rate) * 100) / 3;
+        turnCoordinatorArrow.removeClass("hide");
+        html.css("--turn_rate", `${px}px`);
       }
-    }
+    };
   }
-
 
   // ------------------------------------------------------------------------ //
   // Generate Heading Tape                                                    //
@@ -1211,7 +1427,7 @@ function generateTapes() {
   // Define some constants
   headingTape.safetyOffset = 30;
 
-  if (html.css('--hdg_ease_time').trim() === '0s') {
+  if (html.css("--hdg_ease_time").trim() === "0s") {
     headingTape.removeAnimation = true;
   } else {
     headingTape.removeAnimation = false;
@@ -1227,7 +1443,7 @@ function generateTapes() {
       headingTape.fmu_hdg = constrainDegree(hdg);
     }
     headingTape.forceRedraw = true;
-  }
+  };
 
   headingTape.span = headingTape.width / headingTape.ticks_per_number / 2;
 
@@ -1236,9 +1452,12 @@ function generateTapes() {
     heading = constrainDegree(Math.round(heading));
     headingTape.heading = heading;
     // Update the heading text to display the new heading
-    $('#heading_text span').html(pad(heading, 3) + '°');
+    $("#heading_text span").html(pad(heading, 3) + "°");
     // Check that the tape does not need to be recalculated for the new heading
-    if (headingTape.forceRedraw === true || getDegreeDistance(updateHeading, heading) >= headingTape.safetyOffset / 2) {
+    if (
+      headingTape.forceRedraw === true ||
+      getDegreeDistance(updateHeading, heading) >= headingTape.safetyOffset / 2
+    ) {
       // Current tape needs to be redrawn
       headingTape.redrawHeadingTape(currentHeading, heading);
       // Update this heading as the last heading used for a redraw
@@ -1247,33 +1466,48 @@ function generateTapes() {
     // Calculate direction
     var direction = !(constrainDegree(updateHeading - heading) < 180);
     // Calculate movement offset
-    var value = -(getDegreeDistance(headingTape.left_heading, heading) * headingTape.pixels_per_tick - headingTape.pixels_per_tick * headingTape.padding);
+    var value = -(
+      getDegreeDistance(headingTape.left_heading, heading) *
+        headingTape.pixels_per_tick -
+      headingTape.pixels_per_tick * headingTape.padding
+    );
     // Queue the animation and position change for a slightly later time. Allows
     // the CSS to catch up
     setTimeout(function() {
       if (!headingTape.removeAnimation)
-        $('#heading_tape_scroll').css('transition', 'all var(--hdg_ease_time) ease 0s');
+        $("#heading_tape_scroll").css(
+          "transition",
+          "all var(--hdg_ease_time) ease 0s"
+        );
       //$('#heading_tape_scroll').addClass('annimate');
-      $('#heading_tape_scroll').css('left', value);
+      $("#heading_tape_scroll").css("left", value);
     }, 10);
     // Update the current heading
     currentHeading = heading;
-    if (!isNaN(headingTape.fmu_hdg) && headingTape.fmu_hdg != null && getDegreeDistance(headingTape.heading, headingTape.fmu_hdg, false) > headingTape.span / 2 + 1) {
-      $('#hdg_fmu_arrow').css('display', 'block');
-      if (constrainDegree(headingTape.heading - headingTape.fmu_hdg) < 180 === false) {
-        $('#hdg_fmu_arrow').css('left', 'unset');
-        $('#hdg_fmu_arrow').css('right', '5px');
-        $('#hdg_fmu_arrow').css('transform', 'rotate(180deg)');
+    if (
+      !isNaN(headingTape.fmu_hdg) &&
+      headingTape.fmu_hdg != null &&
+      getDegreeDistance(headingTape.heading, headingTape.fmu_hdg, false) >
+        headingTape.span / 2 + 1
+    ) {
+      $("#hdg_fmu_arrow").css("display", "block");
+      if (
+        constrainDegree(headingTape.heading - headingTape.fmu_hdg) < 180 ===
+        false
+      ) {
+        $("#hdg_fmu_arrow").css("left", "unset");
+        $("#hdg_fmu_arrow").css("right", "5px");
+        $("#hdg_fmu_arrow").css("transform", "rotate(180deg)");
       } else {
-        $('#hdg_fmu_arrow').css('left', '5px');
-        $('#hdg_fmu_arrow').css('right', 'unset');
-        $('#hdg_fmu_arrow').css('transform', 'rotate(0deg)');
+        $("#hdg_fmu_arrow").css("left", "5px");
+        $("#hdg_fmu_arrow").css("right", "unset");
+        $("#hdg_fmu_arrow").css("transform", "rotate(0deg)");
       }
     } else {
-      $('#hdg_fmu_arrow').css('display', 'none');
+      $("#hdg_fmu_arrow").css("display", "none");
     }
     checkIn(AHRS_TYPE.HDG, override);
-  }
+  };
 
   // Define the heading tape redraw method
   headingTape.redrawHeadingTape = function(currentHeading, heading) {
@@ -1281,22 +1515,32 @@ function generateTapes() {
     headingTape.forceRedraw = false;
     //$('#heading_tape_scroll').removeClass('annimate');
     if (!headingTape.removeAnimation)
-      $('#heading_tape_scroll').css('transition', 'all 0s ease 0s');
+      $("#heading_tape_scroll").css("transition", "all 0s ease 0s");
     // Clear current system
-    $('#heading_tape_scroll').html('');
+    $("#heading_tape_scroll").html("");
     // Calculate pixels per tick using dimenstions and range
-    headingTape.pixels_per_tick = (system.ahrs.width - 2 * $('#speed_tape').outerWidth()) / headingTape.range;
+    headingTape.pixels_per_tick =
+      (system.ahrs.width - 2 * $("#speed_tape").outerWidth()) /
+      headingTape.range;
     // Calculate direction
     var direction = !(constrainDegree(updateHeading - heading) < 180);
     // Calculate side padding to reduce redraws
     headingTape.padding = headingTape.safetyOffset / 2;
     // Set the left and right headings
     if (direction) {
-      headingTape.left_heading = constrainDegree(currentHeading - headingTape.range / 2 - headingTape.padding);
-      headingTape.right_heading = constrainDegree(heading + headingTape.range / 2 + headingTape.padding);
+      headingTape.left_heading = constrainDegree(
+        currentHeading - headingTape.range / 2 - headingTape.padding
+      );
+      headingTape.right_heading = constrainDegree(
+        heading + headingTape.range / 2 + headingTape.padding
+      );
     } else {
-      headingTape.right_heading = constrainDegree(currentHeading + headingTape.range / 2 + headingTape.padding);
-      headingTape.left_heading = constrainDegree(heading - headingTape.range / 2 - headingTape.padding);
+      headingTape.right_heading = constrainDegree(
+        currentHeading + headingTape.range / 2 + headingTape.padding
+      );
+      headingTape.left_heading = constrainDegree(
+        heading - headingTape.range / 2 - headingTape.padding
+      );
     }
     // Initialize some variables before the loop
     var pointer = headingTape.left_heading;
@@ -1305,18 +1549,18 @@ function generateTapes() {
     // Loop through the headings
     while (pointer != headingTape.right_heading) {
       // Generate a tick
-      var tick_div = $('<div/>', {
-        class: 'v_tick volitile',
+      var tick_div = $("<div/>", {
+        class: "v_tick volitile"
       });
       // Set the tick's location
-      tick_div.css('left', index * headingTape.pixels_per_tick);
+      tick_div.css("left", index * headingTape.pixels_per_tick);
       // If the current degree falls on a number, add a number
       if (pointer % headingTape.ticks_per_number === 0) {
         // Increase the tick height for the number
-        tick_div.css('height', '30px');
+        tick_div.css("height", "30px");
         // Generate a number
-        var text = $('<div/>', {
-          class: 'heading_text volitile',
+        var text = $("<div/>", {
+          class: "heading_text volitile"
         });
         // Set the number text to the current degree
         text.html(pointer);
@@ -1329,36 +1573,36 @@ function generateTapes() {
           text_offset *= 2;
         }
         // Set the text position
-        text.css('left', index * headingTape.pixels_per_tick - text_offset);
+        text.css("left", index * headingTape.pixels_per_tick - text_offset);
         // Append the text to the scroll div
-        $('#heading_tape_scroll').append(text);
+        $("#heading_tape_scroll").append(text);
       } else if (pointer % (headingTape.ticks_per_number / 2) === 0) {
         // Make the half ticks slightly larger than a regular tick
-        tick_div.css('height', '20px');
+        tick_div.css("height", "20px");
       }
       // If the current heading is a cardinal heading, add extra text
       if (pointer % 90 === 0) {
         // Generate cardinal coord text
-        var text = $('<div/>', {
-          class: 'heading_text card_text volitile'
+        var text = $("<div/>", {
+          class: "heading_text card_text volitile"
         });
         // Associate headings with leters
         if (pointer === 360) {
-          text.html('N');
+          text.html("N");
         } else if (pointer === 90) {
-          text.html('E');
+          text.html("E");
         } else if (pointer === 180) {
-          text.html('S');
+          text.html("S");
         } else if (pointer === 270) {
-          text.html('W');
+          text.html("W");
         }
         // Set position
-        text.css('left', index * headingTape.pixels_per_tick - 13);
+        text.css("left", index * headingTape.pixels_per_tick - 13);
         // Append the text to the scroll div
-        $('#heading_tape_scroll').append(text);
+        $("#heading_tape_scroll").append(text);
       }
       // Append the tick to the scroll div
-      $('#heading_tape_scroll').append(tick_div);
+      $("#heading_tape_scroll").append(tick_div);
       // Update the pointer
       pointer = constrainDegree(pointer + 1);
       // Increment the index
@@ -1368,22 +1612,41 @@ function generateTapes() {
     }
     // Add FMU Marker
     if (!isNaN(headingTape.fmu_hdg) && headingTape.fmu_hdg != null) {
-      var range = getDegreeDistance(headingTape.left_heading, headingTape.right_heading);
-      if (getDegreeDistance(headingTape.left_heading, headingTape.fmu_hdg) < range && constrainDegree(headingTape.left_heading - headingTape.fmu_hdg) < 180 === false) {
-        $('#heading_tape_scroll').append('<div id="hdg_fmu" class="fmu_v"   style="left:' + (getDegreeDistance(headingTape.left_heading, headingTape.fmu_hdg) * headingTape.pixels_per_tick) + 'px;"></div>');
+      var range = getDegreeDistance(
+        headingTape.left_heading,
+        headingTape.right_heading
+      );
+      if (
+        getDegreeDistance(headingTape.left_heading, headingTape.fmu_hdg) <
+          range &&
+        constrainDegree(headingTape.left_heading - headingTape.fmu_hdg) <
+          180 ===
+          false
+      ) {
+        $("#heading_tape_scroll").append(
+          '<div id="hdg_fmu" class="fmu_v"   style="left:' +
+            getDegreeDistance(headingTape.left_heading, headingTape.fmu_hdg) *
+              headingTape.pixels_per_tick +
+            'px;"></div>'
+        );
       }
     } else {
-      $('#hdg_fmu_arrow').css('display', 'none');
+      $("#hdg_fmu_arrow").css("display", "none");
     }
     // Set the scroll div to the tape width. Used for 0px alignment
-    $('#heading_tape_scroll').css('width', tapeWidth);
+    $("#heading_tape_scroll").css("width", tapeWidth);
     // Set the padding offset in pixels
-    headingTape.padding_offset = headingTape.padding * headingTape.pixels_per_tick;
+    headingTape.padding_offset =
+      headingTape.padding * headingTape.pixels_per_tick;
     // Restore the tape to the last location before the redraw
-    var value = -(getDegreeDistance(headingTape.left_heading, currentHeading) * headingTape.pixels_per_tick - headingTape.pixels_per_tick * headingTape.padding);
+    var value = -(
+      getDegreeDistance(headingTape.left_heading, currentHeading) *
+        headingTape.pixels_per_tick -
+      headingTape.pixels_per_tick * headingTape.padding
+    );
     // Update the location
-    $('#heading_tape_scroll').css('left', value);
-    $('#heading_tape_scroll').css('bottom', '0px');
+    $("#heading_tape_scroll").css("left", value);
+    $("#heading_tape_scroll").css("bottom", "0px");
   };
   // Redraw the heading tape initially
   headingTape.redrawHeadingTape(0, 0);
@@ -1395,30 +1658,30 @@ function generateTapes() {
   if (gMeter.display) {
     // Add text to G Meter
     var pos = [
-      [19, 4, '1'],
-      [7, 30, '2'],
-      [31, 30, '0']
+      [19, 4, "1"],
+      [7, 30, "2"],
+      [31, 30, "0"]
     ];
     for (var i = 0; i < pos.length; i++) {
-      var text = $('<div/>', {
-        class: 'g_text volitile noselect'
+      var text = $("<div/>", {
+        class: "g_text volitile noselect"
       });
       // Position text
-      text.css('top', pos[i][0]);
-      text.css('left', pos[i][1]);
+      text.css("top", pos[i][0]);
+      text.css("left", pos[i][1]);
       text.html(pos[i][2]);
       // Append the chevron to the scroll div
-      $('#g_meter').append(text);
+      $("#g_meter").append(text);
     }
 
     // Define the G Meter update method
     gMeter.update = function(gees, override) {
       var rot = 132 * (gees - 1);
-      $('#g_pointer').css('transform', 'rotate(' + rot + 'deg)');
+      $("#g_pointer").css("transform", "rotate(" + rot + "deg)");
       checkIn(AHRS_TYPE.GMETER, override);
     };
   } else {
-    $('#g_meter').css('display', 'none');
+    $("#g_meter").css("display", "none");
     gMeter.update = function(gees) {};
   }
 
@@ -1429,10 +1692,10 @@ function generateTapes() {
   if (satCount.display) {
     // Define the Sat Count update method
     satCount.update = function(count) {
-      $('#sat_count_text').html(count);
+      $("#sat_count_text").html(count);
     };
   } else {
-    $('#sat_count').css('display', 'none');
+    $("#sat_count").css("display", "none");
     satCount.update = function(count) {};
   }
 
@@ -1445,16 +1708,13 @@ function generateTapes() {
 
   // Add invalid flags.
   setInvalid(AHRS_TYPE.ALL, true);
-
 }
-
 
 // Check in method used in all update methods
 var lastCheckInTime = [];
 
 function checkIn(type, override) {
-  if (override === true)
-    return;
+  if (override === true) return;
   while (lastCheckInTime[type] === undefined) {
     lastCheckInTime.push([]);
   }
@@ -1467,12 +1727,15 @@ var invalidList = [false, false, false, false, false, false];
 function checkValid() {
   var now = Date.now();
   for (var i = 0; i < lastCheckInTime.length; i++) {
-    if (now - lastCheckInTime[i] > system.ahrs.updateTimeout && invalidList[i] === false) {
+    if (
+      now - lastCheckInTime[i] > system.ahrs.updateTimeout &&
+      invalidList[i] === false
+    ) {
       // Set invalid
       switch (i) {
         case AHRS_TYPE.SPEED:
           speedTape.update(0, true);
-          satCount.update('-');
+          satCount.update("-");
           break;
         case AHRS_TYPE.ALT:
           altTape.update(0, true);
@@ -1492,7 +1755,10 @@ function checkValid() {
           break;
       }
       setInvalid(i, true);
-    } else if (now - lastCheckInTime[i] < system.ahrs.updateTimeout && invalidList[i] === true) {
+    } else if (
+      now - lastCheckInTime[i] < system.ahrs.updateTimeout &&
+      invalidList[i] === true
+    ) {
       // Set valid
       setInvalid(i, false);
     }
@@ -1504,29 +1770,41 @@ function setInvalid(type, value) {
   var name;
   switch (type) {
     case AHRS_TYPE.SPEED:
-      name = ['speed_tape'];
+      name = ["speed_tape"];
       break;
     case AHRS_TYPE.ALT:
     case AHRS_TYPE.VSPEED:
-      name = ['alt_tape'];
+      name = ["alt_tape"];
       break;
     case AHRS_TYPE.HDG:
-      name = ['heading_tape'];
+      name = ["heading_tape"];
       break;
     case AHRS_TYPE.AHRS:
-      name = ['ahrs_container', /*'pitch_readout',*/ 'roll_readout', 'slip_skid_holder'];
+      name = [
+        "ahrs_container",
+        /*'pitch_readout',*/ "roll_readout",
+        "slip_skid_holder"
+      ];
       break;
     case AHRS_TYPE.ALL:
-      name = ['ahrs_container', /*'pitch_readout',*/ 'roll_readout', 'heading_tape', 'alt_tape', 'speed_tape', 'slip_skid_holder'];
+      name = [
+        "ahrs_container",
+        /*'pitch_readout',*/ "roll_readout",
+        "heading_tape",
+        "alt_tape",
+        "speed_tape",
+        "slip_skid_holder"
+      ];
       break;
   }
-  if (name === undefined)
-    return;
+  if (name === undefined) return;
   for (var i = 0; i < name.length; i++) {
     if (value) {
-      var val = $('#' + name[i] + ' .invalid_holder:first').addClass('invalid')
+      var val = $("#" + name[i] + " .invalid_holder:first").addClass("invalid");
     } else {
-      var val = $('#' + name[i] + ' .invalid_holder:first').removeClass('invalid')
+      var val = $("#" + name[i] + " .invalid_holder:first").removeClass(
+        "invalid"
+      );
     }
   }
   if (type !== AHRS_TYPE.ALL) {
@@ -1538,18 +1816,15 @@ function setInvalid(type, value) {
   }
 }
 
-
 function refreshIfInvalidTimeout() {
   for (var i = 0; i < invalidList.length; i++) {
-    if (invalidList[i] === false)
-      return;
+    if (invalidList[i] === false) return;
   }
   try {
     ahrsWS.close();
     fmuWS.close();
-  } catch (error) {};
+  } catch (error) {}
 }
-
 
 // Helpers
 function constrainDegree(deg) {
@@ -1572,7 +1847,9 @@ function pad(num, size) {
 }
 
 function getDegreeDistance(deg1, deg2, use360 = true) {
-  var out = Math.abs(Math.min(constrainDegree(deg1 - deg2), constrainDegree(deg2 - deg1)));
+  var out = Math.abs(
+    Math.min(constrainDegree(deg1 - deg2), constrainDegree(deg2 - deg1))
+  );
   if (use360 === false && out == 360) {
     return 0;
   }
@@ -1581,11 +1858,17 @@ function getDegreeDistance(deg1, deg2, use360 = true) {
 
 function requestFullScreen(element) {
   // Supports most browsers and their versions.
-  var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+  var requestMethod =
+    element.requestFullScreen ||
+    element.webkitRequestFullScreen ||
+    element.mozRequestFullScreen ||
+    element.msRequestFullScreen;
 
-  if (requestMethod) { // Native full screen.
+  if (requestMethod) {
+    // Native full screen.
     requestMethod.call(element);
-  } else if (typeof window.ActiveXObject !== "undefined") { // Older IE.
+  } else if (typeof window.ActiveXObject !== "undefined") {
+    // Older IE.
     var wscript = new ActiveXObject("WScript.Shell");
     if (wscript !== null) {
       wscript.SendKeys("{F11}");
@@ -1595,8 +1878,8 @@ function requestFullScreen(element) {
 
 var post = function(url) {
   var http = new XMLHttpRequest();
-  var text_url = '';
-  switch(url){
+  var text_url = "";
+  switch (url) {
     case "cageAHRS":
       text_url = "Cage AHRS";
       break;
@@ -1604,10 +1887,10 @@ var post = function(url) {
       text_url = "Cage AHRS";
       break;
     default:
-      text_url = 'Unknown';
+      text_url = "Unknown";
       break;
   }
-  var url = system.push_url + '/' + url;
+  var url = system.push_url + "/" + url;
   var params = "";
   http.open("POST", url, true);
 
@@ -1616,18 +1899,26 @@ var post = function(url) {
   //http.setRequestHeader("Content-length", params.length);
   //http.setRequestHeader("Connection", "close");
 
-  http.onreadystatechange = function() { //Call a function when the state changes.
+  http.onreadystatechange = function() {
+    //Call a function when the state changes.
     if (http.readyState == 4 && http.status == 200) {
       console.log("Done: " + http.responseText);
-      system.sendNotification(`Sent the '${text_url}' command to Stratux`, 4000);
-    }else if(http.readyState == 4 && http.status == 0){
-      system.sendNotification(`Failed to send the '${text_url}' command to Stratux`, 6000, color='red');
-    }else{
+      system.sendNotification(
+        `Sent the '${text_url}' command to Stratux`,
+        4000
+      );
+    } else if (http.readyState == 4 && http.status == 0) {
+      system.sendNotification(
+        `Failed to send the '${text_url}' command to Stratux`,
+        6000,
+        (color = "red")
+      );
+    } else {
       console.log(http);
     }
-  }
+  };
   http.send(params);
-}
+};
 
 window.addEventListener("deviceorientation", handleOrientation, true);
 
@@ -1645,36 +1936,35 @@ function handleOrientation(event) {
   // Do stuff with the new orientation data
 }
 
-
 Math.toDegrees = function(rad) {
   return rad * 57.2958;
-}
+};
 
-function setCookie(name,value,seconds) {
+function setCookie(name, value, seconds) {
   var expires = "";
   if (seconds) {
-      var date = new Date();
-      date.setTime(date.getTime() + (seconds*1000));
-      expires = "; expires=" + date.toUTCString();
+    var date = new Date();
+    date.setTime(date.getTime() + seconds * 1000);
+    expires = "; expires=" + date.toUTCString();
   }
-  document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+  document.cookie = name + "=" + (value || "") + expires + "; path=/";
 }
 function getCookie(name) {
   var nameEQ = name + "=";
-  var ca = document.cookie.split(';');
-  for(var i=0;i < ca.length;i++) {
-      var c = ca[i];
-      while (c.charAt(0)==' ') c = c.substring(1,c.length);
-      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+  var ca = document.cookie.split(";");
+  for (var i = 0; i < ca.length; i++) {
+    var c = ca[i];
+    while (c.charAt(0) == " ") c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
   }
   return null;
 }
-function eraseCookie(name) {   
-  document.cookie = name+'=; Max-Age=-99999999;';  
+function eraseCookie(name) {
+  document.cookie = name + "=; Max-Age=-99999999;";
 }
 
-function doRefresh(){
-  setCookie('bypass_warning', 'true', 5);
+function doRefresh() {
+  setCookie("bypass_warning", "true", 5);
   location.reload();
 }
 
