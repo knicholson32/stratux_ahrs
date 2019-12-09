@@ -1,1 +1,0 @@
-- We ask that any code segment images for issues or documentation are generated using [https://carbon.now.sh](https://carbon.now.sh)
