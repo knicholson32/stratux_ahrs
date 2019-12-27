@@ -109,7 +109,7 @@ var speedTape = {
       end: 200
     }
   ],
-  units: UNITS.MPH // Units for displaying speed
+  units: UNITS.KTS // Units for displaying speed
 };
 /** ******************************** ***** ********************************* **/
 

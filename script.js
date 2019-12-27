@@ -758,17 +758,17 @@ function generateTapes() {
       console.error("Cannot use speed unit: " + speedTape.units);
   }
   speedTape.lowerSpeed = Math.round(
-    speedTape.conv * speedTape.lowerSpeed * conv.mph2mps
+    speedTape.lowerSpeed
   );
   speedTape.upperSpeed = Math.round(
-    speedTape.conv * speedTape.upperSpeed * conv.mph2mps
+    speedTape.upperSpeed
   );
   for (var i = 0; i < speedTape.speeds.length; i++) {
     speedTape.speeds[i].start = Math.round(
-      speedTape.speeds[i].start * conv.mph2mps * speedTape.conv
+      speedTape.speeds[i].start
     );
     speedTape.speeds[i].end = Math.round(
-      speedTape.speeds[i].end * conv.mph2mps * speedTape.conv
+      speedTape.speeds[i].end
     );
   }
   $("#speed_annun_text").html("GPS GS " + speedTape.unitPrefix);
