@@ -99,6 +99,7 @@ var presist = {
   overheat: false
 };
 system.ahrs.inactiveCounter = 0;
+system.force_diff_orientation = false;
 
 system.sendNotification = function(msg, opentime, color = "#587E4B") {
   let l;
@@ -624,6 +625,10 @@ function initButtons() {
   });
   $("#force_update").click(() => {
     window.location.reload(true);
+  });
+  $("#toggle_rotation").click(() => {
+    system.force_diff_orientation = !system.force_diff_orientation;
+    orientationChange();
   });
   $("#simulate_tag").click(function() {
     if (system.simulate === true) {

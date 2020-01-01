@@ -1,23 +1,23 @@
 @charset "UTF-8";
 
 @font-face {
-  font-family: 'Monaco';
-  src: url('../fonts/monaco.ttf');
+  font-family: "Monaco";
+  src: url("../fonts/monaco.ttf");
 }
 
 @font-face {
-  font-family: 'Aileron';
-  src: url('../fonts/Aileron-Regular.ttf');
+  font-family: "Aileron";
+  src: url("../fonts/Aileron-Regular.ttf");
 }
 
 @font-face {
-  font-family: 'Marcellus';
-  src: url('../fonts/Marcellus-Regular.ttf');
+  font-family: "Marcellus";
+  src: url("../fonts/Marcellus-Regular.ttf");
 }
 
 @font-face {
-  font-family: 'Mukta';
-  src: url('../fonts/Mukta-Regular.ttf');
+  font-family: "Mukta";
+  src: url("../fonts/Mukta-Regular.ttf");
 }
 
 /* AHRS CSS STYLESHEET */
@@ -129,7 +129,7 @@ html {
   --tc_ease_time: 0.5s;
   --pitch_amount: 0px;
   background-color: #000;
-  touch-action:manipulation;
+  touch-action: manipulation;
 }
 
 /* input[type='text'],
@@ -158,7 +158,8 @@ body {
   overflow: hidden;
 }
 
-#scroll_prevent {}
+#scroll_prevent {
+}
 
 #sky_container {
   width: 100%;
@@ -184,7 +185,7 @@ body {
   position: absolute;
   top: 28px;
   left: 7px;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   font-size: 23px;
   color: white;
   background-color: rgba(250, 0, 0, 0.7);
@@ -207,7 +208,7 @@ body {
 .h_tick {
   width: 110%;
   height: 4px;
-  background-color: #FFF;
+  background-color: #fff;
   position: absolute;
   right: 1px;
   z-index: -2;
@@ -216,7 +217,7 @@ body {
 .v_tick {
   height: 10px;
   width: 4px;
-  background-color: #FFF;
+  background-color: #fff;
   position: absolute;
   /* top: 0px; */
   bottom: 0px;
@@ -272,7 +273,7 @@ body {
   right: 5px;
   line-height: 40px;
   display: block;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   font-size: 40px;
   text-align: right;
   color: rgba(255, 255, 255, 0.9);
@@ -319,9 +320,9 @@ body {
 #speed_counter_text {
   line-height: 80px;
   display: block;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   font-size: 70px;
-  color: #FFF;
+  color: #fff;
 }
 
 #speed_annun {
@@ -343,7 +344,7 @@ body {
   vertical-align: middle;
   line-height: 30px;
   font-size: 26px;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   top: 50%;
   transform: translateY(-50%);
   position: relative;
@@ -388,7 +389,7 @@ body {
   position: absolute;
   left: 45px;
   display: block;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   font-size: 40px;
   text-align: left;
   color: rgba(255, 255, 255, 0.9);
@@ -430,9 +431,9 @@ body {
 #alt_counter_text {
   line-height: 63px;
   display: block;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   font-size: 52px;
-  color: #FFF;
+  color: #fff;
   position: absolute;
   top: -1px;
   right: 4px;
@@ -481,7 +482,7 @@ body {
   margin-bottom: 10px;
   position: absolute;
   display: block;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   font-size: 15px;
   text-align: right;
   color: rgba(255, 255, 255, 0.9);
@@ -543,7 +544,7 @@ body {
   vertical-align: middle;
   line-height: 30px;
   font-size: 26px;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   top: 50%;
   transform: translateY(-50%);
   position: relative;
@@ -568,11 +569,11 @@ body {
 }
 
 .heading_text {
-  color: #FFF;
+  color: #fff;
   font-size: 20px;
   line-height: 20px;
   position: absolute;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   /* top: 38px; */
   top: -42px;
 }
@@ -603,7 +604,7 @@ body {
   color: #f300ee;
   line-height: 15px;
   font-size: 26px;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   position: absolute;
   /* top: 20px; */
   bottom: 20px;
@@ -650,14 +651,15 @@ body {
   /*background-color: red;*/
 }
 
-#user_bars {}
+#user_bars {
+}
 
 #user_angle_pointer {
   width: 0;
   height: 0;
   border-left: 20px solid transparent;
   border-right: 20px solid transparent;
-  border-bottom: 20px solid #FFF;
+  border-bottom: 20px solid #fff;
   position: absolute;
   left: 50%;
   top: 100px;
@@ -748,11 +750,11 @@ body {
 }
 
 .ahrs_text {
-  color: #FFF;
+  color: #fff;
   font-size: 20px;
   line-height: 20px;
   position: absolute;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   transition: color var(--ease_time) ease-out 0s;
 }
 
@@ -774,7 +776,7 @@ body {
   left: calc(50% - 15px);
 }
 
-#slip_skid_holder.shifted{
+#slip_skid_holder.shifted {
   bottom: 0px;
 }
 
@@ -812,7 +814,7 @@ body {
 
 /* --------------- Turn Coordinator ---------------- */
 
-#turn_coordinator_holder{
+#turn_coordinator_holder {
   z-index: -100;
   width: 270px;
   height: 14px;
@@ -825,42 +827,47 @@ body {
   visibility: hidden;
 }
 
-#turn_coordinator_holder.show{
+#turn_coordinator_holder.show {
   visibility: visible;
 }
 
-
-#turn_coordinator_holder .top_bar{
+#turn_coordinator_holder .top_bar {
   width: 100%;
   height: 2px;
-  background: linear-gradient(to right, rgba(0,0,0,.0) 0%, black 10%, black 90%, rgba(0,0,0,.0) 100%);
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0) 0%,
+    black 10%,
+    black 90%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
-#turn_coordinator_holder .middle_bar{
+#turn_coordinator_holder .middle_bar {
   height: 100%;
   border-right: 2px solid black;
 }
 
-#turn_coordinator_holder .middle_bar.middle{
+#turn_coordinator_holder .middle_bar.middle {
   position: absolute;
   top: 3px;
 }
 
-#turn_coordinator_holder .middle_bar.right_bar{
+#turn_coordinator_holder .middle_bar.right_bar {
   position: absolute;
   right: 35px;
   border-color: white;
   bottom: -4px;
 }
 
-#turn_coordinator_holder .middle_bar.left_bar{
+#turn_coordinator_holder .middle_bar.left_bar {
   position: absolute;
   left: 35px;
   border-color: white;
   bottom: -3px;
 }
 
-#turn_coordinator_indicator{
+#turn_coordinator_indicator {
   height: 15px;
   width: 100%;
   top: 3px;
@@ -868,7 +875,7 @@ body {
   z-index: -100;
 }
 
-#turn_coordinator_indicator .bar{
+#turn_coordinator_indicator .bar {
   background-color: magenta;
   width: var(--turn_rate);
   height: 100%;
@@ -877,30 +884,30 @@ body {
   transition: width var(--tc_ease_time);
 }
 
-#turn_coordinator_indicator .bar.right{
+#turn_coordinator_indicator .bar.right {
   right: unset;
   left: 50%;
 }
 
-#turn_coordinator_indicator .arrow{
-  width: 0; 
-  height: 0; 
+#turn_coordinator_indicator .arrow {
+  width: 0;
+  height: 0;
   position: absolute;
   transition: left var(--tc_ease_time), right var(--tc_ease_time);
 }
 
-#turn_coordinator_indicator .arrow.hide{
+#turn_coordinator_indicator .arrow.hide {
   display: none;
 }
 
-#turn_coordinator_indicator .arrow.right{
+#turn_coordinator_indicator .arrow.right {
   border-top: 7px solid transparent;
   border-bottom: 7px solid transparent;
   border-left: 7px solid magenta;
   left: calc(50% + var(--turn_rate) - 1px);
 }
 
-#turn_coordinator_indicator .arrow.left{
+#turn_coordinator_indicator .arrow.left {
   border-top: 7px solid transparent;
   border-bottom: 7px solid transparent;
   border-right: 7px solid magenta;
@@ -928,7 +935,7 @@ body {
   vertical-align: middle;
   padding: 2px;
   padding-top: 5px;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   display: inline-block;
 }
 
@@ -967,7 +974,7 @@ body {
   font-size: 200px;
   line-height: 200px;
   vertical-align: middle;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   background-color: rgba(0, 0, 0, 0.3);
   background-image: url(../images/chevron-dark-blue.png);
   background-repeat: repeat;
@@ -975,7 +982,7 @@ body {
 }
 
 .invalid::after {
-  content: 'X';
+  content: "X";
   position: absolute;
   left: 50%;
   top: 50%;
@@ -1017,7 +1024,7 @@ body {
   font-size: 20px;
   line-height: 20px;
   vertical-align: middle;
-  font-family: 'Monaco';
+  font-family: "Monaco";
 }
 
 #g_meter {
@@ -1050,7 +1057,7 @@ body {
   color: white;
   font-size: 10px;
   line-height: 10px;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   position: absolute;
 }
 
@@ -1070,7 +1077,7 @@ body {
   color: white;
   font-size: 20px;
   line-height: 20px;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   position: absolute;
   left: 50%;
   top: 50%;
@@ -1119,12 +1126,12 @@ body {
 
 /* ---------------- Settings Menu ---------------- */
 
-#settings_menu{
+#settings_menu {
   width: 95%;
   /* height: 18vh; */
   align-content: space-between;
   background-color: #111;
-  border: 2px solid #BBBBCC;
+  border: 2px solid #bbbbcc;
   border-radius: 0.75em;
   z-index: 1000;
   position: fixed;
@@ -1139,34 +1146,34 @@ body {
   overflow-y: hidden;
 }
 
-
-#settings_overlay{
+#settings_overlay {
   width: 100%;
   height: 100%;
   position: fixed;
   top: 0px;
   left: 0px;
   background-color: black;
-  opacity: 0.0;
+  opacity: 0;
   z-index: 999;
 }
 
-#settings_menu.hidden, #settings_overlay.hidden{
+#settings_menu.hidden,
+#settings_overlay.hidden {
   display: none;
 }
 
-.settings_button{
+.settings_button {
   width: 100%;
   min-width: calc(25% - 14px);
   height: 100px;
   border-radius: 3px;
-  border: 1px solid #BBBBCC;
+  border: 1px solid #bbbbcc;
   background: linear-gradient(to bottom, #333335, #222225, #111115);
   text-align: center;
   line-height: 100px;
   font-size: 1.5em;
   color: white;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   cursor: pointer;
   margin: 0px 5px 0px 5px;
 }
@@ -1179,8 +1186,8 @@ body {
   padding: 0em !important;
 }
 
-.settings_menu_rotated{
-  height: 95vh !important;
+.settings_menu_rotated {
+  height: 95vh;
   width: 18vw !important;
   transform: translate(-50%, -100%) rotate(0deg) !important;
   transform-origin: bottom !important;
@@ -1195,10 +1202,10 @@ body {
   border-radius: 0.3em !important;
 }
 
-.settings_button_rotated{
+.settings_button_rotated {
   height: 18vw;
   margin: 0px 0px 0px 0px;
-  
+
   margin-bottom: 250px;
   width: 393px;
 
@@ -1206,36 +1213,35 @@ body {
   line-height: 4em;
   transform-origin: left !important;
   transform: translate(22%, -44%) rotate(90deg) !important;
-  
 }
 
-.settings_button:active{
+.settings_button:active {
   background: linear-gradient(to bottom, #111115, #151519, #191920);
 }
 
-.settings_input{
+.settings_input {
   margin-bottom: 10px;
 }
 
-.settings_input input{
+.settings_input input {
   width: 90%;
   transform: translateX(5%);
   font-size: 25px;
 }
 
-.settings_spacer{
+.settings_spacer {
   width: 0.5em;
   border-right: 2px solid white;
   margin: 0px 0.25em 0px 0.25em;
 }
 
-.settings_spacer_rotated{
+.settings_spacer_rotated {
   width: 90% !important;
   border-top: 2px solid white !important;
   margin: 0.2em 0.25em 0.2em 0.2em !important;
 }
 
-#settings_icon{
+#settings_icon {
   position: relative;
   left: 20px;
   width: 30px;
@@ -1244,11 +1250,11 @@ body {
   cursor: pointer;
 }
 
-#settings_icon.shifted{
+#settings_icon.shifted {
   bottom: 45px;
 }
 
-.menu_bar{
+.menu_bar {
   height: 4px;
   width: 100%;
   border-radius: 2px;
@@ -1256,12 +1262,12 @@ body {
   margin-bottom: 7px;
 }
 
-#settings_popup{
+#settings_popup {
   background-color: #151519;
   border-radius: 0.5em;
-  border: 2px solid #BBBBCC;
+  border: 2px solid #bbbbcc;
   color: white;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   text-align: center;
   position: fixed;
   width: 60vh;
@@ -1274,11 +1280,11 @@ body {
   transform: translate(-50%, 20%);
 }
 
-#settings_popup.hidden{
+#settings_popup.hidden {
   display: none;
 }
 
-#settings_popup .title{
+#settings_popup .title {
   margin-top: 10px;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -1288,15 +1294,15 @@ body {
   user-select: none;
 }
 
-#settings_popup .small{
-  color: #AAA;
+#settings_popup .small {
+  color: #aaa;
   font-size: 0.5em !important;
   padding-left: 10px;
   position: absolute;
   bottom: 0.35em;
 }
 
-.settings_popup_rotated{
+.settings_popup_rotated {
   width: 60vw !important;
   height: 60vw !important;
   margin-left: 60vw !important;
@@ -1305,21 +1311,20 @@ body {
   font-size: 3em !important;
 }
 
-.altimeter_input{
+.altimeter_input {
   display: flex;
   flex-wrap: wrap;
   flex-grow: 1;
 }
 
-.relative{
+.relative {
   position: relative;
 }
 
-.altimeter_display{
-
+.altimeter_display {
 }
 
-.number_button{
+.number_button {
   flex: 1 0 30%; /* explanation below */
   margin: 5px;
   /* height: 100px; */
@@ -1337,18 +1342,18 @@ body {
   cursor: pointer;
 }
 
-.number_button:active{
+.number_button:active {
   background-color: #333;
   color: white;
 }
 
 /* ---------------- Notification ---------------- */
 
-.notification{
-  background-color: #587E4B;
+.notification {
+  background-color: #587e4b;
   border-radius: 4px;
   color: white;
-  font-family: 'Monaco';
+  font-family: "Monaco";
   font-size: 25px;
   position: fixed;
   padding: 0px 10px 0px 10px;
@@ -1361,7 +1366,7 @@ body {
   z-index: 2000;
 }
 
-.notification.portrait{
+.notification.portrait {
   bottom: 0px;
   top: unset;
   right: -40px;
@@ -1413,7 +1418,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.9);
+  background-color: rgba(0, 0, 0, 0.9);
   color: #ccc;
   /* Black background with opacity */
   z-index: 20;
@@ -1426,7 +1431,7 @@ body {
   padding-top: 20px;
   text-align: center;
   transition: opacity 0.5s ease;
-  font-family: 'Mukta', sans-serif;
+  font-family: "Mukta", sans-serif;
   overflow-y: scroll;
   overflow-x: hidden;
 }
@@ -1434,27 +1439,27 @@ body {
 #overlay p {
   text-align: justify;
   /* font-family: 'Aileron'; */
-  font-family: 'Marcellus', sans-serif;
+  font-family: "Marcellus", sans-serif;
 }
 
 #overlay_text {
   width: 100%;
 }
 
-#lock_orientation{
+#lock_orientation {
   position: relative;
   right: -50%;
   width: 100%;
   display: flex;
   flex-direction: row;
   line-height: 14px;
-  transform: translateX(-11%)
+  transform: translateX(-11%);
 }
 
-#lock_orientation .logo{
+#lock_orientation .logo {
   width: 4em;
   height: 4em;
-  background-color: #FFF;
+  background-color: #fff;
   opacity: 0.8;
   border-radius: 1em;
   color: black;
@@ -1462,7 +1467,7 @@ body {
   background-size: cover;
 }
 
-#lock_orientation .text{
+#lock_orientation .text {
   padding-top: 1.5em;
   /* width: 160px; */
   text-align: center;
@@ -1471,7 +1476,8 @@ body {
   line-height: 20px;
 }
 
-code {}
+code {
+}
 
 #overlay h1 {
   font-size: 40px;

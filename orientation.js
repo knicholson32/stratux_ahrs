@@ -18,6 +18,7 @@
 
 // Initialize orientation system
 function orientationInit() {
+  system.prevent_orientation_change_process = false;
   // Bind orientationChange to the window resize event
   $(window).resize(orientationChange);
 
@@ -47,6 +48,8 @@ function orientationInit() {
     system.device = "Android";
   }
 
+  system.is_ios = system.device === "iPad" || system.device === "iPhone";
+
   // Check if the system started in portrait mode and is a webapp
   if (
     system.fullscreen &&
@@ -54,7 +57,7 @@ function orientationInit() {
     system.device === "iPhone"
   ) {
     system.ios.correction = true;
-    system.ios.orgnial_height = $(window).height();
+    system.ios.original_height = $(window).height();
   }
 
   // Prompt the user to use fullscreen if they can
@@ -83,12 +86,16 @@ function confirmOrientationChange() {
 
 // Process an orientation change
 function orientationChange() {
+  if (system.prevent_orientation_change_process === true) return;
   // Reset the system screen width and height based on the current values
   system.screen_width = $(window).width();
   system.screen_height = $(window).height();
 
+  let option = system.screen_width > system.screen_height;
+  if (system.force_diff_orientation) option = !option;
+
   // Detect if in landscape or portrait based on the screen height and width
-  if (system.screen_width > system.screen_height) {
+  if (option) {
     // Set to landscape
     system.orinetation = "landscape";
     ar = system.screen_width / system.screen_height;
@@ -97,6 +104,18 @@ function orientationChange() {
     $("#ahrs_container").css("width", "100%");
     $("#ahrs_container").css("zoom", "100%");
     $("#ahrs_container").css("left", "unset");
+    $("#ahrs_container").css("top", "unset");
+    $("#settings_menu").css("height", "");
+    $("#settings_menu").css("width", "");
+    if (system.force_diff_orientation) {
+      $("#ahrs_container").css("transform", "rotate(-90deg)");
+      $("#settings_menu").css("zoom", "unset");
+      console.log("orientation mode 3");
+    } else {
+      $("#ahrs_container").css("transform", "unset");
+      $("#settings_menu").css("zoom", "unset");
+      console.log("orientation mode 4");
+    }
 
     if (system.overlay_active === true) {
       $("#overlay").css("height", system.screen_height);
@@ -121,7 +140,7 @@ function orientationChange() {
     // Detect if the user is using an ios device and correct for status bar
     // intrusion
     if (system.ios.correction === true) {
-      system.screen_height = system.ios.orgnial_height;
+      system.screen_height = system.ios.original_height;
       $("#ahrs_container").css("left", "31px");
     }
     // Set the system scale value ratio
@@ -132,7 +151,26 @@ function orientationChange() {
     $("#ahrs_container").css("width", width);
     $("#ahrs_container").css("height", height);
     // Set the scale to fit the portrait mode
-    $("#ahrs_container").css("zoom", system.scale * 100 + 1 + "%");
+    $("#ahrs_container").css("zoom", system.scale * 100 + "%");
+    $("#ahrs_container").css("top", "unset");
+    $("#settings_menu").css("height", "");
+    $("#settings_menu").css("width", "");
+
+    if (system.force_diff_orientation) {
+      $("#ahrs_container").css("transform", "rotate(90deg)");
+      $("#settings_menu").css("zoom", system.scale * 100 + "%");
+      $("#ahrs_container").css("width", system.scale * 100 + "%");
+      let scroll_prevent_width = $("#scroll_prevent").width();
+      let container_width =
+        (scroll_prevent_width * system.scale) / system.scale;
+      $("#ahrs_container").css("top", (container_width - height) / 2 + "px");
+      $("#settings_menu").css("height", scroll_prevent_width - 20 + "px");
+      console.log("orientation mode 1");
+    } else {
+      $("#ahrs_container").css("transform", "unset");
+      $("#settings_menu").css("zoom", "unset");
+      console.log("orientation mode 2");
+    }
 
     if (system.overlay_active === true) {
       $("#overlay").css("width", width + 20);
@@ -149,6 +187,17 @@ function orientationChange() {
     $(".settings_last").addClass("settings_last_rotated");
     $(".settings_spacer").addClass("settings_spacer_rotated");
   }
+
+  system.prevent_orientation_change_process = true;
+  $("meta[name=viewport]").attr(
+    "content",
+    "viewport-fit=cover, user-scalable=no, maximum-scale=0.1"
+  );
+  $("meta[name=viewport]").attr(
+    "content",
+    "viewport-fit=cover, user-scalable=no"
+  );
+  system.prevent_orientation_change_process = false;
 
   // Calculate scale factors for the ahrs virtual horizon bar
   let top = -20.08655 + 39.72259 * ar + 21.09178 * ar * ar;
@@ -196,5 +245,5 @@ function orientationChange() {
   generateTapes();
 
   // Check the orientation change after 1/2 second
-  setTimeout(confirmOrientationChange, 500);
+  // setTimeout(confirmOrientationChange, 500);
 }
