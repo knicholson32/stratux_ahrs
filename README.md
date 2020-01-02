@@ -15,7 +15,7 @@ This example image was created using simulated data, and shows all visual featur
 
 
 ### Installation:
-"stratux_ahrs" is simply a webpage that needs to be copied to the Raspberry pi's /var/www folder. If you can connect the Raspberry Pi to an ethernet internet connection, follow the instructions below. If internet on the Raspberry Pi is not available, clone the repository on a laptop and SFTP the files per the [Wiki](https://github.com/knicholson32/stratux_ahrs/wiki/Instillation)
+"stratux_ahrs" is simply a webpage that needs to be copied to the Raspberry pi's /var/www folder. If you can connect the Raspberry Pi to an ethernet internet connection, follow the instructions below. If internet on the Raspberry Pi is not available, clone the repository on a laptop and SFTP the files per the [Wiki](https://github.com/knicholson32/stratux_ahrs/wiki/Installation)
 
 - Connect the Raspberry pi with Stratux on it to internet via the ethernet jack. Also connect your computer to the stratux wifi network that is created.
 - [Login to the pi using ssh](https://github.com/cyoung/stratux/wiki/SSH-into-Stratux): (Password should be 'raspberry')
