@@ -62,7 +62,8 @@ var UNITS = {
   NAUTICLE_MILES: 9,
   FPNMI: 10,
   INHG: 11,
-  MILLIBAR: 12
+  MILLIBAR: 12,
+  HPA: 13
 };
 var SOURCE = {
   AHRS: 0,
@@ -118,9 +119,9 @@ var speedTape = {
 /** ******************************* ALTITUDE ******************************* **/
 var altTape = {
   units: UNITS.FEET, // Units for displaying altitude
-  altimeter_setting_unit: UNITS.KTS, // Units for entering altimeter settings (INHG or MILLIBAR)
+  altimeter_setting_unit: UNITS.INHG, // Units for entering altimeter settings (INHG, HPA or MILLIBAR)
   default_kollsman_inhg: 29.92, // Default kollsman setting for the baro altimeter (inHg)
-  default_kollsman_millibar: 1013.25 // Default kollsman setting for the baro altimeter (millibar)
+  default_kollsman_millibar_hpa: 1013.2 // Default kollsman setting for the baro altimeter (millibar / hPa)
 };
 /** ******************************* ******** ******************************* **/
 
@@ -195,6 +196,7 @@ var conv = {
   m2mi: 0.000621371,
   mi2m: 1609.3444978926,
   mps2mpm: 60,
-  mpm2mps: 0.01666666667
+  mpm2mps: 0.01666666667,
+  hpa2inhg: 0.029529983071445
 };
 /** ******************************** ****** ******************************** **/

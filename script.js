@@ -412,22 +412,30 @@ function fmuInit() {
 function altimeterSettingInit() {
   if (altTape.altimeter_setting_unit == UNITS.INHG) {
     altTape.kollsman = altTape.default_kollsman_inhg;
+    altTape.unit_text = "inHg";
   } else if (altTape.altimeter_setting_unit == UNITS.MILLIBAR) {
-    altTape.kollsman = altTape.default_kollsman_millibar;
+    altTape.kollsman = altTape.default_kollsman_millibar_hpa;
+    altTape.unit_text = "MB";
+  } else if (altTape.altimeter_setting_unit == UNITS.HPA) {
+    altTape.kollsman = altTape.default_kollsman_millibar_hpa;
+    altTape.unit_text = "hPa";
   } else {
     system.sendNotification(
-      `Invalid alt unit: defaulting to InHg.`,
+      `Invalid alt unit: defaulting to inHg.`,
       7000,
       (color = "red")
     );
+    altTape.altimeter_setting_unit = UNITS.INHG;
     altTape.kollsman = altTape.default_kollsman_inhg;
+    altTape.unit_text = "inHg";
   }
+  $("#altimeter_display_unit").html(altTape.unit_text);
+  altTape.kollsman_standard = altTape.kollsman;
 }
 
 // NOTICE: ALL INPUTS TO UPDATE FUNCTIONS ARE TO BE IN SI UNITS
 
 function initButtons() {
-  console.log(altTape.kollsman);
   let buttons = $(".number_button");
   for (let i = 0; i < buttons.length; i++) {
     let button = $(buttons[i]);
@@ -476,67 +484,144 @@ function initButtons() {
     }
   });
 
-  var baro_input_value = ["2", "9", "9", "2"];
+  var baro_input_value = ["0", "0", "0", "0", "0"];
   var pre_input = true;
   var index = 0;
   function updateBaroPressure(push = false) {
-    if (
-      push &&
-      (baro_input_value[0] === "" ||
-        baro_input_value[1] == "" ||
-        baro_input_value[2] == "" ||
-        baro_input_value[3] == "")
-    ) {
-      system.sendNotification(
-        `Please enter a valid altimeter setting`,
-        2000,
-        (color = "red")
-      );
-      return false;
+    if (push) {
+      if (altTape.altimeter_setting_unit === UNITS.INHG) {
+        if (
+          baro_input_value[0] === "" ||
+          baro_input_value[1] == "" ||
+          baro_input_value[2] == "" ||
+          baro_input_value[3] == ""
+        ) {
+          system.sendNotification(
+            `Please enter a valid altimeter setting`,
+            2000,
+            (color = "red")
+          );
+          return false;
+        }
+      } else {
+        if (
+          baro_input_value[0] === "" &&
+          baro_input_value[1] == "" &&
+          baro_input_value[2] == "" &&
+          baro_input_value[3] == "" &&
+          baro_input_value[4] == ""
+        ) {
+          system.sendNotification(
+            `Please enter a valid altimeter setting`,
+            2000,
+            (color = "red")
+          );
+          return false;
+        }
+      }
     }
-    let press_str =
-      "" +
-      baro_input_value[0] +
-      baro_input_value[1] +
-      "." +
-      baro_input_value[2] +
-      baro_input_value[3];
+    let press_str = "";
+    if (altTape.altimeter_setting_unit === UNITS.INHG) {
+      press_str =
+        "" +
+        baro_input_value[0] +
+        baro_input_value[1] +
+        "." +
+        baro_input_value[2] +
+        baro_input_value[3];
+    } else {
+      press_str =
+        "" +
+        baro_input_value[0] +
+        baro_input_value[1] +
+        baro_input_value[2] +
+        baro_input_value[3] +
+        "." +
+        baro_input_value[4];
+    }
     let val = parseFloat(press_str);
-    if (push || index == 4) {
-      if (val < 26) {
-        system.sendNotification(
-          `Altimeter setting too low`,
-          2000,
-          (color = "red")
-        );
-        val = 26;
-        baro_input_value = ["2", "6", "0", "0"];
-        press_str =
-          "" +
-          baro_input_value[0] +
-          baro_input_value[1] +
-          "." +
-          baro_input_value[2] +
-          baro_input_value[3];
-        $("#altimeter_display").html(press_str);
-        return false;
-      } else if (val > 32) {
-        system.sendNotification(
-          `Altimeter setting too high`,
-          2000,
-          (color = "red")
-        );
-        val = 32;
-        baro_input_value = ["3", "2", "0", "0"];
-        press_str =
-          "" +
-          baro_input_value[0] +
-          baro_input_value[1] +
-          "." +
-          baro_input_value[2] +
-          baro_input_value[3];
-        $("#altimeter_display").html(press_str);
-        return false;
+    if (altTape.altimeter_setting_unit === UNITS.INHG) {
+      if (push || index == 4) {
+        if (val < 26) {
+          system.sendNotification(
+            `Altimeter setting too low`,
+            2000,
+            (color = "red")
+          );
+          val = 26;
+          baro_input_value = ["2", "6", "0", "0", "0"];
+          press_str =
+            "" +
+            baro_input_value[0] +
+            baro_input_value[1] +
+            "." +
+            baro_input_value[2] +
+            baro_input_value[3];
+          $("#altimeter_display").html(press_str);
+          index = 0;
+          return false;
+        } else if (val > 32) {
+          system.sendNotification(
+            `Altimeter setting too high`,
+            2000,
+            (color = "red")
+          );
+          val = 32;
+          baro_input_value = ["3", "2", "0", "0", "0"];
+          press_str =
+            "" +
+            baro_input_value[0] +
+            baro_input_value[1] +
+            "." +
+            baro_input_value[2] +
+            baro_input_value[3];
+          $("#altimeter_display").html(press_str);
+          index = 0;
+          return false;
+        }
+      }
+    } else {
+      // Unit is MB or hPa
+      if (push || index > 5) {
+        if (val < 880.4) {
+          system.sendNotification(
+            `Altimeter setting too low`,
+            2000,
+            (color = "red")
+          );
+          val = 880.4;
+          baro_input_value = ["0", "8", "8", "0", "4"];
+          press_str =
+            "" +
+            baro_input_value[0] +
+            baro_input_value[1] +
+            baro_input_value[2] +
+            baro_input_value[3] +
+            "." +
+            baro_input_value[4];
+          $("#altimeter_display").html(press_str);
+          index = 0;
+          return false;
+        } else if (val > 1049.8) {
+          system.sendNotification(
+            `Altimeter setting too high`,
+            2000,
+            (color = "red")
+          );
+          val = 1049.8;
+          baro_input_value = ["1", "0", "4", "9", "8"];
+          press_str =
+            "" +
+            baro_input_value[0] +
+            baro_input_value[1] +
+            baro_input_value[2] +
+            baro_input_value[3] +
+            "." +
+            baro_input_value[4];
+          $("#altimeter_display").html(press_str);
+          index = 0;
+          return false;
+        }
       }
     }
     $("#altimeter_display").html(press_str);
@@ -549,14 +634,15 @@ function initButtons() {
   function updateKollsmanSetting(kollsman) {
     altTape.kollsman = kollsman;
     system.sendNotification(
-      `Updated altimeter to ${altTape.kollsman}inHg`,
+      `Updated altimeter to ${altTape.kollsman}${altTape.unit_text}`,
       4000
     );
     if (altTape.source == SOURCE.BARO) {
       $("#alt_annun_text").html(
         "Baro Altitude <span>" +
           altTape.kollsman +
-          "inHg, " +
+          altTape.unit_text +
+          ", " +
           altTape.unitPrefix +
           ", " +
           vspeedTape.unitPrefix +
@@ -566,16 +652,26 @@ function initButtons() {
   }
 
   function resetBaroInput(fromCurrent = false) {
+    let tmp = altTape.kollsman_standard;
     if (fromCurrent) {
-      let tmp = altTape.kollsman;
+      tmp = altTape.kollsman;
+    }
+    if (altTape.altimeter_setting_unit === UNITS.INHG) {
       baro_input_value = [
         Math.floor((tmp / 10) % 10),
         Math.floor(tmp % 10),
         Math.floor((tmp * 10) % 10),
-        Math.floor((tmp * 100) % 10)
+        Math.floor((tmp * 100) % 10),
+        ""
       ];
     } else {
-      baro_input_value = ["2", "9", "9", "2"];
+      baro_input_value = [
+        Math.floor((tmp / 1000) % 10),
+        Math.floor((tmp / 100) % 10),
+        Math.floor((tmp / 10) % 10),
+        Math.floor(tmp % 10),
+        Math.floor((tmp * 10) % 10)
+      ];
     }
 
     updateBaroPressure();
@@ -595,12 +691,12 @@ function initButtons() {
 
   function addValue(val) {
     if (pre_input) {
-      baro_input_value = ["", "", "", ""];
+      baro_input_value = ["", "", "", "", ""];
       pre_input = false;
     }
     baro_input_value[index] = val;
     index += 1;
-    if (index === 4) {
+    if (index === (altTape.altimeter_setting_unit === UNITS.INHG ? 4 : 5)) {
       pre_input = true;
       index = 0;
     }
@@ -624,7 +720,7 @@ function initButtons() {
         break;
       case "Clr":
         pre_redix = false;
-        baro_input_value = ["", "", "", ""];
+        baro_input_value = ["", "", "", "", ""];
         index = 0;
         updateBaroPressure();
         break;
@@ -641,7 +737,7 @@ function initButtons() {
   });
 
   $("#set_std_baro").click(() => {
-    updateKollsmanSetting(29.92);
+    updateKollsmanSetting(altTape.kollsman_standard);
   });
   $("#force_update").click(() => {
     window.location.reload(true);
@@ -678,7 +774,8 @@ function initButtons() {
         $("#alt_annun_text").html(
           "Baro Altitude <span>" +
             altTape.kollsman +
-            "inHg, " +
+            altTape.unit_text +
+            ", " +
             altTape.unitPrefix +
             ", " +
             vspeedTape.unitPrefix +
@@ -848,7 +945,8 @@ function generateTapes() {
   }
   $("#alt_annun_text span").html(
     altTape.kollsman +
-      "inHg, " +
+      altTape.unit_text +
+      ", " +
       altTape.unitPrefix +
       ", " +
       vspeedTape.unitPrefix
@@ -1070,8 +1168,12 @@ function generateTapes() {
   // Define the altitude tape update method
   altTape.update = function(alt, override) {
     // Alt in meters at this time. Need to apply Kollsman setting:
+    let kollsman_inhg_tmp = altTape.kollsman;
+    if (altTape.altimeter_setting_unit !== UNITS.INHG)
+      // Alt setting is in hPa - convert to inHg
+      kollsman_inhg_tmp = altTape.kollsman * conv.hpa2inhg;
     alt =
-      -44307.6 * (1 - 0.523779 * Math.pow(altTape.kollsman, 0.190284)) + alt;
+      -44307.6 * (1 - 0.523779 * Math.pow(kollsman_inhg_tmp, 0.190284)) + alt;
     // Unit conversion
     alt *= altTape.conv;
     // Position the scroll div
