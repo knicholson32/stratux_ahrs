@@ -429,6 +429,11 @@ function altimeterSettingInit() {
     altTape.kollsman = altTape.default_kollsman_inhg;
     altTape.unit_text = "inHg";
   }
+  let setting = getCookie("altimeter_setting");
+  let setting_unit = getCookie("altimeter_setting_unit");
+  if (setting != "" && setting_unit === altTape.unit_text) {
+    altTape.kollsman = parseFloat(setting);
+  }
   $("#altimeter_display_unit").html(altTape.unit_text);
   altTape.kollsman_standard = altTape.kollsman;
 }
@@ -633,6 +638,8 @@ function initButtons() {
 
   function updateKollsmanSetting(kollsman) {
     altTape.kollsman = kollsman;
+    setCookie("altimeter_setting", altTape.kollsman, altTape.kollsman_memory_seconds);
+    setCookie("altimeter_setting_unit", altTape.unit_text, altTape.kollsman_memory_seconds);
     system.sendNotification(
       `Updated altimeter to ${altTape.kollsman}${altTape.unit_text}`,
       4000

@@ -63,6 +63,7 @@ var UNITS = {
   FPNMI: 10,
   INHG: 11,
   MILLIBAR: 12,
+  MB: 12,
   HPA: 13
 };
 var SOURCE = {
@@ -121,7 +122,8 @@ var altTape = {
   units: UNITS.FEET, // Units for displaying altitude
   altimeter_setting_unit: UNITS.INHG, // Units for entering altimeter settings (INHG, HPA or MILLIBAR)
   default_kollsman_inhg: 29.92, // Default kollsman setting for the baro altimeter (inHg)
-  default_kollsman_millibar_hpa: 1013.2 // Default kollsman setting for the baro altimeter (millibar / hPa)
+  default_kollsman_millibar_hpa: 1013.2, // Default kollsman setting for the baro altimeter (millibar / hPa)
+  kollsman_memory_seconds: 18000 // Number of seconds the kollsman setting will be remembered (cookie)
 };
 /** ******************************* ******** ******************************* **/
 
