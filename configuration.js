@@ -60,7 +60,9 @@ var UNITS = {
   M: 7,
   MILES: 8,
   NAUTICLE_MILES: 9,
-  FPNMI: 10
+  FPNMI: 10,
+  INHG: 11,
+  MILLIBAR: 12
 };
 var SOURCE = {
   AHRS: 0,
@@ -116,7 +118,9 @@ var speedTape = {
 /** ******************************* ALTITUDE ******************************* **/
 var altTape = {
   units: UNITS.FEET, // Units for displaying altitude
-  kollsman: 29.92 // Default kollsman setting for the baro altimeter
+  altimeter_setting_unit: UNITS.KTS, // Units for entering altimeter settings (INHG or MILLIBAR)
+  default_kollsman_inhg: 29.92, // Default kollsman setting for the baro altimeter (inHg)
+  default_kollsman_millibar: 1013.25 // Default kollsman setting for the baro altimeter (millibar)
 };
 /** ******************************* ******** ******************************* **/
 

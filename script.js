@@ -50,10 +50,8 @@ function systemInit() {
   // Bind button interactions to their functions
   initButtons();
 
-  if(getUrlParameter('simulate') === 'true')
-    system.simulate = true;
-  else if (getUrlParameter('simulate') === 'false')
-    system.simulate = false;
+  if (getUrlParameter("simulate") === "true") system.simulate = true;
+  else if (getUrlParameter("simulate") === "false") system.simulate = false;
 
   // Set up simulation if simulate is enabled
   if (system.simulate) {
@@ -411,9 +409,25 @@ function fmuInit() {
   };
 }
 
+function altimeterSettingInit() {
+  if (altTape.altimeter_setting_unit == UNITS.INHG) {
+    altTape.kollsman = altTape.default_kollsman_inhg;
+  } else if (altTape.altimeter_setting_unit == UNITS.MILLIBAR) {
+    altTape.kollsman = altTape.default_kollsman_millibar;
+  } else {
+    system.sendNotification(
+      `Invalid alt unit: defaulting to InHg.`,
+      7000,
+      (color = "red")
+    );
+    altTape.kollsman = altTape.default_kollsman_inhg;
+  }
+}
+
 // NOTICE: ALL INPUTS TO UPDATE FUNCTIONS ARE TO BE IN SI UNITS
 
 function initButtons() {
+  console.log(altTape.kollsman);
   let buttons = $(".number_button");
   for (let i = 0; i < buttons.length; i++) {
     let button = $(buttons[i]);
@@ -716,6 +730,7 @@ var updateHeading = 0;
 
 function generateTapes() {
   $("div.volitile").remove();
+  altimeterSettingInit();
 
   // Define height and width characteristics
   speedTape.width = $("#speed_tape").outerWidth();
@@ -768,19 +783,11 @@ function generateTapes() {
     default:
       console.error("Cannot use speed unit: " + speedTape.units);
   }
-  speedTape.lowerSpeed = Math.round(
-    speedTape.lowerSpeed
-  );
-  speedTape.upperSpeed = Math.round(
-    speedTape.upperSpeed
-  );
+  speedTape.lowerSpeed = Math.round(speedTape.lowerSpeed);
+  speedTape.upperSpeed = Math.round(speedTape.upperSpeed);
   for (var i = 0; i < speedTape.speeds.length; i++) {
-    speedTape.speeds[i].start = Math.round(
-      speedTape.speeds[i].start
-    );
-    speedTape.speeds[i].end = Math.round(
-      speedTape.speeds[i].end
-    );
+    speedTape.speeds[i].start = Math.round(speedTape.speeds[i].start);
+    speedTape.speeds[i].end = Math.round(speedTape.speeds[i].end);
   }
   $("#speed_annun_text").html("GPS GS " + speedTape.unitPrefix);
 
@@ -839,7 +846,6 @@ function generateTapes() {
     default:
       console.error("Cannot use vspeed unit: " + vspeedTape.units);
   }
-
   $("#alt_annun_text span").html(
     altTape.kollsman +
       "inHg, " +
@@ -1981,19 +1987,20 @@ function doRefresh() {
 
 var getUrlParameter = function getUrlParameter(sParam) {
   var sPageURL = window.location.search.substring(1),
-    sURLVariables = sPageURL.split('&'),
+    sURLVariables = sPageURL.split("&"),
     sParameterName,
     i;
 
   for (i = 0; i < sURLVariables.length; i++) {
-    sParameterName = sURLVariables[i].split('=');
+    sParameterName = sURLVariables[i].split("=");
 
     if (sParameterName[0] === sParam) {
-      return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+      return sParameterName[1] === undefined
+        ? true
+        : decodeURIComponent(sParameterName[1]);
     }
   }
 };
-
 
 const times = [];
 let fps;
