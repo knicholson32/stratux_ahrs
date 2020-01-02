@@ -49,6 +49,12 @@ function systemInit() {
   orientationInit();
   // Bind button interactions to their functions
   initButtons();
+
+  if(getUrlParameter('simulate') === 'true')
+    system.simulate = true;
+  else if (getUrlParameter('simulate') === 'false')
+    system.simulate = false;
+
   // Set up simulation if simulate is enabled
   if (system.simulate) {
     // Init the simulation pace variable
@@ -1972,6 +1978,22 @@ function doRefresh() {
   setCookie("bypass_warning", "true", 5);
   location.reload();
 }
+
+var getUrlParameter = function getUrlParameter(sParam) {
+  var sPageURL = window.location.search.substring(1),
+    sURLVariables = sPageURL.split('&'),
+    sParameterName,
+    i;
+
+  for (i = 0; i < sURLVariables.length; i++) {
+    sParameterName = sURLVariables[i].split('=');
+
+    if (sParameterName[0] === sParam) {
+      return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+    }
+  }
+};
+
 
 const times = [];
 let fps;
