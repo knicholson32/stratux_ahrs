@@ -4,7 +4,7 @@
   "description": "AHRS Display for the Raspberry pi powered Stratux software.",
   "main": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Notice: no test specified\" && exit 0",
     "lint": "./node_modules/.bin/eslint ./js/*.js",
     "lint-fix": "./node_modules/.bin/eslint *.js --fix",
     "host": "./host.sh"
