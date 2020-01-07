@@ -42,7 +42,7 @@ var system = {
   fmu_url: "ws://raspberrypi.local:8888",
   enable_fmu: false, // Enable FMU support - in development
   cpu_temp_warn: 70, // Temp at which the 'Temp' banner will be displayed (C)
-  allowReload: true, // Allows the app to automatically reload if it detects an issue
+  allow_reload: true, // Allows the app to automatically reload if it detects an issue
   status_url: "http://raspberrypi.local/getStatus",
   push_url: "http://raspberrypi.local",
   simulate: false
@@ -221,3 +221,9 @@ var conv = {
   hpa2inhg: 0.029529983071445
 };
 /** ******************************** ****** ******************************** **/
+
+if ( typeof module !== "undefined" ) {
+  module.exports = {
+    system: system
+  };
+}

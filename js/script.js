@@ -201,7 +201,7 @@ function ahrsWSInit() {
     console.log( "Reconnecting after 0.5 seconds:" );
     system.ahrs.inactiveCounter++;
     if (
-      system.allowReload &&
+      system.allow_reload &&
       system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount
     ) {
       console.log( "Reboot!" );
@@ -229,7 +229,7 @@ function ahrsWSInit() {
     if ( d - system.ahrs.updateTimeout > ahrsWS.lastMessage ) {
       ahrsWS.close();
       if (
-        system.allowReload &&
+        system.allow_reload &&
         system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount
       ) {
         console.log( "Reboot!" );

@@ -16,5 +16,6 @@
     "lines-around-comment": "off",
     "camelcase": "off",
     "no-unused-vars": "warn"
-  }
+  },
+  "plugins": ["jest"]
 }

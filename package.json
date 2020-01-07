@@ -4,7 +4,7 @@
   "description": "AHRS Display for the Raspberry pi powered Stratux software.",
   "main": "",
   "scripts": {
-    "test": "echo \"Notice: no test specified\" && exit 0",
+    "test": "jest",
     "lint": "./node_modules/.bin/eslint ./js/*.js",
     "lint-fix": "./node_modules/.bin/eslint *.js --fix",
     "host": "./host.sh"
@@ -33,8 +33,10 @@
     "eslint-config-jquery": "^2.0.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-jest": "^23.3.0",
     "eslint-plugin-node": "^11.0.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1"
+    "eslint-plugin-standard": "^4.0.1",
+    "jest": "^24.9.0"
   }
 }
