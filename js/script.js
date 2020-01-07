@@ -840,26 +840,27 @@ function initButtons() {
     vspeedTape.source = altTape.source;
   } );
 
-  system.checkWS = true;
-  system.smooth = true;
-  $( "#sat_count" ).click( function() {
-    var r = confirm( ( system.smooth ? "Disable" : "Enable" ) + " Smoothing?" );
-    if ( r === false ) {
-      r = confirm( ( system.checkWS ? "Disable" : "Enable" ) + " Check WS?" );
-      if ( r === true ) { system.checkWS = !system.checkWS; }
-    } else {
-      system.smooth = !system.smooth;
-      if ( system.smooth ) {
-        html.css( "--ease_time", "0.2s" );
-        html.css( "--hdg_ease_time", "0.2s" );
-        html.css( "--aux_ease_time", "0.2s" );
-      } else {
-        html.css( "--ease_time", "0s" );
-        html.css( "--hdg_ease_time", "0s" );
-        html.css( "--aux_ease_time", "0s" );
-      }
-    }
-  } );
+  // TODO: Restore this functionality to a proper menu
+  // system.checkWS = true;
+  // system.smooth = true;
+  // $( "#sat_count" ).click( function() {
+  //   var r = confirm( ( system.smooth ? "Disable" : "Enable" ) + " Smoothing?" );
+  //   if ( r === false ) {
+  //     r = confirm( ( system.checkWS ? "Disable" : "Enable" ) + " Check WS?" );
+  //     if ( r === true ) { system.checkWS = !system.checkWS; }
+  //   } else {
+  //     system.smooth = !system.smooth;
+  //     if ( system.smooth ) {
+  //       html.css( "--ease_time", "0.2s" );
+  //       html.css( "--hdg_ease_time", "0.2s" );
+  //       html.css( "--aux_ease_time", "0.2s" );
+  //     } else {
+  //       html.css( "--ease_time", "0s" );
+  //       html.css( "--hdg_ease_time", "0s" );
+  //       html.css( "--aux_ease_time", "0s" );
+  //     }
+  //   }
+  // } );
 }
 
 var currentHeading = 0;
