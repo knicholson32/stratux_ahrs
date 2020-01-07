@@ -1106,6 +1106,7 @@ body {
   position: absolute;
   bottom: 10px;
   left: 5px;
+  display: none;
 }
 
 .fmu_h {
