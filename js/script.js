@@ -18,6 +18,7 @@
 // ============================================== //
 
 var html;
+var message_flag;
 
 // Run systemInit when the DOM is ready for modifications.
 $( document ).ready( systemInit );
@@ -25,6 +26,7 @@ $( document ).ready( systemInit );
 // System Initialization function
 function systemInit() {
   html = $( "html" );
+  message_flag = $( "#message_flag" );
 
   // Print init message
   console.log( "JS INIT" );
@@ -244,9 +246,11 @@ function ahrsWSInit() {
 
   ahrsWS.onmessage = function( message ) {
     ahrsWS.lastMessage = new Date().getTime();
-    $( "#message_flag" ).toggleClass( "bright" );
+    message_flag.toggleClass( "bright" );
     if ( message.isTrusted ) {
       system.ahrs.inactiveCounter = 0;
+      // TODO: Consider using a JSON parser that takes schema into account
+      // For example: https://github.com/mafintosh/turbo-json-parse
       var data = JSON.parse( message.data );
 
       // console.log(data);
@@ -291,6 +295,7 @@ function ahrsWSInit() {
         case SOURCE.GPS:
           if ( gpsValid ) {
             // vspeedTape.update(data.GPSVerticalSpeed * conv.fps2mps);    // Given in f/s -> 100ft/min  BaroVerticalSpeed GPSVerticalSpeed
+            // eslint-disable-next-line no-undef
             altTape.update( data.GPSAltitudeMSL * conv.ft2m ); // BaroPressureAltitude BaroPressureAltitude GPSAltitudeMSL
           }
           break;
@@ -429,12 +434,15 @@ function altimeterSettingInit() {
   if ( altTape.altimeter_setting_unit === UNITS.INHG ) {
     altTape.kollsman = altTape.default_kollsman_inhg;
     altTape.unit_text = "inHg";
+    altTape.kollsman_standard = altTape.kollsman;
   } else if ( altTape.altimeter_setting_unit === UNITS.MILLIBAR ) {
     altTape.kollsman = altTape.default_kollsman_millibar_hpa;
     altTape.unit_text = "MB";
+    altTape.kollsman_standard = altTape.kollsman;
   } else if ( altTape.altimeter_setting_unit === UNITS.HPA ) {
     altTape.kollsman = altTape.default_kollsman_millibar_hpa;
     altTape.unit_text = "hPa";
+    altTape.kollsman_standard = altTape.kollsman;
   } else {
     system.sendNotification(
       "Invalid alt unit: defaulting to inHg.",
@@ -452,7 +460,6 @@ function altimeterSettingInit() {
     altTape.kollsman = parseFloat( setting );
   }
   $( "#altimeter_display_unit" ).html( altTape.unit_text );
-  altTape.kollsman_standard = altTape.kollsman;
 }
 
 // NOTICE: ALL INPUTS TO UPDATE FUNCTIONS ARE TO BE IN SI UNITS
@@ -1122,13 +1129,18 @@ function generateTapes() {
     "<div id=\"speed_fmu\" class=\"fmu_h volitile\"></div>"
   );
 
+  // Save jQuery objects for faster update
+  speedTape.speed_tape_scroll = $( "#speed_tape_scroll" );
+  speedTape.speed_counter_text = $( "#speed_counter_text" );
+  speedTape.speed_fmu = $( "#speed_fmu" );
+
   // Define the speed tape update method
   speedTape.update = function( s, override ) {
     // Unit conversion
     s *= speedTape.conv;
 
     // Position the scroll div
-    $( "#speed_tape_scroll" ).css(
+    speedTape.speed_tape_scroll.css(
       "top",
       s * speedTape.pixels_per_number -
         speedTape.total_height +
@@ -1141,15 +1153,15 @@ function generateTapes() {
 
     // Pad and display speed in the speed box
     if ( s < 10 ) {
-      $( "#speed_counter_text" ).html( "00" + s );
+      speedTape.speed_counter_text.html( "00" + s );
     } else if ( s < 100 ) {
-      $( "#speed_counter_text" ).html( "0" + s );
+      speedTape.speed_counter_text.html( "0" + s );
     } else {
-      $( "#speed_counter_text" ).html( s );
+      speedTape.speed_counter_text.html( s );
     }
     if ( !isNaN( speedTape.fmu_speed ) && speedTape.fmu_speed != null ) {
-      $( "#speed_fmu" ).css( "display", "block" );
-      $( "#speed_fmu" ).css(
+      speedTape.speed_fmu.css( "display", "block" );
+      speedTape.speed_fmu.css(
         "bottom",
         -( speedTape.upperSpeed - speedTape.fmu_speed ) *
           speedTape.pixels_per_number -
@@ -1157,7 +1169,7 @@ function generateTapes() {
           "px"
       );
     } else {
-      $( "#speed_fmu" ).css( "display", "none" );
+      speedTape.speed_fmu.css( "display", "none" );
     }
 
     checkIn( AHRS_TYPE.SPEED, override );
@@ -1171,6 +1183,8 @@ function generateTapes() {
   tick_offset = 4;
   altTape.pixels_per_number = 2.2;
   altTape.total_height = 0;
+  altTape.saved_kollsman_setting = -1;
+  altTape.alt_offset = 0;
 
   // Calculate tick offset based on text size
   altTape.offset = speedTape.offset;
@@ -1221,22 +1235,34 @@ function generateTapes() {
   }
   $( "#alt_tape_text" ).append( "<div class=\"alt_tape_index volitile\">0</div>" );
 
+  // Save jQuery objects for faster update
+  altTape.alt_tape_scroll = $( "#alt_tape_scroll" );
+  altTape.alt_counter_text = $( "#alt_counter_text" );
+
   // Define the altitude tape update method
   altTape.update = function( alt, override ) {
-    // Alt in meters at this time. Need to apply Kollsman setting:
-    let kollsman_inhg_tmp = altTape.kollsman;
-    if ( altTape.altimeter_setting_unit !== UNITS.INHG ) {
-      // Alt setting is in hPa - convert to inHg
-      kollsman_inhg_tmp = altTape.kollsman * conv.hpa2inhg;
+    // Alt in meters at this time.
+    // Check if we are using baro as the altitude source
+    if ( altTape.source === SOURCE.BARO ) {
+      // Need to apply the kollsman setting
+      let kollsman_inhg_tmp = altTape.kollsman;
+      if ( altTape.altimeter_setting_unit !== UNITS.INHG ) {
+        // Alt setting is in hPa - convert to inHg
+        kollsman_inhg_tmp = altTape.kollsman * conv.hpa2inhg;
+      }
+      if ( altTape.saved_kollsman_setting !== kollsman_inhg_tmp ) {
+        // The kollsman setting has changed! Time to recalculate the altitude offset
+        altTape.alt_offset = -44307.6 * ( 1 - 0.523779 * Math.pow( kollsman_inhg_tmp, 0.190284 ) );
+        altTape.saved_kollsman_setting = kollsman_inhg_tmp;
+        console.info( `Updated Kollsman Altitude Offset using ${kollsman_inhg_tmp}inHg` );
+      }
+      alt = alt + altTape.alt_offset;
     }
-    alt =
-      -44307.6 * ( 1 - 0.523779 * Math.pow( kollsman_inhg_tmp, 0.190284 ) ) + alt;
-
     // Unit conversion
     alt *= altTape.conv;
 
     // Position the scroll div
-    $( "#alt_tape_scroll" ).css(
+    altTape.alt_tape_scroll.css(
       "top",
       ( alt / 10 ) * altTape.pixels_per_number -
         altTape.total_height +
@@ -1249,35 +1275,36 @@ function generateTapes() {
 
     // Pad and display the altitude in the altitude box
     if ( alt <= -1000 ) {
-      $( "#alt_counter_text" ).html( Math.abs( alt ) );
+      altTape.alt_counter_text.html( Math.abs( alt ) );
     } else if ( alt <= -100 ) {
-      $( "#alt_counter_text" ).html( "-" + Math.abs( alt ) );
+      altTape.alt_counter_text.html( "-" + Math.abs( alt ) );
     } else if ( alt <= -10 ) {
-      $( "#alt_counter_text" ).html( "-0" + Math.abs( alt ) );
+      altTape.alt_counter_text.html( "-0" + Math.abs( alt ) );
     } else if ( alt < 0 ) {
-      $( "#alt_counter_text" ).html( "-00" + Math.abs( alt ) );
+      altTape.alt_counter_text.html( "-00" + Math.abs( alt ) );
     } else if ( alt < 10 ) {
-      $( "#alt_counter_text" ).html( "000" + alt );
+      altTape.alt_counter_text.html( "000" + alt );
     } else if ( alt < 100 ) {
-      $( "#alt_counter_text" ).html( "00" + alt );
+      altTape.alt_counter_text.html( "00" + alt );
     } else if ( alt < 1000 ) {
-      $( "#alt_counter_text" ).html( "0" + alt );
+      altTape.alt_counter_text.html( "0" + alt );
     } else if ( alt < 10000 ) {
-      $( "#alt_counter_text" ).html( alt );
+      altTape.alt_counter_text.html( alt );
     } else {
-      $( "#alt_counter_text" ).html( Math.floor( alt / 100 ) + "X" );
+      altTape.alt_counter_text.html( Math.floor( alt / 100 ) + "X" );
     }
-    if ( !isNaN( altTape.fmu_alt ) && altTape.fmu_alt != null ) {
-      $( "#alt_fmu" ).css(
-        "bottom",
-        ( -( 10000 - altTape.fmu_alt ) * altTape.pixels_per_number ) / 10 -
-          30 +
-          "px"
-      );
-      $( "#alt_fmu" ).css( "display", "block" );
-    } else {
-      $( "#alt_fmu" ).css( "display", "none" );
-    }
+
+    // if ( !isNaN( altTape.fmu_alt ) && altTape.fmu_alt != null ) {
+    //   $( "#alt_fmu" ).css(
+    //     "bottom",
+    //     ( -( 10000 - altTape.fmu_alt ) * altTape.pixels_per_number ) / 10 -
+    //       30 +
+    //       "px"
+    //   );
+    //   $( "#alt_fmu" ).css( "display", "block" );
+    // } else {
+    //   $( "#alt_fmu" ).css( "display", "none" );
+    // }
 
     checkIn( AHRS_TYPE.ALT, override );
   };
@@ -1356,6 +1383,10 @@ function generateTapes() {
     text_pos += vspeedTape.pixels_per_number * 5;
   }
 
+  // Save jQuery objects for faster update
+  vspeedTape.vspeed_pointer = $( "#vspeed_pointer" );
+  vspeedTape.vspeed_trail = $( "#vspeed_trail" );
+
   // Define the altitude tape update method
   vspeedTape.update = function( vspeed, override ) {
     // Unit conversion
@@ -1363,28 +1394,28 @@ function generateTapes() {
     vspeed /= 10000;
 
     // Position the vspeed pointer
-    $( "#vspeed_pointer" ).css(
+    vspeedTape.vspeed_pointer.css(
       "top",
       vspeedTape.height / 2 -
         vspeed * vspeedTape.pixels_per_number -
-        $( "#vspeed_pointer" ).outerHeight() / 2 -
+        vspeedTape.vspeed_pointer.outerHeight() / 2 -
         14 +
         vspeedTape.total_offset
     );
 
     // Set the vspeed tail position and height
     if ( vspeed > 0 ) {
-      $( "#vspeed_trail" ).css(
+      vspeedTape.vspeed_trail.css(
         "top",
         vspeedTape.height / 2 -
           vspeed * vspeedTape.pixels_per_number -
           3 +
           vspeedTape.total_offset
       );
-      $( "#vspeed_trail" ).css( "height", vspeed * vspeedTape.pixels_per_number );
+      vspeedTape.vspeed_trail.css( "height", vspeed * vspeedTape.pixels_per_number );
     } else {
-      $( "#vspeed_trail" ).css( "height", -vspeed * vspeedTape.pixels_per_number );
-      $( "#vspeed_trail" ).css(
+      vspeedTape.vspeed_trail.css( "height", -vspeed * vspeedTape.pixels_per_number );
+      vspeedTape.vspeed_trail.css(
         "top",
         vspeedTape.height / 2 - 3 + vspeedTape.total_offset
       );
@@ -1599,8 +1630,9 @@ function generateTapes() {
   // Generate Turn Coordinator                                                //
   // ------------------------------------------------------------------------ //
 
-  var turnCoordinatorArrow = $( "#tcarrow" );
-  var turnCoordinatorBar = $( "#tcbar" );
+  // Save jQuery objects for faster update
+  turnCoordinator.arrow = $( "#tcarrow" );
+  turnCoordinator.bar = $( "#tcbar" );
   if ( turnCoordinator.display === false ) {
     turnCoordinator.update = function( _rate, _override ) {};
   } else {
@@ -1617,21 +1649,21 @@ function generateTapes() {
       }
       if ( Math.abs( rate ) < 0.2 ) {
         html.css( "--turn_rate", "0px" );
-        turnCoordinatorArrow.addClass( "hide" );
+        turnCoordinator.arrow.addClass( "hide" );
       } else {
         if ( rate < 0 ) {
-          turnCoordinatorBar.addClass( "right" );
-          turnCoordinatorArrow.addClass( "right" );
-          turnCoordinatorBar.removeClass( "left" );
-          turnCoordinatorArrow.removeClass( "left" );
+          turnCoordinator.bar.addClass( "right" );
+          turnCoordinator.arrow.addClass( "right" );
+          turnCoordinator.bar.removeClass( "left" );
+          turnCoordinator.arrow.removeClass( "left" );
         } else {
-          turnCoordinatorBar.addClass( "left" );
-          turnCoordinatorArrow.addClass( "left" );
-          turnCoordinatorBar.removeClass( "right" );
-          turnCoordinatorArrow.removeClass( "right" );
+          turnCoordinator.bar.addClass( "left" );
+          turnCoordinator.arrow.addClass( "left" );
+          turnCoordinator.bar.removeClass( "right" );
+          turnCoordinator.arrow.removeClass( "right" );
         }
         const px = ( Math.abs( rate ) * 100 ) / 3;
-        turnCoordinatorArrow.removeClass( "hide" );
+        turnCoordinator.arrow.removeClass( "hide" );
         html.css( "--turn_rate", `${px}px` );
       }
     };
@@ -1664,13 +1696,18 @@ function generateTapes() {
 
   headingTape.span = headingTape.width / headingTape.ticks_per_number / 2;
 
+  // Save jQuery objects for faster update
+  headingTape.text_span = $( "#heading_text span" );
+  headingTape.tape_scroll = $( "#heading_tape_scroll" );
+  headingTape.speed_tape = $( "#speed_tape" );
+
   // Define the heading tape update method
   headingTape.update = function( heading, override ) {
     heading = constrainDegree( Math.round( heading ) );
     headingTape.heading = heading;
 
     // Update the heading text to display the new heading
-    $( "#heading_text span" ).html( pad( heading, 3 ) + "°" );
+    headingTape.text_span.html( pad( heading, 3 ) + "°" );
 
     // Check that the tape does not need to be recalculated for the new heading
     if (
@@ -1695,40 +1732,40 @@ function generateTapes() {
     // the CSS to catch up
     setTimeout( function() {
       if ( !headingTape.removeAnimation ) {
-        $( "#heading_tape_scroll" ).css(
+        headingTape.tape_scroll.css(
           "transition",
           "all var(--hdg_ease_time) ease 0s"
         );
       }
 
       // $('#heading_tape_scroll').addClass('annimate');
-      $( "#heading_tape_scroll" ).css( "left", value );
+      headingTape.tape_scroll.css( "left", value );
     }, 10 );
 
     // Update the current heading
     currentHeading = heading;
-    if (
-      !isNaN( headingTape.fmu_hdg ) &&
-      headingTape.fmu_hdg != null &&
-      getDegreeDistance( headingTape.heading, headingTape.fmu_hdg, false ) >
-        headingTape.span / 2 + 1
-    ) {
-      $( "#hdg_fmu_arrow" ).css( "display", "block" );
-      if (
-        ( constrainDegree( headingTape.heading - headingTape.fmu_hdg ) < 180 ) ===
-        false
-      ) {
-        $( "#hdg_fmu_arrow" ).css( "left", "unset" );
-        $( "#hdg_fmu_arrow" ).css( "right", "5px" );
-        $( "#hdg_fmu_arrow" ).css( "transform", "rotate(180deg)" );
-      } else {
-        $( "#hdg_fmu_arrow" ).css( "left", "5px" );
-        $( "#hdg_fmu_arrow" ).css( "right", "unset" );
-        $( "#hdg_fmu_arrow" ).css( "transform", "rotate(0deg)" );
-      }
-    } else {
-      $( "#hdg_fmu_arrow" ).css( "display", "none" );
-    }
+    // if (
+    //   !isNaN( headingTape.fmu_hdg ) &&
+    //   headingTape.fmu_hdg != null &&
+    //   getDegreeDistance( headingTape.heading, headingTape.fmu_hdg, false ) >
+    //     headingTape.span / 2 + 1
+    // ) {
+    //   $( "#hdg_fmu_arrow" ).css( "display", "block" );
+    //   if (
+    //     ( constrainDegree( headingTape.heading - headingTape.fmu_hdg ) < 180 ) ===
+    //     false
+    //   ) {
+    //     $( "#hdg_fmu_arrow" ).css( "left", "unset" );
+    //     $( "#hdg_fmu_arrow" ).css( "right", "5px" );
+    //     $( "#hdg_fmu_arrow" ).css( "transform", "rotate(180deg)" );
+    //   } else {
+    //     $( "#hdg_fmu_arrow" ).css( "left", "5px" );
+    //     $( "#hdg_fmu_arrow" ).css( "right", "unset" );
+    //     $( "#hdg_fmu_arrow" ).css( "transform", "rotate(0deg)" );
+    //   }
+    // } else {
+    //   $( "#hdg_fmu_arrow" ).css( "display", "none" );
+    // }
     checkIn( AHRS_TYPE.HDG, override );
   };
 
@@ -1739,19 +1776,19 @@ function generateTapes() {
 
     // $('#heading_tape_scroll').removeClass('annimate');
     if ( !headingTape.removeAnimation ) {
-      $( "#heading_tape_scroll" ).css( "transition", "all 0s ease 0s" );
+      headingTape.tape_scroll.css( "transition", "all 0s ease 0s" );
     }
 
     // Clear current system
-    $( "#heading_tape_scroll" ).html( "" );
+    headingTape.tape_scroll.html( "" );
 
     // Calculate pixels per tick using dimenstions and range
     headingTape.pixels_per_tick =
-      ( system.ahrs.width - 2 * $( "#speed_tape" ).outerWidth() ) /
+      ( system.ahrs.width - 2 * headingTape.speed_tape.outerWidth() ) /
       headingTape.range;
 
     // Calculate direction
-    var direction = !( constrainDegree( updateHeading - heading ) < 180 );
+    const direction = !( constrainDegree( updateHeading - heading ) < 180 );
 
     // Calculate side padding to reduce redraws
     headingTape.padding = headingTape.safetyOffset / 2;
@@ -1774,9 +1811,9 @@ function generateTapes() {
     }
 
     // Initialize some variables before the loop
-    var pointer = headingTape.left_heading;
-    var index = 0;
-    var tapeWidth = 0;
+    let pointer = headingTape.left_heading;
+    let index = 0;
+    let tapeWidth = 0;
 
     // Loop through the headings
     while ( pointer !== headingTape.right_heading ) {
@@ -1815,7 +1852,7 @@ function generateTapes() {
         text.css( "left", index * headingTape.pixels_per_tick - text_offset );
 
         // Append the text to the scroll div
-        $( "#heading_tape_scroll" ).append( text );
+        headingTape.tape_scroll.append( text );
       } else if ( pointer % ( headingTape.ticks_per_number / 2 ) === 0 ) {
         // Make the half ticks slightly larger than a regular tick
         tick_div.css( "height", "20px" );
@@ -1843,11 +1880,11 @@ function generateTapes() {
         text.css( "left", index * headingTape.pixels_per_tick - 13 );
 
         // Append the text to the scroll div
-        $( "#heading_tape_scroll" ).append( text );
+        headingTape.tape_scroll.append( text );
       }
 
       // Append the tick to the scroll div
-      $( "#heading_tape_scroll" ).append( tick_div );
+      headingTape.tape_scroll.append( tick_div );
 
       // Update the pointer
       pointer = constrainDegree( pointer + 1 );
@@ -1859,32 +1896,32 @@ function generateTapes() {
       tapeWidth += headingTape.pixels_per_tick;
     }
 
-    // Add FMU Marker
-    if ( !isNaN( headingTape.fmu_hdg ) && headingTape.fmu_hdg != null ) {
-      var range = getDegreeDistance(
-        headingTape.left_heading,
-        headingTape.right_heading
-      );
-      if (
-        getDegreeDistance( headingTape.left_heading, headingTape.fmu_hdg ) <
-          range &&
-        ( constrainDegree( headingTape.left_heading - headingTape.fmu_hdg ) <
-          180 ) ===
-          false
-      ) {
-        $( "#heading_tape_scroll" ).append(
-          "<div id=\"hdg_fmu\" class=\"fmu_v\"   style=\"left:" +
-            getDegreeDistance( headingTape.left_heading, headingTape.fmu_hdg ) *
-              headingTape.pixels_per_tick +
-            "px;\"></div>"
-        );
-      }
-    } else {
-      $( "#hdg_fmu_arrow" ).css( "display", "none" );
-    }
+    // // Add FMU Marker
+    // if ( !isNaN( headingTape.fmu_hdg ) && headingTape.fmu_hdg != null ) {
+    //   var range = getDegreeDistance(
+    //     headingTape.left_heading,
+    //     headingTape.right_heading
+    //   );
+    //   if (
+    //     getDegreeDistance( headingTape.left_heading, headingTape.fmu_hdg ) <
+    //       range &&
+    //     ( constrainDegree( headingTape.left_heading - headingTape.fmu_hdg ) <
+    //       180 ) ===
+    //       false
+    //   ) {
+    //     $( "#heading_tape_scroll" ).append(
+    //       "<div id=\"hdg_fmu\" class=\"fmu_v\"   style=\"left:" +
+    //         getDegreeDistance( headingTape.left_heading, headingTape.fmu_hdg ) *
+    //           headingTape.pixels_per_tick +
+    //         "px;\"></div>"
+    //     );
+    //   }
+    // } else {
+    //   $( "#hdg_fmu_arrow" ).css( "display", "none" );
+    // }
 
     // Set the scroll div to the tape width. Used for 0px alignment
-    $( "#heading_tape_scroll" ).css( "width", tapeWidth );
+    headingTape.tape_scroll.css( "width", tapeWidth );
 
     // Set the padding offset in pixels
     headingTape.padding_offset =
@@ -1898,8 +1935,8 @@ function generateTapes() {
     );
 
     // Update the location
-    $( "#heading_tape_scroll" ).css( "left", value );
-    $( "#heading_tape_scroll" ).css( "bottom", "0px" );
+    headingTape.tape_scroll.css( "left", value );
+    headingTape.tape_scroll.css( "bottom", "0px" );
   };
 
   // Redraw the heading tape initially
@@ -1930,10 +1967,13 @@ function generateTapes() {
       $( "#g_meter" ).append( text );
     }
 
+    // Save jQuery objects for faster update
+    gMeter.pointer = $( "#g_pointer" );
+
     // Define the G Meter update method
     gMeter.update = function( gees, override ) {
       var rot = 132 * ( gees - 1 );
-      $( "#g_pointer" ).css( "transform", "rotate(" + rot + "deg)" );
+      gMeter.pointer.css( "transform", "rotate(" + rot + "deg)" );
       checkIn( AHRS_TYPE.GMETER, override );
     };
   } else {
@@ -1946,9 +1986,11 @@ function generateTapes() {
   // ------------------------------------------------------------------------ //
 
   if ( satCount.display ) {
+    // Save jQuery objects for faster update
+    satCount.sat_count_text = $( "#sat_count_text" );
     // Define the Sat Count update method
     satCount.update = function( count ) {
-      $( "#sat_count_text" ).html( count );
+      satCount.sat_count_text.html( count );
     };
   } else {
     $( "#sat_count" ).css( "display", "none" );
