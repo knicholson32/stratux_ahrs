@@ -1,0 +1,40 @@
+{
+  "name": "stratux_ahrs",
+  "version": "1.0.0",
+  "description": "AHRS Display for the Raspberry pi powered Stratux software.",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "./node_modules/.bin/eslint ./js/*.js",
+    "lint-fix": "./node_modules/.bin/eslint *.js --fix",
+    "host": "./host.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/knicholson32/stratux_ahrs.git"
+  },
+  "keywords": [
+    "stratux",
+    "ahrs",
+    "display",
+    "raspberry-pi",
+    "ahrs-display",
+    "backup",
+    "attitude-indicator"
+  ],
+  "author": "Keenan Nicholson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/knicholson32/stratux_ahrs/issues"
+  },
+  "homepage": "https://github.com/knicholson32/stratux_ahrs#readme",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-jquery": "^2.0.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.19.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
+  }
+}

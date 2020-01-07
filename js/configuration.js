@@ -1,7 +1,25 @@
-/** ************************** Configuration File ************************** **/
-/** Edit settings for each component of the AHRS and ADS-b traffic display.
-/** Descriptions of each setting are commented.
-/** ************************** ****************** ************************** **/
+/* eslint-disable no-unused-vars */
+/* global system, AHRS_TYPE, UNITS, SOURCE, COLORS, headingTape, speedTape, altTape, vspeedTape, ahrsTape, slipSkid, turnCoordinator, gMeter, satCount, conv */
+// ============================================== //
+// configuration.js :: Stratux AHRS
+
+// Edit settings for each component of the AHRS and ADS-b traffic display.
+// Descriptions of each setting are commented.
+//
+// View the repo at
+// https://github.com/knicholson32/stratux_ahrs
+//
+// Run with via webserver. Entry point is
+// 'index.html'
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+// ============================================== //
 
 /** ******************************** SYSTEM ******************************** **/
 var system = {
@@ -19,12 +37,12 @@ var system = {
   checkActiveTime: 2250,
   // Websocket URL for situation
   websocket_url: "ws://raspberrypi.local/situation",
-  enable_ahrs_ws: true,
+  enable_ahrs_ws: false,
   // Websocket URL for FMU Update
   fmu_url: "ws://raspberrypi.local:8888",
   enable_fmu: false, // Enable FMU support - in development
   cpu_temp_warn: 70, // Temp at which the 'Temp' banner will be displayed (C)
-  allowReload: true, // Allows the app to automatically reload if it detects an issue
+  allowReload: false, // Allows the app to automatically reload if it detects an issue
   status_url: "http://raspberrypi.local/getStatus",
   push_url: "http://raspberrypi.local",
   simulate: false
@@ -135,8 +153,9 @@ var vspeedTape = {
 
 /** ********************************* AHRS ********************************* **/
 var ahrsTape = {
+
   // AHRS in the center of the AHRS
-  limits: [30, -30], // Limits for the degrees that are displayed. Values
+  limits: [ 30, -30 ], // Limits for the degrees that are displayed. Values
   // outside this range show chevrons
   degrees_in_view: 25, // Degrees in constant view (range)
   chevrons: 4, // Number of chevrons shown passed the limits

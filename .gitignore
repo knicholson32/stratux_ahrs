@@ -1,3 +1,6 @@
 .ftpconfig
 .ftp
 .prettierignore
+.jshintrc
+.vscode
+node_modules
