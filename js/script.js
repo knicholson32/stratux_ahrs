@@ -916,7 +916,7 @@ function generateTapes() {
       speedTape.conv = conv.mps2kph;
       break;
     case UNITS.MPM:
-      speedTape.unitPrefix = "M/Min";
+      speedTape.unitPrefix = "M/M";
       speedTape.conv = conv.mps2mpm;
       break;
     default:
@@ -941,11 +941,11 @@ function generateTapes() {
       altTape.conv = 1;
       break;
     case UNITS.MILES:
-      altTape.unitPrefix = "Mils";
+      altTape.unitPrefix = "Miles";
       altTape.conv = conv.m2mi;
       break;
     case UNITS.NAUTICLE_MILES:
-      altTape.unitPrefix = "N Miles";
+      altTape.unitPrefix = "NM";
       altTape.conv = conv.m2nmi;
       break;
     default:
@@ -1623,9 +1623,14 @@ function generateTapes() {
   // Generate SLIP SKID                                                       //
   // ------------------------------------------------------------------------ //
 
-  slipSkid.update = function( yaw, _override ) {
-    html.css( "--slip_skid", yaw * slipSkid.multiplier + "px" );
-  };
+  if ( slipSkid.display === false ) {
+    slipSkid.update = function( _yaw, _override ) {};
+  } else {
+    $( "#slip_skid_holder" ).addClass( "show" );
+    slipSkid.update = function( yaw, _override ) {
+      html.css( "--slip_skid", yaw * slipSkid.multiplier + "px" );
+    };
+  }
 
   // ------------------------------------------------------------------------ //
   // Generate Turn Coordinator                                                //

@@ -78,7 +78,6 @@ var UNITS = {
   M: 7,
   MILES: 8,
   NAUTICLE_MILES: 9,
-  FPNMI: 10,
   INHG: 11,
   MILLIBAR: 12,
   MB: 12,
@@ -106,10 +105,10 @@ var headingTape = {
 /** ******************************** SPEED ********************************* **/
 var speedTape = {
   // Speed tape on the left of the AHRS
-  lowerSpeed: 0, // Lower displayed speed given in MPH
-  upperSpeed: 200, // Upper displayed speed given in MPH
+  lowerSpeed: 0, // Lower displayed speed given in the selected unit
+  upperSpeed: 200, // Upper displayed speed given in the selected unit
   speeds: [
-    // Speed color band configurations given in MPH
+    // Speed color band configurations given in the selected unit
     {
       color: COLORS.WHITE,
       start: 55,
@@ -131,7 +130,7 @@ var speedTape = {
       end: 200
     }
   ],
-  units: UNITS.KTS // Units for displaying speed
+  units: UNITS.KTS // Units for displaying speed and for speed config.
 };
 /** ******************************** ***** ********************************* **/
 
@@ -165,7 +164,8 @@ var ahrsTape = {
 
 /** ****************************** SLIP SKID ******************************* **/
 var slipSkid = {
-  multiplier: 6 // Arbitrary scale for tuning slip-skid movement
+  multiplier: 6, // Arbitrary scale for tuning slip-skid movement
+  display: true
 };
 /** ****************************** SLIP SKID ******************************* **/
 
