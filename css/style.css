@@ -774,6 +774,11 @@ body {
   position: relative;
   bottom: 20px;
   left: calc(50% - 15px);
+  visibility: hidden;
+}
+
+#slip_skid_holder.show {
+  visibility: visible;
 }
 
 #slip_skid_holder.shifted {

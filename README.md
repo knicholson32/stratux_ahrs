@@ -1,4 +1,4 @@
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/knicholson32/stratux_ahrs) [![GitHub license](https://img.shields.io/github/license/knicholson32/stratux_ahrs.svg)](https://github.com/knicholson32/stratux_ahrs/blob/master/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/knicholson32/stratux_ahrs.svg)](https://github.com/knicholson32/stratux_ahrs/issues) ![GitHub repo size](https://img.shields.io/github/repo-size/knicholson32/stratux_ahrs)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/knicholson32/stratux_ahrs) [![GitHub license](https://img.shields.io/github/license/knicholson32/stratux_ahrs.svg)](https://github.com/knicholson32/stratux_ahrs/blob/master/LICENSE) [![GitHub issues](https://img.shields.io/github/issues/knicholson32/stratux_ahrs.svg)](https://github.com/knicholson32/stratux_ahrs/issues) ![CircleCI](https://img.shields.io/circleci/build/github/knicholson32/stratux_ahrs/develop?label=dev%20build)
 
 # stratux_ahrs
 AHRS Display for the Raspberry pi powered Stratux software.
@@ -7,6 +7,8 @@ AHRS Display for the Raspberry pi powered Stratux software.
 
 
 Extension to the [Stratux](https://github.com/cyoung/stratux) project that allows a browser to be used to display AHRS information. Modeled visually after the [Garmin G5](https://buy.garmin.com/en-US/US/p/570665).
+
+#### [View an online demo here](https://knicholson32.github.io/stratux_ahrs/?simulate=true)
 
 ### Example Screenshot
 This example image was created using simulated data, and shows all visual features of the device.
