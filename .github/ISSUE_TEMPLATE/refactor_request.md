@@ -1,7 +1,7 @@
 ---
 name: Refactor proposal
 about: Suggest a different way to format or implement an existing feature
-title: ''
+title: 'Refactor proposal: '
 labels: 'refactor'
 assignees: ''
 

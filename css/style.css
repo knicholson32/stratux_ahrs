@@ -453,6 +453,11 @@ body {
   width: 60px;
   float: right;
   border-left: 2px solid gray;
+  visibility: hidden;
+}
+
+#alt_vspeed.visible {
+  visibility: visible;
 }
 
 .vspeed_tick {
@@ -774,6 +779,11 @@ body {
   position: relative;
   bottom: 20px;
   left: calc(50% - 15px);
+  visibility: hidden;
+}
+
+#slip_skid_holder.show {
+  visibility: visible;
 }
 
 #slip_skid_holder.shifted {

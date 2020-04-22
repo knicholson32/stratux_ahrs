@@ -27,7 +27,7 @@ var system = {
   overlay_active: true, // Enable warning overlay on startup
   ahrs: {
     // Settings for the overall AHRS
-    updateTimeout: 750, // Time (in ms) required for a metric to be set as invalid
+    updateTimeout: 1250, // Time (in ms) required for a metric to be set as invalid
     reloadAfterTimeoutCount: 4 // Number of times the timeout has to be hit before a reboot
   },
   fmu: {
@@ -38,11 +38,12 @@ var system = {
   // Websocket URL for situation
   websocket_url: "ws://raspberrypi.local/situation",
   enable_ahrs_ws: true,
+  enable_get_status: true,
   // Websocket URL for FMU Update
   fmu_url: "ws://raspberrypi.local:8888",
   enable_fmu: false, // Enable FMU support - in development
   cpu_temp_warn: 70, // Temp at which the 'Temp' banner will be displayed (C)
-  allowReload: true, // Allows the app to automatically reload if it detects an issue
+  allow_reload: true, // Allows the app to automatically reload if it detects an issue
   status_url: "http://raspberrypi.local/getStatus",
   push_url: "http://raspberrypi.local",
   simulate: false
@@ -78,7 +79,6 @@ var UNITS = {
   M: 7,
   MILES: 8,
   NAUTICLE_MILES: 9,
-  FPNMI: 10,
   INHG: 11,
   MILLIBAR: 12,
   MB: 12,
@@ -106,10 +106,10 @@ var headingTape = {
 /** ******************************** SPEED ********************************* **/
 var speedTape = {
   // Speed tape on the left of the AHRS
-  lowerSpeed: 0, // Lower displayed speed given in MPH
-  upperSpeed: 200, // Upper displayed speed given in MPH
+  lowerSpeed: 0, // Lower displayed speed given in the selected unit
+  upperSpeed: 200, // Upper displayed speed given in the selected unit
   speeds: [
-    // Speed color band configurations given in MPH
+    // Speed color band configurations given in the selected unit
     {
       color: COLORS.WHITE,
       start: 55,
@@ -131,7 +131,7 @@ var speedTape = {
       end: 200
     }
   ],
-  units: UNITS.KTS // Units for displaying speed
+  units: UNITS.KTS // Units for displaying speed and for speed config.
 };
 /** ******************************** ***** ********************************* **/
 
@@ -147,17 +147,17 @@ var altTape = {
 
 /** ******************************** VSPEED ******************************** **/
 var vspeedTape = {
-  units: UNITS.FPM // Units for displaying vertical speed
+  units: UNITS.FPM, // Units for displaying vertical speed
+  display: true
 };
 /** ******************************** ****** ******************************** **/
 
 /** ********************************* AHRS ********************************* **/
 var ahrsTape = {
-
   // AHRS in the center of the AHRS
   limits: [ 30, -30 ], // Limits for the degrees that are displayed. Values
   // outside this range show chevrons
-  degrees_in_view: 25, // Degrees in constant view (range)
+  degrees_in_view: 50, // Degrees in constant view (range)
   chevrons: 4, // Number of chevrons shown passed the limits
   chevron_space: 140 // Space given to each chevron (sizing)
 };
@@ -165,7 +165,8 @@ var ahrsTape = {
 
 /** ****************************** SLIP SKID ******************************* **/
 var slipSkid = {
-  multiplier: 6 // Arbitrary scale for tuning slip-skid movement
+  multiplier: 6, // Arbitrary scale for tuning slip-skid movement
+  display: true
 };
 /** ****************************** SLIP SKID ******************************* **/
 
@@ -221,3 +222,9 @@ var conv = {
   hpa2inhg: 0.029529983071445
 };
 /** ******************************** ****** ******************************** **/
+
+if ( typeof module !== "undefined" ) {
+  module.exports = {
+    system: system
+  };
+}
