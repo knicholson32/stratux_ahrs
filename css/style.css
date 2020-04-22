@@ -453,6 +453,11 @@ body {
   width: 60px;
   float: right;
   border-left: 2px solid gray;
+  visibility: hidden;
+}
+
+#alt_vspeed.visible {
+  visibility: visible;
 }
 
 .vspeed_tick {

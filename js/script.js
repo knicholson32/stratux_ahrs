@@ -96,7 +96,7 @@ function systemInit() {
       gMeter.update( Math.cos( interval_val / 30 ) + 1 );
 
       // Toggle message flag to show updates
-      $( "#message_flag" ).toggleClass( "bright" );
+      $( "#message_flag" ).toggleClass( "bright" ); // TODO: Make this faster!!!
     }, 250 );
   }
 
@@ -246,7 +246,7 @@ function ahrsWSInit() {
 
   ahrsWS.onmessage = function( message ) {
     ahrsWS.lastMessage = new Date().getTime();
-    message_flag.toggleClass( "bright" );
+    message_flag.toggleClass( "bright" );  // TODO: Make this faster!!!
     if ( message.isTrusted ) {
       system.ahrs.inactiveCounter = 0;
       // TODO: Consider using a JSON parser that takes schema into account
@@ -359,17 +359,19 @@ function ahrsWSInit() {
 }
 
 // Get status at interval
-var getRequest = true;
-setInterval( function() {
-  if ( getRequest === true ) {
-    getRequest = false;
-    $.getJSON( system.status_url, function( data ) {
-      system_status = data;
-    } ).always( function() {
-      getRequest = true;
-    } );
-  }
-}, 1000 );
+if ( system.enable_get_status === true ) {
+  var getRequest = true;
+  setInterval( function() {
+    if ( getRequest === true ) {
+      getRequest = false;
+      $.getJSON( system.status_url, function( data ) {
+        system_status = data;
+      } ).always( function() {
+        getRequest = true;
+      } );
+    }
+  }, 1000 );
+}
 
 var fmuWS;
 
@@ -833,7 +835,7 @@ function initButtons() {
       case SOURCE.INPUT:
         return;
 
-      /* $('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>'); */
+      // $('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
       // TODO: Implement user defined altimeter setting
       // break;
     }
@@ -1321,108 +1323,113 @@ function generateTapes() {
   // Generate vertical speed tape                                             //
   // ------------------------------------------------------------------------ //
 
-  // Define some constants
-  vspeedTape.total_offset = 7;
-  vspeedTape.offset =
-    $( "#alt_vspeed" ).outerHeight() / 2 + vspeedTape.total_offset;
-  vspeedTape.pixels_per_number = 22;
-  tick_offset = 4;
+  if ( vspeedTape.display === true ) {
+    $( "#alt_vspeed" ).addClass( "visible" );
+    // Define some constants
+    vspeedTape.total_offset = 7;
+    vspeedTape.offset =
+      $( "#alt_vspeed" ).outerHeight() / 2 + vspeedTape.total_offset;
+    vspeedTape.pixels_per_number = 22;
+    tick_offset = 4;
 
-  // VSpeed tick generation
-  for ( let i = 15; i >= -15; i -= 1 ) {
-    // Generate a tick
-    const tick_div = $( "<div/>", {
-      class: "h_tick vspeed_tick volitile"
-    } );
+    // VSpeed tick generation
+    for ( let i = 15; i >= -15; i -= 1 ) {
+      // Generate a tick
+      const tick_div = $( "<div/>", {
+        class: "h_tick vspeed_tick volitile"
+      } );
 
-    // Set the tick location
-    tick_div.css(
-      "top",
-      i * vspeedTape.pixels_per_number + vspeedTape.offset - tick_offset
-    );
+      // Set the tick location
+      tick_div.css(
+        "top",
+        i * vspeedTape.pixels_per_number + vspeedTape.offset - tick_offset
+      );
 
-    // If the tick is a 5th tick, make it larger
-    if ( i % 5 === 0 ) {
-      tick_div.css( "width", "20px" );
-      tick_div.css( "height", "4px" );
+      // If the tick is a 5th tick, make it larger
+      if ( i % 5 === 0 ) {
+        tick_div.css( "width", "20px" );
+        tick_div.css( "height", "4px" );
+      }
+
+      // Append the tick to the tick holder
+      $( "#vspeed_tape_tick_holder" ).append( tick_div );
+
+      // Update the total height
+      altTape.total_height = Math.max(
+        altTape.total_height,
+        i * vspeedTape.pixels_per_number + vspeedTape.offset - tick_offset
+      );
     }
 
-    // Append the tick to the tick holder
-    $( "#vspeed_tape_tick_holder" ).append( tick_div );
+    // Set the text position based on the size
+    var text_pos =
+      $( "#alt_vspeed" ).outerHeight() / 2 -
+      vspeedTape.pixels_per_number * 16 +
+      8 +
+      vspeedTape.total_offset;
 
-    // Update the total height
-    altTape.total_height = Math.max(
-      altTape.total_height,
-      i * vspeedTape.pixels_per_number + vspeedTape.offset - tick_offset
-    );
-  }
+    // Loop through each number and add it
+    for ( let i = 15; i >= 0; i -= 5 ) {
+      const val = $( "<div/>", {
+        class: "vspeed_tape_index volitile",
+        html: i
+      } );
+      val.css( "top", text_pos );
+      $( "#vspeed_tape_text" ).append( val );
+      text_pos += vspeedTape.pixels_per_number * 5;
+    }
+    for ( let i = 5; i <= 15; i += 5 ) {
+      const val = $( "<div/>", {
+        class: "vspeed_tape_index volitile",
+        html: i
+      } );
+      val.css( "top", text_pos );
+      $( "#vspeed_tape_text" ).append( val );
+      text_pos += vspeedTape.pixels_per_number * 5;
+    }
 
-  // Set the text position based on the size
-  var text_pos =
-    $( "#alt_vspeed" ).outerHeight() / 2 -
-    vspeedTape.pixels_per_number * 16 +
-    8 +
-    vspeedTape.total_offset;
+    // Save jQuery objects for faster update
+    vspeedTape.vspeed_pointer = $( "#vspeed_pointer" );
+    vspeedTape.vspeed_trail = $( "#vspeed_trail" );
 
-  // Loop through each number and add it
-  for ( let i = 15; i >= 0; i -= 5 ) {
-    const val = $( "<div/>", {
-      class: "vspeed_tape_index volitile",
-      html: i
-    } );
-    val.css( "top", text_pos );
-    $( "#vspeed_tape_text" ).append( val );
-    text_pos += vspeedTape.pixels_per_number * 5;
-  }
-  for ( let i = 5; i <= 15; i += 5 ) {
-    const val = $( "<div/>", {
-      class: "vspeed_tape_index volitile",
-      html: i
-    } );
-    val.css( "top", text_pos );
-    $( "#vspeed_tape_text" ).append( val );
-    text_pos += vspeedTape.pixels_per_number * 5;
-  }
+    // Define the altitude tape update method
+    vspeedTape.update = function( vspeed, override ) {
+      // Unit conversion
+      vspeed *= vspeedTape.conv;
+      vspeed /= 10000;
 
-  // Save jQuery objects for faster update
-  vspeedTape.vspeed_pointer = $( "#vspeed_pointer" );
-  vspeedTape.vspeed_trail = $( "#vspeed_trail" );
-
-  // Define the altitude tape update method
-  vspeedTape.update = function( vspeed, override ) {
-    // Unit conversion
-    vspeed *= vspeedTape.conv;
-    vspeed /= 10000;
-
-    // Position the vspeed pointer
-    vspeedTape.vspeed_pointer.css(
-      "top",
-      vspeedTape.height / 2 -
-        vspeed * vspeedTape.pixels_per_number -
-        vspeedTape.vspeed_pointer.outerHeight() / 2 -
-        14 +
-        vspeedTape.total_offset
-    );
-
-    // Set the vspeed tail position and height
-    if ( vspeed > 0 ) {
-      vspeedTape.vspeed_trail.css(
+      // Position the vspeed pointer
+      vspeedTape.vspeed_pointer.css(
         "top",
         vspeedTape.height / 2 -
           vspeed * vspeedTape.pixels_per_number -
-          3 +
+          vspeedTape.vspeed_pointer.outerHeight() / 2 -
+          14 +
           vspeedTape.total_offset
       );
-      vspeedTape.vspeed_trail.css( "height", vspeed * vspeedTape.pixels_per_number );
-    } else {
-      vspeedTape.vspeed_trail.css( "height", -vspeed * vspeedTape.pixels_per_number );
-      vspeedTape.vspeed_trail.css(
-        "top",
-        vspeedTape.height / 2 - 3 + vspeedTape.total_offset
-      );
-    }
-    checkIn( AHRS_TYPE.VSPEED, override );
-  };
+
+      // Set the vspeed tail position and height
+      if ( vspeed > 0 ) {
+        vspeedTape.vspeed_trail.css(
+          "top",
+          vspeedTape.height / 2 -
+            vspeed * vspeedTape.pixels_per_number -
+            3 +
+            vspeedTape.total_offset
+        );
+        vspeedTape.vspeed_trail.css( "height", vspeed * vspeedTape.pixels_per_number );
+      } else {
+        vspeedTape.vspeed_trail.css( "height", -vspeed * vspeedTape.pixels_per_number );
+        vspeedTape.vspeed_trail.css(
+          "top",
+          vspeedTape.height / 2 - 3 + vspeedTape.total_offset
+        );
+      }
+      checkIn( AHRS_TYPE.VSPEED, override );
+    };
+  } else {
+    vspeedTape.update = function( _vspeed, _override ) {};
+  }
 
   // ------------------------------------------------------------------------ //
   // Generate AHRS                                                            //
@@ -1556,6 +1563,10 @@ function generateTapes() {
     $( "#pitch_tape_scroll" ).append( chevron );
   }
 
+  ahrsTape.in_view_at = ahrsTape.degrees_in_view / 5;
+  ahrsTape.not_in_view_at = ahrsTape.degrees_in_view / 3;
+  ahrsTape.view_diff = ahrsTape.not_in_view_at - ahrsTape.in_view_at;
+
   // Define the AHRS update method
   ahrsTape.update = function( pitch, roll, override ) {
     // Set the pitch amount to the global CSS variable
@@ -1567,22 +1578,22 @@ function generateTapes() {
     // Loop through each stored tick
     for ( let i = 0; i < ahrsTape.ticks.length; i++ ) {
       const val = ahrsTape.ticks[ i ];
+      if ( val.type === "chevron" ) {
+        continue;
+      }
       var dist = Math.abs( pitch - val.angle );
 
-      // If the current tick is a third from the center, set it to full white
-      if ( dist <= ahrsTape.degrees_in_view / 3 ) {
+      // If the current tick is 1/5 from the center, set it to full white
+      if ( dist <= ahrsTape.in_view_at ) {
         if ( val.type === "text" ) {
           val.val.css( "color", "white" );
         } else if ( val.type === "tick" ) {
           val.val.css( "background-color", "white" );
         }
-      } else if ( dist <= ahrsTape.degrees_in_view / 2 ) {
-        // Otherwise if it is within a half, set it to some transparancy value
+      } else if ( dist <= ahrsTape.not_in_view_at ) {
+        // Otherwise if it is within a third, set it to some transparancy value
         // Generate a transparancy level
-        var level = Math.abs(
-          ( dist - ahrsTape.degrees_in_view / 2 ) /
-            ( ahrsTape.degrees_in_view / 2 - ahrsTape.degrees_in_view / 3 )
-        );
+        var level = Math.abs( ( dist - ahrsTape.not_in_view_at ) / ahrsTape.view_diff );
 
         // Set the color to that value
         var color = "rgba(255,255,255," + level + ")";
@@ -2108,6 +2119,7 @@ function setInvalid( type, value ) {
     } else {
       $( "#" + name[ i ] + " .invalid_holder:first" ).removeClass( "invalid" );
     }
+    console.log('add remove')
   }
   if ( type !== AHRS_TYPE.ALL ) {
     invalidList[ type ] = value;

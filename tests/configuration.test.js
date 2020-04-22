@@ -8,6 +8,7 @@ test( "confirm system configuration usable for production", () => {
   expect( system.enable_fmu ).toBe( false );
   expect( system.allow_reload ).toBe( true );
   expect( system.simulate ).toBe( false );
+  expect( system.enable_get_status ).toBe( true );
   expect( system.websocket_url ).toBe( "ws://raspberrypi.local/situation" );
   expect( system.status_url ).toBe( "http://raspberrypi.local/getStatus" );
   expect( system.push_url ).toBe( "http://raspberrypi.local" );

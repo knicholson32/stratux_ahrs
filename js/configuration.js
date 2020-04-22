@@ -27,7 +27,7 @@ var system = {
   overlay_active: true, // Enable warning overlay on startup
   ahrs: {
     // Settings for the overall AHRS
-    updateTimeout: 750, // Time (in ms) required for a metric to be set as invalid
+    updateTimeout: 1250, // Time (in ms) required for a metric to be set as invalid
     reloadAfterTimeoutCount: 4 // Number of times the timeout has to be hit before a reboot
   },
   fmu: {
@@ -38,6 +38,7 @@ var system = {
   // Websocket URL for situation
   websocket_url: "ws://raspberrypi.local/situation",
   enable_ahrs_ws: true,
+  enable_get_status: true,
   // Websocket URL for FMU Update
   fmu_url: "ws://raspberrypi.local:8888",
   enable_fmu: false, // Enable FMU support - in development
@@ -146,17 +147,17 @@ var altTape = {
 
 /** ******************************** VSPEED ******************************** **/
 var vspeedTape = {
-  units: UNITS.FPM // Units for displaying vertical speed
+  units: UNITS.FPM, // Units for displaying vertical speed
+  display: true
 };
 /** ******************************** ****** ******************************** **/
 
 /** ********************************* AHRS ********************************* **/
 var ahrsTape = {
-
   // AHRS in the center of the AHRS
   limits: [ 30, -30 ], // Limits for the degrees that are displayed. Values
   // outside this range show chevrons
-  degrees_in_view: 25, // Degrees in constant view (range)
+  degrees_in_view: 50, // Degrees in constant view (range)
   chevrons: 4, // Number of chevrons shown passed the limits
   chevron_space: 140 // Space given to each chevron (sizing)
 };

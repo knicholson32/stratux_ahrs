@@ -35,7 +35,7 @@ cd /var/www/
 ```
 - Clone this repository:
 ```unix
-git clone https://github.com/knicholson32/stratux_ahrs.git ahrs
+sudo git clone https://github.com/knicholson32/stratux_ahrs.git ahrs
 ```
 _If you get a warning about server verification failure, check the time setting:_
 ```unix

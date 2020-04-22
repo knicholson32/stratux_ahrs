@@ -3,5 +3,6 @@
 .prettierignore
 .jshintrc
 .vscode
+*.code-workspace
 node_modules
 *.ai
