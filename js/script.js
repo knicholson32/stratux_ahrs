@@ -246,7 +246,7 @@ function ahrsWSInit() {
 
   ahrsWS.onmessage = function( message ) {
     ahrsWS.lastMessage = new Date().getTime();
-    message_flag.toggleClass( "bright" );  // TODO: Make this faster!!!
+    message_flag.toggleClass( "bright" ); // TODO: Make this faster!!!
     if ( message.isTrusted ) {
       system.ahrs.inactiveCounter = 0;
       // TODO: Consider using a JSON parser that takes schema into account
@@ -2119,7 +2119,7 @@ function setInvalid( type, value ) {
     } else {
       $( "#" + name[ i ] + " .invalid_holder:first" ).removeClass( "invalid" );
     }
-    console.log('add remove')
+    // console.log( "add remove" );
   }
   if ( type !== AHRS_TYPE.ALL ) {
     invalidList[ type ] = value;
