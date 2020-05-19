@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
-/* global system, AHRS_TYPE, UNITS, SOURCE, COLORS, headingTape, speedTape, altTape, vspeedTape, ahrsTape, slipSkid, turnCoordinator, gMeter, satCount, conv */
+/* global system, AHRS_TYPE, UNITS, SOURCE, COLORS, headingTape, speedTape, altTape, vspeedTape, ahrsTape, slipSkid,
+   turnCoordinator, gMeter, satCount, conv */
 // ============================================== //
 // configuration.js :: Stratux AHRS
 

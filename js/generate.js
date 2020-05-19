@@ -1,6 +1,7 @@
-/* global system, orientationInit, orientationChange, AHRS_TYPE, SOURCE, UNITS, COLORS, headingTape, speedTape, altTape, vspeedTape, ahrsTape, slipSkid, turnCoordinator, gMeter, satCount, conv */
+/* global system, AHRS_TYPE, SOURCE, UNITS, COLORS, headingTape, speedTape, altTape, vspeedTape, ahrsTape, slipSkid,
+   turnCoordinator, gMeter, satCount, conv, constrainDegree, getDegreeDistance, getCookie, setInvalid, pad */
 // ============================================== //
-// script.js :: Stratux AHRS
+// generate.js :: Stratux AHRS
 //
 // View the repo at
 // https://github.com/knicholson32/stratux_ahrs
@@ -17,856 +18,9 @@
 // SOFTWARE.
 // ============================================== //
 
-var html;
-var message_flag;
-
-// Run systemInit when the DOM is ready for modifications.
-$( document ).ready( systemInit );
-
-// System Initialization function
-function systemInit() {
-  html = $( "html" );
-  message_flag = $( "#message_flag" );
-
-  // Print init message
-  console.log( "JS INIT" );
-
-  // Prevent touch moves to ensure the user can't scroll off the screen
-  $( "body" ).bind( "touchmove", function( e ) {
-    e.preventDefault();
-  } );
-
-  // Init Overlay
-  const bypass_warning = getCookie( "bypass_warning" );
-  if ( system.overlay_active === true && bypass_warning !== "true" ) {
-    $( "#overlay" ).css( "display", "unset" );
-    $( "#overlay" ).click( function() {
-      console.warn(
-        "User acknowledged warning. View './README.md' for more information."
-      );
-      $( "#overlay" ).css( "opacity", "0" );
-      setTimeout( function() {
-        system.overlay_active = false;
-        $( "#overlay" ).remove();
-      }, 500 );
-    } );
-  }
-
-  // Initialize the orientation system
-  orientationInit();
-
-  // Bind button interactions to their functions
-  initButtons();
-
-  if ( getUrlParameter( "simulate" ) === "true" ) {
-    system.simulate = true;
-  } else if ( getUrlParameter( "simulate" ) === "false" ) {
-    system.simulate = false;
-  }
-
-  // Set up simulation if simulate is enabled
-  if ( system.simulate ) {
-    // Init the simulation pace variable
-    var interval_val = 0;
-
-    // Don't init ahrs_ws if we are simulating
-    system.enable_ahrs_ws = false;
-    $( "#simulate_tag" ).css( "display", "unset" );
-
-    // Repeating function every 1/4 second
-    setInterval( function() {
-      // Exit simulation if it has been canceled
-      if ( !system.simulate ) { return; }
-
-      // Increment interval
-      interval_val++;
-
-      // Send artificial updates for simulation
-      headingTape.update( +interval_val );
-      ahrsTape.update(
-        Math.sin( interval_val / 10 ) * 7,
-        Math.cos( interval_val / 15 + 0.7 ) * 12
-      );
-      speedTape.update( Math.sin( interval_val / 20 + 0.5 ) * 9 + 70 );
-      altTape.update( Math.cos( interval_val / 18 + 0.3 ) * 75 + 1423 );
-      vspeedTape.update( Math.sin( interval_val / 18 + 0.3 ) * 50 + 4 );
-      slipSkid.update( Math.sin( interval_val / 27 ) * 20 );
-      turnCoordinator.update( Math.sin( interval_val / 17 ) * 3.5 );
-      satCount.update( 7 );
-      gMeter.update( Math.cos( interval_val / 30 ) + 1 );
-
-      // Toggle message flag to show updates
-      $( "#message_flag" ).toggleClass( "bright" ); // TODO: Make this faster!!!
-    }, 250 );
-  }
-
-  // Check for valid date every 1/4 second
-  setInterval( checkValid, 250 );
-
-  // Refresh the websock connections after set time (checkActiveTime) if the
-  // data is not valid for too long
-  setInterval( refreshIfInvalidTimeout, system.checkActiveTime );
-
-  if ( system.simulate === false ) {
-    initWS();
-  }
-}
-
-var ahrsWS;
-var avgCount = 0;
-var headingAvg = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
-var system_status = {};
-var presist = {
-  overheat: false
-};
-system.ahrs.inactiveCounter = 0;
-system.force_diff_orientation = false;
-
-system.sendNotification = function( msg, opentime, color = "#587E4B" ) {
-  let l;
-  let side = "top";
-  if ( system.orinetation === "landscape" ) {
-    l = $( `<div class="notification">${msg}</div>` );
-  } else {
-    l = $( `<div class="notification portrait">${msg}</div>` );
-    side = "right";
-  }
-  l.css( "background-color", color );
-  $( "body" ).append( l );
-  setTimeout( () => {
-    l.css( side, "0px" );
-  }, 1 );
-  setTimeout( () => {
-    l.css( side, "-40px" );
-  }, opentime );
-  setTimeout( () => {
-    l.remove();
-  }, opentime + 2000 );
-};
-
-var sockets = [];
-function initWS() {
-  // Init AHRS
-  if ( system.enable_ahrs_ws === true ) {
-    ahrsWSInit();
-    setInterval( ahrsWS.checkActive, 500 );
-  }
-
-  // Init FMU - BETA
-  if ( system.enable_fmu === true ) {
-    fmuInit();
-    setInterval( fmuWS.checkActive, 1000 );
-  }
-}
-
-function removeAllClients() {
-  for ( const s in sockets ) {
-    sockets[ s ].close();
-  }
-  sockets = [];
-}
-
-function ahrsWSInit() {
-  console.log( "Attempting to connect to " + system.websocket_url );
-  try {
-    try {
-      ahrsWS.onmessage = function() {};
-      ahrsWS.checkActive = function() {};
-      ahrsWS.onerror = function() {};
-    } catch ( error ) {}
-    removeAllClients();
-
-    // ahrsWS.close();
-  } catch ( error ) {
-    console.error( error );
-  }
-  ahrsWS = new WebSocket( system.websocket_url );
-  sockets.push( ahrsWS );
-  ahrsWS.closed = true;
-  ahrsWS.lastMessage = new Date().getTime();
-
-  ahrsWS.onopen = function( _e ) {
-    console.log( "Connection established!" );
-    ahrsWS.closed = false;
-  };
-
-  ahrsWS.onclose = function( e ) {
-    ahrsWS.closed = true;
-    var name = e.target.url.substr( e.target.url.lastIndexOf( "/" ) + 1 );
-    if ( e.wasClean ) {
-      console.log( "Websocket \"" + name + "\" closed cleanly." );
-    } else {
-      console.warn( "Websocket \"" + name + "\" did not closed cleanly." );
-    }
-    console.log( "Reconnecting after 0.5 seconds:" );
-    system.ahrs.inactiveCounter++;
-    if (
-      system.allow_reload &&
-      system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount
-    ) {
-      console.log( "Reboot!" );
-      doRefresh();
-    } else {
-      setTimeout( function() {
-        ahrsWSInit();
-      }, 500 );
-    }
-  };
-
-  ahrsWS.kill = function() {
-    system.checkWS = false;
-    ahrsWS.closed = true;
-    ahrsWS.close();
-  };
-
-  ahrsWS.checkActive = function() {
-    if ( system.checkWS === false || ahrsWS.closed === true ) { return; }
-
-    // Get the current time
-    var d = new Date().getTime();
-
-    // If it has been too long since a message, restart the connection
-    if ( d - system.ahrs.updateTimeout > ahrsWS.lastMessage ) {
-      ahrsWS.close();
-      if (
-        system.allow_reload &&
-        system.ahrs.inactiveCounter > system.ahrs.reloadAfterTimeoutCount
-      ) {
-        console.log( "Reboot!" );
-        doRefresh();
-      } else {
-        console.log( "Reconnecting after 0.5 seconds:" );
-        setTimeout( function() {
-          ahrsWS = undefined;
-          ahrsWSInit();
-        }, 500 );
-      }
-    }
-  };
-
-  ahrsWS.onmessage = function( message ) {
-    ahrsWS.lastMessage = new Date().getTime();
-    message_flag.toggleClass( "bright" ); // TODO: Make this faster!!!
-    if ( message.isTrusted ) {
-      system.ahrs.inactiveCounter = 0;
-      // TODO: Consider using a JSON parser that takes schema into account
-      // For example: https://github.com/mafintosh/turbo-json-parse
-      var data = JSON.parse( message.data );
-
-      // console.log(data);
-      var gpsValid = false;
-
-      // GPS Detection:
-      switch ( data.GPSFixQuality ) {
-        case 2: // WAAS
-        case 1: // 2D / 3D
-          if (
-            data.GPSSatellitesSeen < 7 ||
-            data.GPSLatitude === 0.0 ||
-            data.GPSLongitude === 0.0 ||
-            data.GPSNACp < 7 ||
-            data.GPSHorizontalAccuracy > 100 ||
-            data.GPSVerticalAccuracy >
-              500 /* || data.GPSPositionSampleRate === 0 */
-          ) {
-            // Data is invalid for some reason
-            break;
-          }
-          gpsValid = true;
-          satCount.update( data.GPSSatellites );
-          speedTape.update( data.GPSGroundSpeed * conv.kts2mps ); // Given in kts
-          headingAvg[ avgCount ] = data.AHRSGyroHeading;
-          headingTape.update( data.AHRSGyroHeading ); // AHRSGyroHeading  GPSTrueCourse
-          avgCount++;
-          if ( avgCount > headingAvg.length - 1 ) {
-            avgCount = 0;
-          }
-          break;
-        case 6: // Dead Reckoning
-        case 0: // NONE
-          break;
-        default:
-
-          // No fix / unreliable fix
-          break;
-      }
-
-      switch ( altTape.source ) {
-        case SOURCE.GPS:
-          if ( gpsValid ) {
-            // vspeedTape.update(data.GPSVerticalSpeed * conv.fps2mps);    // Given in f/s -> 100ft/min  BaroVerticalSpeed GPSVerticalSpeed
-            // eslint-disable-next-line no-undef
-            altTape.update( data.GPSAltitudeMSL * conv.ft2m ); // BaroPressureAltitude BaroPressureAltitude GPSAltitudeMSL
-          }
-          break;
-        case SOURCE.BARO:
-          if (
-            data.BaroVerticalSpeed !== 99999 &&
-            data.BaroPressureAltitude !== 99999
-          ) {
-            // vspeedTape.update(data.BaroVerticalSpeed * conv.fps2mps);   // Given in f/s -> 100ft/min  BaroVerticalSpeed GPSVerticalSpeed
-            altTape.update( data.BaroPressureAltitude * conv.ft2m ); // BaroPressureAltitude BaroPressureAltitude GPSAltitudeMSL
-          }
-          break;
-      }
-
-      if (
-        data.BaroVerticalSpeed !== 99999 &&
-        data.BaroPressureAltitude !== 99999
-      ) {
-        vspeedTape.update( data.BaroVerticalSpeed * conv.fps2mps );
-      }
-
-      if ( data.AHRSStatus !== 1 ) {
-        ahrsTape.update( data.AHRSPitch, data.AHRSRoll );
-        slipSkid.update( data.AHRSSlipSkid );
-        gMeter.update( data.AHRSGLoad );
-      }
-
-      if ( data.AHRSTurnRate !== 3276.7 ) {
-        turnCoordinator.update( data.AHRSTurnRate );
-      } else {
-        turnCoordinator.update( 0 );
-      }
-
-      if (
-        presist.overheat === false &&
-        system_status.CPUTemp > system.cpu_temp_warn
-      ) {
-        presist.overheat = true;
-        $( "#overheat_flag" ).css( "display", "block" );
-      } else if (
-        presist.overheat === true &&
-        system_status.CPUTemp < system.cpu_temp_warn
-      ) {
-        presist.overheat = false;
-        $( "#overheat_flag" ).css( "display", "none" );
-      }
-
-      // console.log(data);
-    } else {
-      console.log( "Invalid data" );
-    }
-  };
-
-  ahrsWS.onerror = function( message ) {
-    var name = message.target.url.substr(
-      message.target.url.lastIndexOf( "/" ) + 1
-    );
-    console.error( "Websocket \"" + name + "\" had an error." );
-    ahrsWS.close();
-  };
-}
-
-// Get status at interval
-if ( system.enable_get_status === true ) {
-  var getRequest = true;
-  setInterval( function() {
-    if ( getRequest === true ) {
-      getRequest = false;
-      $.getJSON( system.status_url, function( data ) {
-        system_status = data;
-      } ).always( function() {
-        getRequest = true;
-      } );
-    }
-  }, 1000 );
-}
-
-var fmuWS;
-
-function fmuInit() {
-  console.log( "Attempting to connect to " + system.fmu_url );
-  try {
-    fmuWS.close();
-  } catch ( error ) {}
-  fmuWS = new WebSocket( system.fmu_url );
-  fmuWS.lastMessage = new Date().getTime();
-  fmuWS.closed = true;
-  fmuWS.onopen = function( e ) {
-    console.log( "Connection established!" );
-    console.log( e );
-    fmuWS.closed = false;
-  };
-
-  fmuWS.onclose = function( e ) {
-    fmuWS.closed = true;
-    var name = e.target.url.substr( e.target.url.lastIndexOf( "/" ) + 1 );
-    if ( e.wasClean ) {
-      console.log( "Websocket \"" + name + "\" closed cleanly." );
-    } else {
-      console.warn( "Websocket \"" + name + "\" did not closed cleanly." );
-    }
-    console.log( "Reconnecting after 0.5 seconds:" );
-    setTimeout( function() {
-      fmuInit();
-    }, 500 );
-  };
-
-  fmuWS.checkActive = function() {
-    if ( system.checkWS === false || fmuWS.closed === true ) { return; }
-
-    // If it has been too long since a message, restart the connection
-    if ( new Date().getTime() - system.fmu.updateTimeout > fmuWS.lastMessage ) {
-      fmuWS.close();
-    }
-  };
-
-  fmuWS.onmessage = function( message ) {
-    fmuWS.lastMessage = new Date().getTime();
-    $( "#message_flag" ).toggleClass( "bright" );
-    if ( message.isTrusted ) {
-      var data = JSON.parse( message.data );
-      headingTape.updateFMU( data.hdg );
-      speedTape.updateFMU( data.spd );
-      altTape.updateFMU( data.alt );
-    }
-  };
-
-  fmuWS.onerror = function( message ) {
-    var name = message.target.url.substr(
-      message.target.url.lastIndexOf( "/" ) + 1
-    );
-    console.error( "Websocket \"" + name + "\" had an error." );
-    fmuWS.close();
-  };
-}
-
-function altimeterSettingInit() {
-  if ( altTape.altimeter_setting_unit === UNITS.INHG ) {
-    altTape.kollsman = altTape.default_kollsman_inhg;
-    altTape.unit_text = "inHg";
-    altTape.kollsman_standard = altTape.kollsman;
-  } else if ( altTape.altimeter_setting_unit === UNITS.MILLIBAR ) {
-    altTape.kollsman = altTape.default_kollsman_millibar_hpa;
-    altTape.unit_text = "MB";
-    altTape.kollsman_standard = altTape.kollsman;
-  } else if ( altTape.altimeter_setting_unit === UNITS.HPA ) {
-    altTape.kollsman = altTape.default_kollsman_millibar_hpa;
-    altTape.unit_text = "hPa";
-    altTape.kollsman_standard = altTape.kollsman;
-  } else {
-    system.sendNotification(
-      "Invalid alt unit: defaulting to inHg.",
-      7000,
-      // eslint-disable-next-line no-undef
-      ( color = "red" )
-    );
-    altTape.altimeter_setting_unit = UNITS.INHG;
-    altTape.kollsman = altTape.default_kollsman_inhg;
-    altTape.unit_text = "inHg";
-  }
-  const setting = getCookie( "altimeter_setting" );
-  const setting_unit = getCookie( "altimeter_setting_unit" );
-  if ( setting !== "" && setting_unit === altTape.unit_text ) {
-    altTape.kollsman = parseFloat( setting );
-  }
-  $( "#altimeter_display_unit" ).html( altTape.unit_text );
-}
-
-// NOTICE: ALL INPUTS TO UPDATE FUNCTIONS ARE TO BE IN SI UNITS
-
-function initButtons() {
-  const buttons = $( ".number_button" );
-  for ( let i = 0; i < buttons.length; i++ ) {
-    $( buttons[ i ] ).click( event => {
-      reportButton( $( event.currentTarget ).html() );
-    } );
-  }
-
-  $( "#settings_icon" ).mouseup( () => {
-    // Make the menu visible
-    $( "#settings_menu" ).removeClass( "hidden" );
-    $( "#settings_overlay" ).removeClass( "hidden" );
-
-    // Now that it is visible, set its scroll back to 0 so that
-    // the default icons are visible first
-    $( "#settings_menu" )[ 0 ].scrollLeft = 0;
-    $( "#settings_menu" )[ 0 ].scrollTop = 0;
-  } );
-
-  $( document ).keyup( function( e ) {
-    if ( e.keyCode === 27 ) {
-      $( "#settings_menu" ).addClass( "hidden" );
-      $( "#settings_overlay" ).addClass( "hidden" );
-      hideBaroInput();
-    }
-  } );
-
-  $( "#settings_overlay" ).click( () => {
-    $( "#settings_menu" ).addClass( "hidden" );
-    $( "#settings_overlay" ).addClass( "hidden" );
-    hideBaroInput();
-  } );
-
-  // Set Pitch On-Click
-  $( "#align_ahrs" ).click( function() {
-    var r = confirm( "Center AHRS?" );
-    if ( r === true ) {
-      post( "cageAHRS" );
-    }
-  } );
-
-  $( "#calibrate_gyro" ).click( function() {
-    var r = confirm( "Calibrate GYRO?" );
-    if ( r === true ) {
-      post( "calibrateAHRS" );
-    }
-  } );
-
-  var baro_input_value = [ "0", "0", "0", "0", "0" ];
-  var pre_input = true;
-  var index = 0;
-  function updateBaroPressure( push = false ) {
-    if ( push ) {
-      if ( altTape.altimeter_setting_unit === UNITS.INHG ) {
-        if (
-          baro_input_value[ 0 ] === "" ||
-          baro_input_value[ 1 ] === "" ||
-          baro_input_value[ 2 ] === "" ||
-          baro_input_value[ 3 ] === ""
-        ) {
-          system.sendNotification(
-            "Please enter a valid altimeter setting",
-            2000,
-            // eslint-disable-next-line no-undef
-            ( color = "red" )
-          );
-          return false;
-        }
-      } else {
-        if (
-          baro_input_value[ 0 ] === "" &&
-          baro_input_value[ 1 ] === "" &&
-          baro_input_value[ 2 ] === "" &&
-          baro_input_value[ 3 ] === "" &&
-          baro_input_value[ 4 ] === ""
-        ) {
-          system.sendNotification(
-            "Please enter a valid altimeter setting",
-            2000,
-            // eslint-disable-next-line no-undef
-            ( color = "red" )
-          );
-          return false;
-        }
-      }
-    }
-    let press_str = "";
-    if ( altTape.altimeter_setting_unit === UNITS.INHG ) {
-      press_str =
-        "" +
-        baro_input_value[ 0 ] +
-        baro_input_value[ 1 ] +
-        "." +
-        baro_input_value[ 2 ] +
-        baro_input_value[ 3 ];
-    } else {
-      press_str =
-        "" +
-        baro_input_value[ 0 ] +
-        baro_input_value[ 1 ] +
-        baro_input_value[ 2 ] +
-        baro_input_value[ 3 ] +
-        "." +
-        baro_input_value[ 4 ];
-    }
-    let val = parseFloat( press_str );
-    if ( altTape.altimeter_setting_unit === UNITS.INHG ) {
-      if ( push || index === 4 ) {
-        if ( val < 26 ) {
-          system.sendNotification(
-            "Altimeter setting too low",
-            2000,
-            // eslint-disable-next-line no-undef
-            ( color = "red" )
-          );
-          val = 26;
-          baro_input_value = [ "2", "6", "0", "0", "0" ];
-          press_str =
-            "" +
-            baro_input_value[ 0 ] +
-            baro_input_value[ 1 ] +
-            "." +
-            baro_input_value[ 2 ] +
-            baro_input_value[ 3 ];
-          $( "#altimeter_display" ).html( press_str );
-          index = 0;
-          return false;
-        } else if ( val > 32 ) {
-          system.sendNotification(
-            "Altimeter setting too high",
-            2000,
-            // eslint-disable-next-line no-undef
-            ( color = "red" )
-          );
-          val = 32;
-          baro_input_value = [ "3", "2", "0", "0", "0" ];
-          press_str =
-            "" +
-            baro_input_value[ 0 ] +
-            baro_input_value[ 1 ] +
-            "." +
-            baro_input_value[ 2 ] +
-            baro_input_value[ 3 ];
-          $( "#altimeter_display" ).html( press_str );
-          index = 0;
-          return false;
-        }
-      }
-    } else {
-      // Unit is MB or hPa
-      if ( push || index > 5 ) {
-        if ( val < 880.4 ) {
-          system.sendNotification(
-            "Altimeter setting too low",
-            2000,
-            // eslint-disable-next-line no-undef
-            ( color = "red" )
-          );
-          val = 880.4;
-          baro_input_value = [ "0", "8", "8", "0", "4" ];
-          press_str =
-            "" +
-            baro_input_value[ 0 ] +
-            baro_input_value[ 1 ] +
-            baro_input_value[ 2 ] +
-            baro_input_value[ 3 ] +
-            "." +
-            baro_input_value[ 4 ];
-          $( "#altimeter_display" ).html( press_str );
-          index = 0;
-          return false;
-        } else if ( val > 1049.8 ) {
-          system.sendNotification(
-            "Altimeter setting too high",
-            2000,
-            // eslint-disable-next-line no-undef
-            ( color = "red" )
-          );
-          val = 1049.8;
-          baro_input_value = [ "1", "0", "4", "9", "8" ];
-          press_str =
-            "" +
-            baro_input_value[ 0 ] +
-            baro_input_value[ 1 ] +
-            baro_input_value[ 2 ] +
-            baro_input_value[ 3 ] +
-            "." +
-            baro_input_value[ 4 ];
-          $( "#altimeter_display" ).html( press_str );
-          index = 0;
-          return false;
-        }
-      }
-    }
-    $( "#altimeter_display" ).html( press_str );
-    if ( push ) {
-      updateKollsmanSetting( val );
-    }
-    return true;
-  }
-
-  function updateKollsmanSetting( kollsman ) {
-    altTape.kollsman = kollsman;
-    setCookie( "altimeter_setting", altTape.kollsman, altTape.kollsman_memory_seconds );
-    setCookie( "altimeter_setting_unit", altTape.unit_text, altTape.kollsman_memory_seconds );
-    system.sendNotification(
-      `Updated altimeter to ${altTape.kollsman}${altTape.unit_text}`,
-      4000
-    );
-    if ( altTape.source === SOURCE.BARO ) {
-      $( "#alt_annun_text" ).html(
-        "Baro Altitude <span>" +
-          altTape.kollsman +
-          altTape.unit_text +
-          ", " +
-          altTape.unitPrefix +
-          ", " +
-          vspeedTape.unitPrefix +
-          "</span>"
-      );
-    }
-  }
-
-  function resetBaroInput( fromCurrent = false ) {
-    let tmp = altTape.kollsman_standard;
-    if ( fromCurrent ) {
-      tmp = altTape.kollsman;
-    }
-    if ( altTape.altimeter_setting_unit === UNITS.INHG ) {
-      baro_input_value = [
-        Math.floor( ( tmp / 10 ) % 10 ),
-        Math.floor( tmp % 10 ),
-        Math.floor( ( tmp * 10 ) % 10 ),
-        Math.floor( ( tmp * 100 ) % 10 ),
-        ""
-      ];
-    } else {
-      baro_input_value = [
-        Math.floor( ( tmp / 1000 ) % 10 ),
-        Math.floor( ( tmp / 100 ) % 10 ),
-        Math.floor( ( tmp / 10 ) % 10 ),
-        Math.floor( tmp % 10 ),
-        Math.floor( ( tmp * 10 ) % 10 )
-      ];
-    }
-
-    updateBaroPressure();
-    pre_input = true;
-    index = 0;
-  }
-
-  function showBaroInput() {
-    $( "#settings_popup" ).removeClass( "hidden" );
-    // eslint-disable-next-line no-undef
-    resetBaroInput( ( fromCurrent = true ) );
-  }
-
-  function hideBaroInput() {
-    $( "#settings_popup" ).addClass( "hidden" );
-    // eslint-disable-next-line no-undef
-    resetBaroInput( ( fromCurrent = true ) );
-  }
-
-  function addValue( val ) {
-    if ( pre_input ) {
-      baro_input_value = [ "", "", "", "", "" ];
-      pre_input = false;
-    }
-    baro_input_value[ index ] = val;
-    index += 1;
-    if ( index === ( altTape.altimeter_setting_unit === UNITS.INHG ? 4 : 5 ) ) {
-      pre_input = true;
-      index = 0;
-    }
-
-    // console.log(baro_input_value);
-    updateBaroPressure();
-  }
-
-  function reportButton( button ) {
-    switch ( button ) {
-      case "1":
-      case "2":
-      case "3":
-      case "4":
-      case "5":
-      case "6":
-      case "7":
-      case "8":
-      case "9":
-      case "0":
-        addValue( button );
-        break;
-      case "Clr":
-        baro_input_value = [ "", "", "", "", "" ];
-        index = 0;
-        updateBaroPressure();
-        break;
-      case "Ent":
-        // eslint-disable-next-line no-undef
-        if ( updateBaroPressure( ( push = true ) ) ) {
-          hideBaroInput();
-        }
-        break;
-    }
-  }
-
-  $( "#update_baro" ).click( () => {
-    showBaroInput();
-  } );
-
-  $( "#set_std_baro" ).click( () => {
-    updateKollsmanSetting( altTape.kollsman_standard );
-  } );
-  $( "#force_update" ).click( () => {
-    window.location.reload( true );
-  } );
-  $( "#toggle_rotation" ).click( () => {
-    system.force_diff_orientation = !system.force_diff_orientation;
-    orientationChange();
-  } );
-  $( "#simulate_tag" ).click( function() {
-    if ( system.simulate === true ) {
-      system.simulate = false;
-      system.enable_ahrs_ws = true;
-      initWS();
-      $( "#simulate_tag" ).css( "display", "none" );
-    }
-  } );
-
-  // Set altitude button up
-  $( "#alt_annun" ).click( function() {
-    var loc = 0;
-    for ( let i = 0; i < altTape.possibleSources.length; i++ ) {
-      if ( altTape.possibleSources[ i ] === altTape.source ) {
-        loc = i;
-        break;
-      }
-    }
-    loc++;
-    if ( loc >= altTape.possibleSources.length ) {
-      loc = 0;
-    }
-    altTape.source = altTape.possibleSources[ loc ];
-    switch ( altTape.source ) {
-      case SOURCE.BARO:
-        $( "#alt_annun_text" ).html(
-          "Baro Altitude <span>" +
-            altTape.kollsman +
-            altTape.unit_text +
-            ", " +
-            altTape.unitPrefix +
-            ", " +
-            vspeedTape.unitPrefix +
-            "</span>"
-        );
-        break;
-      case SOURCE.GPS:
-        $( "#alt_annun_text" ).html(
-          "GPS Altitude <span>" +
-            altTape.unitPrefix +
-            ", " +
-            vspeedTape.unitPrefix +
-            "</span>"
-        );
-        break;
-      case SOURCE.INPUT:
-        return;
-
-      // $('#alt_annun_text').html('User Altitude <span>' + altTape.unitPrefix + ', ' + vspeedTape.unitPrefix + '</span>');
-      // TODO: Implement user defined altimeter setting
-      // break;
-    }
-    vspeedTape.source = altTape.source;
-  } );
-
-  // TODO: Restore this functionality to a proper menu
-  // system.checkWS = true;
-  // system.smooth = true;
-  // $( "#sat_count" ).click( function() {
-  //   var r = confirm( ( system.smooth ? "Disable" : "Enable" ) + " Smoothing?" );
-  //   if ( r === false ) {
-  //     r = confirm( ( system.checkWS ? "Disable" : "Enable" ) + " Check WS?" );
-  //     if ( r === true ) { system.checkWS = !system.checkWS; }
-  //   } else {
-  //     system.smooth = !system.smooth;
-  //     if ( system.smooth ) {
-  //       html.css( "--ease_time", "0.2s" );
-  //       html.css( "--hdg_ease_time", "0.2s" );
-  //       html.css( "--aux_ease_time", "0.2s" );
-  //     } else {
-  //       html.css( "--ease_time", "0s" );
-  //       html.css( "--hdg_ease_time", "0s" );
-  //       html.css( "--aux_ease_time", "0s" );
-  //     }
-  //   }
-  // } );
-}
-
 var currentHeading = 0;
 var updateHeading = 0;
+var html;
 
 // eslint-disable-next-line no-unused-vars
 function generateTapes() {
@@ -989,11 +143,11 @@ function generateTapes() {
   }
   $( "#alt_annun_text span" ).html(
     altTape.kollsman +
-      altTape.unit_text +
-      ", " +
-      altTape.unitPrefix +
-      ", " +
-      vspeedTape.unitPrefix
+        altTape.unit_text +
+        ", " +
+        altTape.unitPrefix +
+        ", " +
+        vspeedTape.unitPrefix
   );
 
   // ------------------------------------------------------------------------ //
@@ -1019,22 +173,22 @@ function generateTapes() {
 
   // Calculate speed tape total height
   speedTape.total_height =
-    ( number_height * ( speedTape.upperSpeed - speedTape.lowerSpeed ) ) / space;
+        ( number_height * ( speedTape.upperSpeed - speedTape.lowerSpeed ) ) / space;
 
   // Calculate tick offset based on text size
   speedTape.offset =
-    parseInt(
-      $( "#speed_tape_text" )
-        .css( "margin-top" )
-        .replace( "px", "" )
-    ) +
-    parseInt(
-      $( "#speed_tape_text" )
-        .css( "line-height" )
-        .replace( "px", "" )
-    ) /
-      2 +
-    4;
+        parseInt(
+          $( "#speed_tape_text" )
+            .css( "margin-top" )
+            .replace( "px", "" )
+        ) +
+        parseInt(
+          $( "#speed_tape_text" )
+            .css( "line-height" )
+            .replace( "px", "" )
+        ) /
+        2 +
+        4;
 
   // Loop through each speed and add color bars
   for ( let i = 0; i < speedTape.speeds.length; i++ ) {
@@ -1055,7 +209,7 @@ function generateTapes() {
       color_bar.css(
         "top",
         ( speedTape.upperSpeed - bar.end ) * speedTape.pixels_per_number +
-          speedTape.offset
+                speedTape.offset
       );
     } else if ( bar.end === speedTape.upperSpeed ) {
       color_bar.css(
@@ -1074,7 +228,7 @@ function generateTapes() {
       color_bar.css(
         "top",
         ( speedTape.upperSpeed - bar.end ) * speedTape.pixels_per_number +
-          speedTape.offset
+                speedTape.offset
       );
     }
 
@@ -1146,9 +300,9 @@ function generateTapes() {
     speedTape.speed_tape_scroll.css(
       "top",
       s * speedTape.pixels_per_number -
-        speedTape.total_height +
-        system.ahrs.height / 2 -
-        2
+            speedTape.total_height +
+            system.ahrs.height / 2 -
+            2
     );
 
     // Round speed for text display
@@ -1167,9 +321,9 @@ function generateTapes() {
       speedTape.speed_fmu.css(
         "bottom",
         -( speedTape.upperSpeed - speedTape.fmu_speed ) *
-          speedTape.pixels_per_number -
-          30 +
-          "px"
+                speedTape.pixels_per_number -
+                30 +
+                "px"
       );
     } else {
       speedTape.speed_fmu.css( "display", "none" );
@@ -1268,9 +422,9 @@ function generateTapes() {
     altTape.alt_tape_scroll.css(
       "top",
       ( alt / 10 ) * altTape.pixels_per_number -
-        altTape.total_height +
-        system.ahrs.height / 2 -
-        2
+            altTape.total_height +
+            system.ahrs.height / 2 -
+            2
     );
 
     // Round the altitude for text display
@@ -1328,7 +482,7 @@ function generateTapes() {
     // Define some constants
     vspeedTape.total_offset = 7;
     vspeedTape.offset =
-      $( "#alt_vspeed" ).outerHeight() / 2 + vspeedTape.total_offset;
+            $( "#alt_vspeed" ).outerHeight() / 2 + vspeedTape.total_offset;
     vspeedTape.pixels_per_number = 22;
     tick_offset = 4;
 
@@ -1363,10 +517,10 @@ function generateTapes() {
 
     // Set the text position based on the size
     var text_pos =
-      $( "#alt_vspeed" ).outerHeight() / 2 -
-      vspeedTape.pixels_per_number * 16 +
-      8 +
-      vspeedTape.total_offset;
+            $( "#alt_vspeed" ).outerHeight() / 2 -
+            vspeedTape.pixels_per_number * 16 +
+            8 +
+            vspeedTape.total_offset;
 
     // Loop through each number and add it
     for ( let i = 15; i >= 0; i -= 5 ) {
@@ -1402,10 +556,10 @@ function generateTapes() {
       vspeedTape.vspeed_pointer.css(
         "top",
         vspeedTape.height / 2 -
-          vspeed * vspeedTape.pixels_per_number -
-          vspeedTape.vspeed_pointer.outerHeight() / 2 -
-          14 +
-          vspeedTape.total_offset
+                vspeed * vspeedTape.pixels_per_number -
+                vspeedTape.vspeed_pointer.outerHeight() / 2 -
+                14 +
+                vspeedTape.total_offset
       );
 
       // Set the vspeed tail position and height
@@ -1413,9 +567,9 @@ function generateTapes() {
         vspeedTape.vspeed_trail.css(
           "top",
           vspeedTape.height / 2 -
-            vspeed * vspeedTape.pixels_per_number -
-            3 +
-            vspeedTape.total_offset
+                    vspeed * vspeedTape.pixels_per_number -
+                    3 +
+                    vspeedTape.total_offset
         );
         vspeedTape.vspeed_trail.css( "height", vspeed * vspeedTape.pixels_per_number );
       } else {
@@ -1428,7 +582,7 @@ function generateTapes() {
       checkIn( AHRS_TYPE.VSPEED, override );
     };
   } else {
-    vspeedTape.update = function( _vspeed, _override ) {};
+    vspeedTape.update = function( _vspeed, _override ) { };
   }
 
   // ------------------------------------------------------------------------ //
@@ -1635,7 +789,7 @@ function generateTapes() {
   // ------------------------------------------------------------------------ //
 
   if ( slipSkid.display === false ) {
-    slipSkid.update = function( _yaw, _override ) {};
+    slipSkid.update = function( _yaw, _override ) { };
   } else {
     $( "#slip_skid_holder" ).addClass( "show" );
     slipSkid.update = function( yaw, _override ) {
@@ -1651,7 +805,7 @@ function generateTapes() {
   turnCoordinator.arrow = $( "#tcarrow" );
   turnCoordinator.bar = $( "#tcbar" );
   if ( turnCoordinator.display === false ) {
-    turnCoordinator.update = function( _rate, _override ) {};
+    turnCoordinator.update = function( _rate, _override ) { };
   } else {
     $( "#turn_coordinator_holder" ).addClass( "show" );
 
@@ -1729,7 +883,7 @@ function generateTapes() {
     // Check that the tape does not need to be recalculated for the new heading
     if (
       headingTape.forceRedraw === true ||
-      getDegreeDistance( updateHeading, heading ) >= headingTape.safetyOffset / 2
+            getDegreeDistance( updateHeading, heading ) >= headingTape.safetyOffset / 2
     ) {
       // Current tape needs to be redrawn
       headingTape.redrawHeadingTape( currentHeading, heading );
@@ -1741,8 +895,8 @@ function generateTapes() {
     // Calculate movement offset
     var value = -(
       getDegreeDistance( headingTape.left_heading, heading ) *
-        headingTape.pixels_per_tick -
-      headingTape.pixels_per_tick * headingTape.padding
+            headingTape.pixels_per_tick -
+            headingTape.pixels_per_tick * headingTape.padding
     );
 
     // Queue the animation and position change for a slightly later time. Allows
@@ -1801,8 +955,8 @@ function generateTapes() {
 
     // Calculate pixels per tick using dimenstions and range
     headingTape.pixels_per_tick =
-      ( system.ahrs.width - 2 * headingTape.speed_tape.outerWidth() ) /
-      headingTape.range;
+            ( system.ahrs.width - 2 * headingTape.speed_tape.outerWidth() ) /
+            headingTape.range;
 
     // Calculate direction
     const direction = !( constrainDegree( updateHeading - heading ) < 180 );
@@ -1942,13 +1096,13 @@ function generateTapes() {
 
     // Set the padding offset in pixels
     headingTape.padding_offset =
-      headingTape.padding * headingTape.pixels_per_tick;
+            headingTape.padding * headingTape.pixels_per_tick;
 
     // Restore the tape to the last location before the redraw
     var value = -(
       getDegreeDistance( headingTape.left_heading, currentHeading ) *
-        headingTape.pixels_per_tick -
-      headingTape.pixels_per_tick * headingTape.padding
+            headingTape.pixels_per_tick -
+            headingTape.pixels_per_tick * headingTape.padding
     );
 
     // Update the location
@@ -1995,7 +1149,7 @@ function generateTapes() {
     };
   } else {
     $( "#g_meter" ).css( "display", "none" );
-    gMeter.update = function( _gees ) {};
+    gMeter.update = function( _gees ) { };
   }
 
   // ------------------------------------------------------------------------ //
@@ -2011,7 +1165,7 @@ function generateTapes() {
     };
   } else {
     $( "#sat_count" ).css( "display", "none" );
-    satCount.update = function( _count ) {};
+    satCount.update = function( _count ) { };
   }
 
   // Initialize the tapes
@@ -2025,6 +1179,38 @@ function generateTapes() {
   setInvalid( AHRS_TYPE.ALL, true );
 }
 
+function altimeterSettingInit() {
+  if ( altTape.altimeter_setting_unit === UNITS.INHG ) {
+    altTape.kollsman = altTape.default_kollsman_inhg;
+    altTape.unit_text = "inHg";
+    altTape.kollsman_standard = altTape.kollsman;
+  } else if ( altTape.altimeter_setting_unit === UNITS.MILLIBAR ) {
+    altTape.kollsman = altTape.default_kollsman_millibar_hpa;
+    altTape.unit_text = "MB";
+    altTape.kollsman_standard = altTape.kollsman;
+  } else if ( altTape.altimeter_setting_unit === UNITS.HPA ) {
+    altTape.kollsman = altTape.default_kollsman_millibar_hpa;
+    altTape.unit_text = "hPa";
+    altTape.kollsman_standard = altTape.kollsman;
+  } else {
+    system.sendNotification(
+      "Invalid alt unit: defaulting to inHg.",
+      7000,
+      // eslint-disable-next-line no-undef
+      ( color = "red" )
+    );
+    altTape.altimeter_setting_unit = UNITS.INHG;
+    altTape.kollsman = altTape.default_kollsman_inhg;
+    altTape.unit_text = "inHg";
+  }
+  const setting = getCookie( "altimeter_setting" );
+  const setting_unit = getCookie( "altimeter_setting_unit" );
+  if ( setting !== "" && setting_unit === altTape.unit_text ) {
+    altTape.kollsman = parseFloat( setting );
+  }
+  $( "#altimeter_display_unit" ).html( altTape.unit_text );
+}
+
 // Check in method used in all update methods
 var lastCheckInTime = [];
 
@@ -2035,283 +1221,3 @@ function checkIn( type, override ) {
   }
   lastCheckInTime[ type ] = Date.now();
 }
-
-// Checks if all the fields are valid
-var invalidList = [ false, false, false, false, false, false ];
-
-function checkValid() {
-  var now = Date.now();
-  for ( var i = 0; i < lastCheckInTime.length; i++ ) {
-    if (
-      now - lastCheckInTime[ i ] > system.ahrs.updateTimeout &&
-      invalidList[ i ] === false
-    ) {
-      // Set invalid
-      switch ( i ) {
-        case AHRS_TYPE.SPEED:
-          speedTape.update( 0, true );
-          satCount.update( "-" );
-          break;
-        case AHRS_TYPE.ALT:
-          altTape.update( 0, true );
-          break;
-        case AHRS_TYPE.VSPEED:
-          vspeedTape.update( 0, true );
-          break;
-        case AHRS_TYPE.HDG:
-          headingTape.update( 0, true );
-          break;
-        case AHRS_TYPE.AHRS:
-        case AHRS_TYPE.GMETER:
-          ahrsTape.update( 0, 0, true );
-          gMeter.update( 1, true );
-          slipSkid.update( 0, true );
-          turnCoordinator.update( 0, true );
-          break;
-      }
-      setInvalid( i, true );
-    } else if (
-      now - lastCheckInTime[ i ] < system.ahrs.updateTimeout &&
-      invalidList[ i ] === true
-    ) {
-      // Set valid
-      setInvalid( i, false );
-    }
-  }
-}
-
-// Sets a field with the invalid flag
-function setInvalid( type, value ) {
-  var name;
-  switch ( type ) {
-    case AHRS_TYPE.SPEED:
-      name = [ "speed_tape" ];
-      break;
-    case AHRS_TYPE.ALT:
-    case AHRS_TYPE.VSPEED:
-      name = [ "alt_tape" ];
-      break;
-    case AHRS_TYPE.HDG:
-      name = [ "heading_tape" ];
-      break;
-    case AHRS_TYPE.AHRS:
-      name = [
-        "ahrs_container",
-        /* 'pitch_readout', */ "roll_readout",
-        "slip_skid_holder"
-      ];
-      break;
-    case AHRS_TYPE.ALL:
-      name = [
-        "ahrs_container",
-        /* 'pitch_readout', */ "roll_readout",
-        "heading_tape",
-        "alt_tape",
-        "speed_tape",
-        "slip_skid_holder"
-      ];
-      break;
-  }
-  if ( name === undefined ) { return; }
-  for ( let i = 0; i < name.length; i++ ) {
-    if ( value ) {
-      $( "#" + name[ i ] + " .invalid_holder:first" ).addClass( "invalid" );
-    } else {
-      $( "#" + name[ i ] + " .invalid_holder:first" ).removeClass( "invalid" );
-    }
-    // console.log( "add remove" );
-  }
-  if ( type !== AHRS_TYPE.ALL ) {
-    invalidList[ type ] = value;
-  } else {
-    for ( let i = 0; i < invalidList.length; i++ ) {
-      invalidList[ i ] = value;
-    }
-  }
-}
-
-function refreshIfInvalidTimeout() {
-  for ( let i = 0; i < invalidList.length; i++ ) {
-    if ( invalidList[ i ] === false ) { return; }
-  }
-  try {
-    ahrsWS.close();
-    fmuWS.close();
-  } catch ( error ) {}
-}
-
-// Helpers
-function constrainDegree( deg ) {
-  if ( deg <= 0 ) {
-    while ( deg <= 0 ) {
-      deg += 360;
-    }
-  } else {
-    while ( deg > 360 ) {
-      deg -= 360;
-    }
-  }
-  return deg;
-}
-
-function pad( num, size ) {
-  var s = num + "";
-  while ( s.length < size ) { s = "0" + s; }
-  return s;
-}
-
-function getDegreeDistance( deg1, deg2, use360 = true ) {
-  var out = Math.abs(
-    Math.min( constrainDegree( deg1 - deg2 ), constrainDegree( deg2 - deg1 ) )
-  );
-  if ( use360 === false && out === 360 ) {
-    return 0;
-  }
-  return out;
-}
-
-function requestFullScreen( element ) {
-  // Supports most browsers and their versions.
-  var requestMethod =
-    element.requestFullScreen ||
-    element.webkitRequestFullScreen ||
-    element.mozRequestFullScreen ||
-    element.msRequestFullScreen;
-
-  if ( requestMethod ) {
-    // Native full screen.
-    requestMethod.call( element );
-  } else if ( typeof window.ActiveXObject !== "undefined" ) {
-    // Older IE.
-    // eslint-disable-next-line no-undef
-    var wscript = new ActiveXObject( "WScript.Shell" );
-    if ( wscript !== null ) {
-      wscript.SendKeys( "{F11}" );
-    }
-  }
-}
-
-var post = function( url ) {
-  const http = new XMLHttpRequest();
-  let text_url = "";
-  switch ( url ) {
-    case "cageAHRS":
-      text_url = "Cage AHRS";
-      break;
-    case "calibrateAHRS":
-      text_url = "Cage AHRS";
-      break;
-    default:
-      text_url = "Unknown";
-      break;
-  }
-  url = system.push_url + "/" + url;
-  const params = "";
-  http.open( "POST", url, true );
-
-  // Send the proper header information along with the request
-  http.setRequestHeader( "Content-type", "application/x-www-form-urlencoded" );
-
-  // http.setRequestHeader("Content-length", params.length);
-  // http.setRequestHeader("Connection", "close");
-
-  http.onreadystatechange = function() {
-    // Call a function when the state changes.
-    if ( http.readyState === 4 && http.status === 200 ) {
-      console.log( "Done: " + http.responseText );
-      system.sendNotification(
-        `Sent the '${text_url}' command to Stratux`,
-        4000
-      );
-    } else if ( http.readyState === 4 && http.status === 0 ) {
-      system.sendNotification(
-        `Failed to send the '${text_url}' command to Stratux`,
-        6000,
-        // eslint-disable-next-line no-undef
-        ( color = "red" )
-      );
-    } else {
-      console.log( http );
-    }
-  };
-  http.send( params );
-};
-
-// window.addEventListener( "deviceorientation", handleOrientation, true );
-
-// function handleOrientation( event ) {
-//   var absolute = event.absolute;
-//   var alpha = event.alpha;
-//   var beta = event.beta;
-//   var gamma = event.gamma;
-
-//   // console.log('Absolute: ' + absolute)
-//   // console.log('Alpha: ' + alpha)
-//   // console.log('Beta: ' + beta)
-//   // console.log('Gamma: ' + gamma)
-
-//   // Do stuff with the new orientation data
-// }
-
-Math.toDegrees = function( rad ) {
-  return rad * 57.2958;
-};
-
-function setCookie( name, value, seconds ) {
-  var expires = "";
-  if ( seconds ) {
-    var date = new Date();
-    date.setTime( date.getTime() + seconds * 1000 );
-    expires = "; expires=" + date.toUTCString();
-  }
-  document.cookie = name + "=" + ( value || "" ) + expires + "; path=/";
-}
-function getCookie( name ) {
-  var nameEQ = name + "=";
-  var ca = document.cookie.split( ";" );
-  for ( var i = 0; i < ca.length; i++ ) {
-    var c = ca[ i ];
-    while ( c.charAt( 0 ) === " " ) { c = c.substring( 1, c.length ); }
-    if ( c.indexOf( nameEQ ) === 0 ) { return c.substring( nameEQ.length, c.length ); }
-  }
-  return null;
-}
-
-function doRefresh() {
-  setCookie( "bypass_warning", "true", 5 );
-  location.reload();
-}
-
-var getUrlParameter = function getUrlParameter( sParam ) {
-  var sPageURL = window.location.search.substring( 1 );
-  var sURLVariables = sPageURL.split( "&" );
-  var sParameterName;
-  var i;
-
-  for ( i = 0; i < sURLVariables.length; i++ ) {
-    sParameterName = sURLVariables[ i ].split( "=" );
-
-    if ( sParameterName[ 0 ] === sParam ) {
-      return sParameterName[ 1 ] === undefined ?
-        true :
-        decodeURIComponent( sParameterName[ 1 ] );
-    }
-  }
-};
-
-// const times = [];
-// var fps;
-
-// function refreshLoop() {
-//   window.requestAnimationFrame( () => {
-//     const now = performance.now();
-//     while ( times.length > 0 && times[ 0 ] <= now - 1000 ) {
-//       times.shift();
-//     }
-//     times.push( now );
-//     fps = times.length;
-//     refreshLoop();
-//   } );
-// }
-
-// refreshLoop();
